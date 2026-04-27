@@ -177,6 +177,48 @@ void main() {
       expect(result.any((r) => r.id == 'h8'), isTrue);
     },
   );
+
+  test(
+    'getByDate should include task if endDate is null or not passed, exclude if passed',
+    () async {
+      // Covers: US-203
+      // Arrange
+      final recordNullEnd = RecordModel(
+        id: 't1',
+        type: RecordType.task,
+        title: 'Bitiş tarihi yok',
+        repeatDays: const [],
+        createdAt: DateTime.now(),
+      );
+      final recordWithEnd = RecordModel(
+        id: 't2',
+        type: RecordType.task,
+        title: 'Bitiş tarihi var',
+        repeatDays: const [],
+        endDate: DateTime(2024, 1, 5),
+        createdAt: DateTime.now(),
+      );
+      
+      await repository.create(recordNullEnd);
+      await repository.create(recordWithEnd);
+
+      // Act & Assert
+      // 2024-01-04 (Before end date -> should show both)
+      var result = await repository.getByDate('2024-01-04');
+      expect(result.any((r) => r.id == 't1'), isTrue);
+      expect(result.any((r) => r.id == 't2'), isTrue);
+
+      // 2024-01-05 (On end date -> should show both)
+      result = await repository.getByDate('2024-01-05');
+      expect(result.any((r) => r.id == 't1'), isTrue);
+      expect(result.any((r) => r.id == 't2'), isTrue);
+
+      // 2024-01-06 (After end date -> should exclude t2)
+      result = await repository.getByDate('2024-01-06');
+      expect(result.any((r) => r.id == 't1'), isTrue);
+      expect(result.any((r) => r.id == 't2'), isFalse);
+    },
+  );
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
