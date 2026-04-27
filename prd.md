@@ -16,10 +16,10 @@ Bu uygulama, yeni alışkanlıklar edinmek, günlük işlerini organize etmek ve
 ### 2.2. Kayıt Tipleri ve Özellikleri
 Kullanıcı bir kayıt oluştururken aşağıdaki **üç** ana türden birini seçer:
 
-| Özellik | 1. Alışkanlık (Zamana Bağlı Olmayan) | 2. Görev / Plan (Zamana Bağlı) | 3. Bırakma / Kötü Alışkanlık (Reverse Track) |
+| Özellik | 1. Yeni Alışkanlık (Zamana Bağlı Olmayan) | 2. Takvime Ekle (Zamana Bağlı) | 3. Bırakma / Kötü Alışkanlık (Reverse Track) |
 | :--- | :--- | :--- | :--- |
-| **Zamanlama** | Gün içinde herhangi bir saat. | Belirli bir saatte (Örn: 14:00 Toplantı). | Zaman bağımsız (Eylemden kaçınma). |
-| **Tekrar (Sıklık)** | Her gün, haftanın belirli günleri. | Tek seferlik veya opsiyonel tekrar. | Sürekli aktif (Bozulana kadar). |
+| **Zamanlama** | Gün içinde herhangi bir saat. | Belirli bir tarih ve saatte. | Zaman bağımsız (Eylemden kaçınma). |
+| **Tekrar (Sıklık)** | Haftanın belirli günleri **veya** X günde bir. | Tek seferlik. | Sürekli aktif (Bozulana kadar). |
 | **Önem Sırası** | Yüksek, Orta, Düşük. | Zaman önceliklidir. | Her zaman en yüksek öncelik. |
 | **Başarı Kriteri** | Eylemi gerçekleştirmek ve işaretlemek. | Görevi vaktinde tamamlamak. | **Eylemi yapmamak** (Son ihlalden bu yana geçen gün sayacı). |
 

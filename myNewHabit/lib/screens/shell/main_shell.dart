@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 import 'package:my_new_habit/core/router/app_router.dart';
 import 'package:my_new_habit/core/theme/app_colors.dart';
+import 'package:my_new_habit/core/theme/app_spacing.dart';
+import 'package:my_new_habit/data/models/record_model.dart';
+import 'package:my_new_habit/modals/add_record_modal.dart';
+import 'package:my_new_habit/modals/habit_details_sheet.dart';
+import 'package:my_new_habit/modals/naming_modal.dart';
+import 'package:my_new_habit/modals/quit_sheet.dart';
+import 'package:my_new_habit/modals/task_timing_sheet.dart';
+import 'package:my_new_habit/providers/record_provider.dart';
 
 /// Ana navigasyon kabuğu.
 ///
 /// 3 tab: 🏠 Ana Sayfa · ➕ Ekle · 👤 Profil
-/// "Ekle" sekmesi doğrudan bir sayfa değil; bottom sheet açar.
-/// Bu nedenle ShellRoute içindeki sadece 2 sayfa rotaya kayıtlıdır.
+/// "Ekle" sekmesi doğrudan bir sayfa değil; bottom sheet akışı açar.
 class MainShell extends StatelessWidget {
   const MainShell({super.key, required this.child});
 
@@ -30,26 +41,100 @@ class MainShell extends StatelessWidget {
     );
   }
 
-  // "Ekle" (index 1) tıklandığında bottom sheet açılır; rota değişmez.
   void _onNavTap(BuildContext context, int index) {
     switch (index) {
       case 0:
         context.go(AppRoutes.home);
       case 1:
-        // Sprint 2'de AddRecordModal burada açılacak
-        _showAddPlaceholder(context);
+        _openAddFlow(context);
       case 2:
         context.go(AppRoutes.profile);
     }
   }
 
-  void _showAddPlaceholder(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Kayıt ekleme — Sprint 2\'de gelecek!'),
-        duration: Duration(seconds: 2),
-      ),
+  /// Sprint 2 ekleme akışı:
+  /// Adım 1 → tip seç · Adım 2 → isim gir · Adım 3 → tipine göre detay
+  Future<void> _openAddFlow(BuildContext context) async {
+    RecordType? selectedType;
+
+    await showAddRecordModal(
+      context,
+      onTypeSelected: (type) {
+        selectedType = type;
+        Navigator.of(context).pop();
+      },
     );
+
+    if (selectedType == null || !context.mounted) return;
+
+    String? title;
+
+    // Kötü Alışkanlık ise isim sormayı (naming modal) atla;
+    // showQuitSheet kendi ismini zaten soruyor.
+    if (selectedType == RecordType.quit) {
+      title = ''; // Quit sheet içerisinde ilk başta boş gelecek.
+    } else {
+      title = await showNamingModal(context, type: selectedType!);
+      if (title == null || !context.mounted) return;
+    }
+
+    await _openDetailSheet(context, selectedType!, title);
+  }
+
+  Future<void> _openDetailSheet(
+    BuildContext context,
+    RecordType type,
+    String title,
+  ) async {
+    final provider = context.read<RecordProvider>();
+
+    switch (type) {
+      case RecordType.habit:
+        final details = await showHabitDetailsSheet(context);
+        if (details == null || !context.mounted) return;
+        await provider.createRecord(RecordModel(
+          id: const Uuid().v4(),
+          type: RecordType.habit,
+          title: title,
+          repeatDays: details.repeatDays,
+          intervalDays: details.intervalDays,
+          priority: details.priority,
+          createdAt: DateTime.now(),
+        ));
+
+      case RecordType.task:
+        final timing = await showTaskTimingSheet(context);
+        if (timing == null || !context.mounted) return;
+        await provider.createRecord(RecordModel(
+          id: const Uuid().v4(),
+          type: RecordType.task,
+          title: title,
+          scheduledTime: timing.startTime,
+          endDate: timing.endDate,
+          createdAt: timing.startDate, // Başlangıç tarihi olarak createdAt kullanıyoruz
+        ));
+
+      case RecordType.quit:
+        final confirmed = await showQuitSheet(context);
+        if (confirmed == null || !context.mounted) return;
+        title = confirmed; // Final ismi buradan aldık
+        await provider.createRecord(RecordModel(
+          id: const Uuid().v4(),
+          type: RecordType.quit,
+          title: title,
+          createdAt: DateTime.now(),
+        ));
+    }
+
+    if (context.mounted) {
+      HapticFeedback.lightImpact();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('"$title" eklendi 🎉'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   int _locationToIndex(String location) {
@@ -77,14 +162,15 @@ class _CustomBottomNavBar extends StatelessWidget {
 
     return Container(
       width: width,
-      height: 64, // p-3 ve icon boyutlarına uygun sabit yükseklik
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: AppSpacing.xxl,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F2F2),
-        borderRadius: BorderRadius.circular(9999),
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryContainer.withAlpha(38), // rgba(255,140,0,0.15) yerine ana renkten 15% shadow
+            // %15 opaklık: tasarımdaki pill shadow'un ana renkten türetilmesi
+            color: AppColors.primaryContainer.withAlpha(38),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
@@ -144,7 +230,7 @@ class _NavItem extends StatelessWidget {
         ),
         child: Icon(
           icon,
-          color: isSelected ? Colors.white : Colors.grey.shade500,
+          color: isSelected ? AppColors.onPrimary : AppColors.onSurfaceVariant,
           size: iconSize,
         ),
       ),

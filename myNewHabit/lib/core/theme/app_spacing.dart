@@ -3,7 +3,7 @@
 
 /// 4px grid'e dayalı spacing sabitleri.
 ///
-/// Tasarım kaynağı: base=8px, xs=4px, sm=12px, md=24px, lg=40px, xl=64px
+/// Değerler: xs=4dp · sm=8dp · smMd=12dp · md=16dp · lg=32dp · xl=40dp · xxl=64dp
 abstract final class AppSpacing {
   /// 4 dp — en küçük boşluk (ikon arası, chip padding)
   static const double xs = 4;

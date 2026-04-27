@@ -23,10 +23,6 @@ class HomeScreen extends StatelessWidget {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Not: _NotificationIconButton artık kullanılmıyor, istendiğinde Home ekranı body'sine veya profil sayfasına eklenebilir.
-
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _HomeBody extends StatelessWidget {
   const _HomeBody();
 

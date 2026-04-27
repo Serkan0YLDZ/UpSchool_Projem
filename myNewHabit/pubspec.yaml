@@ -45,6 +45,9 @@ dev_dependencies:
 
   flutter_lints: ^6.0.0
 
+  # sqflite için masaüstü / CI test desteği (record_repository_test.dart)
+  sqflite_common_ffi: ^2.3.4
+
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.

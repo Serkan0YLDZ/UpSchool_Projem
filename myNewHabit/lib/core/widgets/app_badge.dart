@@ -59,6 +59,7 @@ class PriorityBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(sprint-2): Priority enum tanımlandıktan sonra String karşılaştırması enum'a çevrilecek.
     final (color, textColor) = switch (priorityLabel.toLowerCase()) {
       'high' || 'yüksek' => (
           AppColors.error.withAlpha(26),

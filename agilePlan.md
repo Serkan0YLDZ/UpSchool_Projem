@@ -34,8 +34,8 @@
 
 ### Teknik Görevler
 
-- [ ] `flutter create myNewHabit` ile proje oluştur
-- [ ] `pubspec.yaml` bağımlılıkları ekle:
+- [x] `flutter create myNewHabit` ile proje oluştur
+- [x] `pubspec.yaml` bağımlılıkları ekle:
   ```yaml
   dependencies:
     sqflite:
@@ -48,35 +48,35 @@
     shared_preferences: 
     uuid:
   ```
-- [ ] `lib/core/theme/app_colors.dart` → Renk sabitlerini tanımla
-- [ ] `lib/core/theme/app_typography.dart` → Plus Jakarta Sans + text style'ları
-- [ ] `lib/core/theme/app_spacing.dart` → 4px grid spacing sabitleri
-- [ ] `lib/core/theme/app_theme.dart` → `ThemeData` merkezi tanım
-- [ ] `lib/core/widgets/` → Temel widget'lar: `AppButton`, `AppCard`, `AppBadge`, `AppIconButton`
-- [ ] `go_router` ile navigasyon kur: **Ana Sayfa** (🏠) · **Ekle** (+) · **Profil** (👤)
-- [ ] `BottomNavigationBar` veya `NavigationBar` (Material 3) kurulumu
+- [x] `lib/core/theme/app_colors.dart` → Renk sabitlerini tanımla
+- [x] `lib/core/theme/app_typography.dart` → Plus Jakarta Sans + text style'ları
+- [x] `lib/core/theme/app_spacing.dart` → 4px grid spacing sabitleri
+- [x] `lib/core/theme/app_theme.dart` → `ThemeData` merkezi tanım
+- [x] `lib/core/widgets/` → Temel widget'lar: `AppButton`, `AppCard`, `AppBadge` ✅ · `AppIconButton` ⚠️ eksik
+- [x] `go_router` ile navigasyon kur: **Ana Sayfa** (🏠) · **Ekle** (+) · **Profil** (👤)
+- [x] `BottomNavigationBar` veya `NavigationBar` (Material 3) kurulumu — pill-shaped custom nav bar
 - [ ] Splash screen & app icon placeholder
 
 ### Kabul Kriterleri
 
-- [ ] `flutter run` komutu hatasız çalışır (iOS Simulator veya Android Emulator)
-- [ ] 3 tab görünür ve tıklanabilir
-- [ ] Primary renk `#0077B6` tüm butonlarda doğru görünür
-- [ ] Plus Jakarta Sans yüklü ve metinlerde aktif
+- [x] `flutter run` komutu hatasız çalışır (iOS Simulator veya Android Emulator)
+- [x] 3 tab görünür ve tıklanabilir
+- [x] Primary renk `#0077B6` tüm butonlarda doğru görünür
+- [x] Plus Jakarta Sans yüklü ve metinlerde aktif
 
 ---
 
 ## 🗄️ Sprint 2 — Veri Katmanı & Kayıt Tipleri
 
-**Hedef:** `sqflite` ile local veritabanı; Alışkanlık, Görev/Plan ve Kötü Alışkanlık tiplerinin tam CRUD'u.
+**Hedef:** `sqflite` ile local veritabanı; Yeni Alışkanlık, Takvime Ekle (Görev/Plan) ve Kötü Alışkanlık tiplerinin tam CRUD'u.
 
 ### Kullanıcı Hikayeleri
 
 | ID | Hikaye | Öncelik |
 |----|--------|---------|
 | US-201 | Kullanıcı olarak "Ne Eklemek İstersin?" bottom sheet'inden üç tip arasında seçim yapabilmeliyim. | 🔴 Kritik |
-| US-202 | Alışkanlık eklerken isim girebilmeli, tekrar sıklığı (Gün seçimi) ve önem derecesi (Düşük/Orta/Yüksek) belirleyebilmeliyim. | 🔴 Kritik |
-| US-203 | Görev/Plan eklerken tarih seçici ve saat seçici açılabilmeli; bitiş tarihi opsiyonel olmalıdır. | 🔴 Kritik |
+| US-202 | Yeni Alışkanlık eklerken isim girebilmeli, tekrar sıklığı (Gün seçimi veya X günde bir) ve önem derecesi belirleyebilmeliyim. | 🔴 Kritik |
+| US-203 | Takvime Ekle modülünde başlangıç tarihi/saati ve opsiyonel bitiş tarihi/saati seçebilmeliyim. | 🔴 Kritik |
 | US-204 | Kötü Alışkanlık eklerken sadece isim girerek kayıt oluşturabilmeliyim; sistem otomatik sayaç başlatır. | 🔴 Kritik |
 | US-205 | Kayıtlarımı düzenleyip silebilmeliyim. | 🟠 Yüksek |
 
@@ -91,6 +91,7 @@ CREATE TABLE records (
   icon          TEXT,
   priority      TEXT,            -- 'low' | 'medium' | 'high'
   repeat_days   TEXT,            -- JSON: '["MON","TUE"]'
+  interval_days INTEGER,         -- Örn: 3 (3 günde bir)
   scheduled_time TEXT,           -- 'HH:mm' formatı
   end_date      TEXT,            -- ISO date
   created_at    TEXT NOT NULL,
@@ -131,6 +132,7 @@ class RecordModel {
   final String? icon;
   final Priority? priority;
   final List<String> repeatDays; // ['MON','TUE',...]
+  final int? intervalDays;       // 3 günde bir vb.
   final String? scheduledTime;
   final DateTime? endDate;
   final DateTime createdAt;
