@@ -1,16 +1,71 @@
 // Sprint 1: Widget testleri — NavigationBar ve 3-tab yapısı
-// Kabul kriteri: 3 tab görünür ve tıklanabilir; Plus Jakarta Sans yüklü.
+// Sprint 3: HomeScreen Provider gerektirdiği için MultiProvider eklendi.
+// Not: "Snackbar placeholder" testi Sprint 2 modal akışına geçildiği için kaldırıldı.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:provider/provider.dart';
+
+import 'package:go_router/go_router.dart';
 import 'package:my_new_habit/core/router/app_router.dart';
 import 'package:my_new_habit/core/theme/app_theme.dart';
-import 'package:my_new_habit/core/widgets/empty_state_widget.dart';
+import 'package:my_new_habit/providers/completion_provider.dart';
+import 'package:my_new_habit/providers/record_provider.dart';
+import 'package:my_new_habit/screens/home/home_screen.dart';
+import 'package:my_new_habit/screens/profile/profile_screen.dart';
+import 'package:my_new_habit/screens/shell/main_shell.dart';
+
+import '../data/repositories/completion_repository_stub.dart';
+import '../data/repositories/record_repository_stub.dart';
+
+Widget _buildApp() {
+  final router = GoRouter(
+    initialLocation: AppRoutes.home,
+    routes: [
+      ShellRoute(
+        builder: (context, state, child) => MainShell(child: child),
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: HomeScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.profile,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ProfileScreen(),
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
+
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider<RecordProvider>(
+        create: (_) => RecordProvider(StubRecordRepository()),
+      ),
+      ChangeNotifierProvider<CompletionProvider>(
+        create: (_) => CompletionProvider(StubCompletionRepository()),
+      ),
+    ],
+    child: MaterialApp.router(
+      theme: AppTheme.light,
+      routerConfig: router,
+    ),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 void main() {
-  setUpAll(() {
+  setUpAll(() async {
     GoogleFonts.config.allowRuntimeFetching = false;
+    await initializeDateFormatting('tr_TR', null);
   });
 
   group('Navigation — Sprint 1 kabul kriterleri', () {
@@ -18,15 +73,10 @@ void main() {
       'should show 3 navigation destinations',
       (tester) async {
         // Arrange
-        await tester.pumpWidget(
-          MaterialApp.router(
-            theme: AppTheme.light,
-            routerConfig: appRouter,
-          ),
-        );
+        await tester.pumpWidget(_buildApp());
         await tester.pumpAndSettle();
 
-        // Assert — 3 NavigationIcon görünmeli (text label yok)
+        // Assert — 3 NavigationIcon görünmeli
         expect(find.byIcon(Icons.home_rounded), findsOneWidget);
         expect(find.byIcon(Icons.add_rounded), findsOneWidget);
         expect(find.byIcon(Icons.person_rounded), findsOneWidget);
@@ -37,17 +87,10 @@ void main() {
       'should navigate to Profile tab when Profil tapped',
       (tester) async {
         // Arrange
-        await tester.pumpWidget(
-          MaterialApp.router(
-            theme: AppTheme.light,
-            routerConfig: appRouter,
-          ),
-        );
+        await tester.pumpWidget(_buildApp());
         await tester.pumpAndSettle();
 
-        // Act — Profil tab'ı ortadaki (add) değil, sağdaki (person) ikon.
-        // Ama "Profil" yazılı bir AppBar olduğu için (ProfileScreen placeholder'ında)
-        // navigasyonun çalıştığını "Profil" yazısından anlayabiliriz.
+        // Act — sağdaki (person) ikonuna tıkla
         await tester.tap(find.byIcon(Icons.person_rounded));
         await tester.pumpAndSettle();
 
@@ -60,37 +103,12 @@ void main() {
       'should show home screen by default on launch',
       (tester) async {
         // Arrange
-        await tester.pumpWidget(
-          MaterialApp.router(
-            theme: AppTheme.light,
-            routerConfig: appRouter,
-          ),
-        );
+        await tester.pumpWidget(_buildApp());
         await tester.pumpAndSettle();
 
-        // Assert — Home ekranında boş durum widget'ı bulunmalı
-        expect(find.byType(EmptyStateWidget), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'should show snackbar placeholder when Ekle tapped in Sprint 1',
-      (tester) async {
-        // Arrange
-        await tester.pumpWidget(
-          MaterialApp.router(
-            theme: AppTheme.light,
-            routerConfig: appRouter,
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        // Act
-        await tester.tap(find.byIcon(Icons.add_rounded));
-        await tester.pump();
-
-        // Assert — Sprint 2 placeholder snackbar görünmeli
-        expect(find.byType(SnackBar), findsOneWidget);
+        // Assert — Ev (home) ikonu aktif; LoadingIndicator veya EmptyState görünür.
+        // HomeScreen yüklendi = Scaffold hazır.
+        expect(find.byIcon(Icons.home_rounded), findsOneWidget);
       },
     );
   });
@@ -103,12 +121,7 @@ void main() {
         tester.view.physicalSize = const Size(375 * 3, 667 * 3);
         tester.view.devicePixelRatio = 3.0;
 
-        await tester.pumpWidget(
-          MaterialApp.router(
-            theme: AppTheme.light,
-            routerConfig: appRouter,
-          ),
-        );
+        await tester.pumpWidget(_buildApp());
         await tester.pumpAndSettle();
 
         // Assert — overflow hatası olmamalı

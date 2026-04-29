@@ -25,32 +25,35 @@ void main() async {
     ),
   );
 
-  SystemChrome.setPreferredOrientations([
+  await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
-  ]).then((_) => runApp(const MyNewHabitApp()));
+  ]);
+
+  // DB'yi runApp'tan ÖNCE WidgetsFlutterBinding garantisi altında aç.
+  // Bu sayede sqflite iOS plugin'i tam olarak kayıtlanmış olur.
+  final dbHelper = DatabaseHelper.instance;
+  await dbHelper.database; // Eager initialization
+
+  runApp(MyNewHabitApp(dbHelper: dbHelper));
 }
 
 /// Uygulamanın kök widget'ı.
-///
-/// Sprint 2: MultiProvider ile RecordProvider ve CompletionProvider
-/// en üst seviyede enjekte edilmiştir.
 class MyNewHabitApp extends StatelessWidget {
-  const MyNewHabitApp({super.key});
+  const MyNewHabitApp({super.key, required this.dbHelper});
+
+  final DatabaseHelper dbHelper;
 
   @override
   Widget build(BuildContext context) {
-    final dbHelper = DatabaseHelper.instance;
-    final recordRepo = SqfliteRecordRepository(dbHelper);
-    final completionRepo = SqfliteCompletionRepository(dbHelper);
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => RecordProvider(recordRepo),
+          create: (_) => RecordProvider(SqfliteRecordRepository(dbHelper)),
         ),
         ChangeNotifierProvider(
-          create: (_) => CompletionProvider(completionRepo),
+          create: (_) =>
+              CompletionProvider(SqfliteCompletionRepository(dbHelper)),
         ),
       ],
       child: MaterialApp.router(

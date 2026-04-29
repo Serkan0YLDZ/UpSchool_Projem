@@ -178,6 +178,7 @@ class RecordModel {
 | US-307 | Kötü alışkanlık kartında "Yaptım" butonuna basarsam sayaç sıfırlanır. | 🔴 Kritik |
 | US-308 | Filtreleme: "En Önemli", "En Erken", "Bu hafta/ay/bugün" seçenekleri çalışmalı. | 🟠 Yüksek |
 
+
 ### Teknik Görevler
 
 - [ ] **`CalendarBarWidget`** → `ListView.builder` (horizontal) · Seçili gün `#0077B6` dairesi · `AnimatedContainer`
@@ -189,6 +190,10 @@ class RecordModel {
 - [ ] Filtreleme mantığını `RecordProvider` içine ekle
 - [ ] Tamamlama toggle animasyonu → `AnimatedOpacity` + checkmark `Icon` fade-in
 - [ ] Boş durum → `EmptyStateWidget` ("Bugün için kayıt yok, ➕ ekleyelim!")
+- [ ] Tüm kayıt kartlarında (alışkanlık, görev, bırakılan) uzun basınca silme
+
+#### UX Polish
+- Silme onay modalları, alt bar ve diğer UI öğelerinin önünde, tam ekran ve dikkat çekici şekilde açılır.
 
 ### Kabul Kriterleri
 

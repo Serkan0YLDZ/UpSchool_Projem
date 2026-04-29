@@ -45,6 +45,8 @@ Ana sayfadaki zamana bağlı olmayan kayıtlar için şu filtreleme opsiyonları
 2.  En Erken Bitmesi Gereken
 3.  Bu ay, bu hafta veya bugün bitmesi gerekenler
 
+### UX Notu
+- Silme işlemleri, kullanıcıdan tam ekran ve önde kalan bir onay modalı ile onay alınarak yapılır. Modal, alt bar ve diğer UI öğelerinin önünde açılır.
 ---
 
 ## 4. Gelecekte Eklenecek Özellikler (V2 ve Sonrası)

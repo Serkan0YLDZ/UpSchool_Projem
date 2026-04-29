@@ -1,4 +1,5 @@
-// Sprint 2: Unit testler — RecordProvider
+// Sprint 3: Unit testler — RecordProvider filtreleme (US-308)
+// Sprint 2'de yazılan testlere Sprint 3 testleri eklendi.
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,7 +17,7 @@ void main() {
     provider = RecordProvider(stub);
   });
 
-  // ── loadRecords ───────────────────────────────────────────────────────────
+  // ── loadRecords (Sprint 2'den taşındı) ───────────────────────────────────
 
   test(
     'loadRecords should populate records when repository returns data',
@@ -82,10 +83,10 @@ void main() {
     },
   );
 
-  // ── computed getters ──────────────────────────────────────────────────────
+  // ── habits getter (Sprint 2'den taşındı) ─────────────────────────────────
 
   test(
-    'habits getter should sort by priority high first',
+    'habits getter should sort by priority high first when filter is all',
     () async {
       // Arrange
       stub.recordsToReturn = [
@@ -98,12 +99,14 @@ void main() {
       // Act
       final habits = provider.habits;
 
-      // Assert
+      // Assert (US-304: önem sırasına göre)
       expect(habits[0].priority, Priority.high);
       expect(habits[1].priority, Priority.medium);
       expect(habits[2].priority, Priority.low);
     },
   );
+
+  // ── selectDate (US-302) ───────────────────────────────────────────────────
 
   test(
     'selectDate should reload records for new date',
@@ -114,25 +117,150 @@ void main() {
       // Act
       await provider.selectDate(newDate);
 
-      // Assert
+      // Assert (US-302: farklı güne tıklanınca kayıtlar yüklenmeli)
       expect(provider.selectedDate, newDate);
       expect(stub.lastQueriedDate, newDate);
+    },
+  );
+
+  // ── applyFilter (US-308) ─────────────────────────────────────────────────
+
+  test(
+    'applyFilter mostImportant should sort habits by priority descending',
+    () async {
+      // Arrange
+      stub.recordsToReturn = [
+        _habit('hA', 'Düşük Öncelik', priority: Priority.low),
+        _habit('hB', 'Yüksek Öncelik', priority: Priority.high),
+      ];
+      await provider.loadRecords();
+
+      // Act
+      provider.applyFilter(FilterType.mostImportant);
+      final habits = provider.habits;
+
+      // Assert (US-308: En Önemli filtresi high önce getirir)
+      expect(habits.first.priority, Priority.high);
+    },
+  );
+
+  test(
+    'applyFilter should toggle off when same filter applied twice',
+    () async {
+      // Arrange
+      provider.applyFilter(FilterType.thisWeek);
+      expect(provider.activeFilter, FilterType.thisWeek);
+
+      // Act — aynı filtreye tekrar bas
+      provider.applyFilter(FilterType.thisWeek);
+
+      // Assert — all'a döner (toggle davranışı)
+      expect(provider.activeFilter, FilterType.all);
+    },
+  );
+
+  test(
+    'applyFilter earliest should sort habits by createdAt ascending',
+    () async {
+      // Arrange
+      final older = _habitAt('hC', 'Eski', DateTime(2024, 1, 1));
+      final newer = _habitAt('hD', 'Yeni', DateTime(2024, 6, 1));
+      stub.recordsToReturn = [newer, older];
+      await provider.loadRecords();
+
+      // Act
+      provider.applyFilter(FilterType.earliest);
+
+      // Assert (En Erken filtresi: createdAt küçük olan önce)
+      expect(provider.habits.first.id, 'hC');
+    },
+  );
+
+  // ── quitRecords (US-305) ──────────────────────────────────────────────────
+
+  test(
+    'quitRecords should only return quit type records',
+    () async {
+      // Arrange
+      stub.recordsToReturn = [
+        _habit('h8', 'Rutin'),
+        _quit('q1', 'Sigara'),
+        _task('t1', 'Toplantı'),
+      ];
+      await provider.loadRecords();
+
+      // Act & Assert (US-305: sadece quit tipler)
+      expect(provider.quitRecords.length, 1);
+      expect(provider.quitRecords.first.type, RecordType.quit);
+    },
+  );
+
+  // ── scheduledTasks (US-303) ──────────────────────────────────────────────
+
+  test(
+    'scheduledTasks should return only tasks with scheduledTime sorted by time',
+    () async {
+      // Arrange
+      stub.recordsToReturn = [
+        _taskAt('t2', 'Akşam', '18:00'),
+        _taskAt('t3', 'Sabah', '09:00'),
+        _taskAt('t4', 'Öğle', '13:30'),
+      ];
+      await provider.loadRecords();
+
+      // Act
+      final tasks = provider.scheduledTasks;
+
+      // Assert (US-303: kronolojik sıra)
+      expect(tasks[0].scheduledTime, '09:00');
+      expect(tasks[1].scheduledTime, '13:30');
+      expect(tasks[2].scheduledTime, '18:00');
     },
   );
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-RecordModel _habit(
-  String id,
-  String title, {
-  Priority priority = Priority.medium,
-}) =>
+RecordModel _habit(String id, String title, {Priority priority = Priority.medium}) =>
     RecordModel(
       id: id,
       type: RecordType.habit,
       title: title,
       priority: priority,
+      repeatDays: const [],
+      createdAt: DateTime.now(),
+    );
+
+RecordModel _habitAt(String id, String title, DateTime createdAt) => RecordModel(
+      id: id,
+      type: RecordType.habit,
+      title: title,
+      priority: Priority.medium,
+      repeatDays: const [],
+      createdAt: createdAt,
+    );
+
+RecordModel _quit(String id, String title) => RecordModel(
+      id: id,
+      type: RecordType.quit,
+      title: title,
+      repeatDays: const [],
+      createdAt: DateTime.now(),
+    );
+
+RecordModel _task(String id, String title) => RecordModel(
+      id: id,
+      type: RecordType.task,
+      title: title,
+      repeatDays: const [],
+      createdAt: DateTime.now(),
+    );
+
+RecordModel _taskAt(String id, String title, String time) => RecordModel(
+      id: id,
+      type: RecordType.task,
+      title: title,
+      scheduledTime: time,
       repeatDays: const [],
       createdAt: DateTime.now(),
     );

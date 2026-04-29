@@ -188,7 +188,7 @@ void main() {
         type: RecordType.task,
         title: 'Bitiş tarihi yok',
         repeatDays: const [],
-        createdAt: DateTime.now(),
+        createdAt: DateTime(2024, 1, 4),
       );
       final recordWithEnd = RecordModel(
         id: 't2',
@@ -196,26 +196,31 @@ void main() {
         title: 'Bitiş tarihi var',
         repeatDays: const [],
         endDate: DateTime(2024, 1, 5),
-        createdAt: DateTime.now(),
+        createdAt: DateTime(2024, 1, 4),
       );
       
       await repository.create(recordNullEnd);
       await repository.create(recordWithEnd);
 
       // Act & Assert
-      // 2024-01-04 (Before end date -> should show both)
-      var result = await repository.getByDate('2024-01-04');
+      // 2024-01-03 (Before creation date -> should NOT show any)
+      var result = await repository.getByDate('2024-01-03');
+      expect(result.any((r) => r.id == 't1'), isFalse);
+      expect(result.any((r) => r.id == 't2'), isFalse);
+
+      // 2024-01-04 (Creation date -> should show both)
+      result = await repository.getByDate('2024-01-04');
       expect(result.any((r) => r.id == 't1'), isTrue);
       expect(result.any((r) => r.id == 't2'), isTrue);
 
-      // 2024-01-05 (On end date -> should show both)
+      // 2024-01-05 (On end date -> should show t2, but NOT t1 because t1 only shows on creation date)
       result = await repository.getByDate('2024-01-05');
-      expect(result.any((r) => r.id == 't1'), isTrue);
+      expect(result.any((r) => r.id == 't1'), isFalse);
       expect(result.any((r) => r.id == 't2'), isTrue);
 
-      // 2024-01-06 (After end date -> should exclude t2)
+      // 2024-01-06 (After end date -> should exclude t2 and t1)
       result = await repository.getByDate('2024-01-06');
-      expect(result.any((r) => r.id == 't1'), isTrue);
+      expect(result.any((r) => r.id == 't1'), isFalse);
       expect(result.any((r) => r.id == 't2'), isFalse);
     },
   );

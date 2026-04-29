@@ -9,7 +9,7 @@ import 'package:path/path.dart';
 /// bu sayede ilerideki sprint'lerde yeni tablo/sütun eklemek güvendedir.
 class DatabaseHelper {
   static const String _dbName = 'my_new_habit.db';
-  static const int _dbVersion = 1;
+  static const int _dbVersion = 2;
 
   final String? _inMemoryPath;
 
@@ -62,8 +62,23 @@ class DatabaseHelper {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     for (var v = oldVersion + 1; v <= newVersion; v++) {
       if (v == 2) {
-        // Örnek: await _migrate_v2(db);
+        await _migrate_v2(db);
       }
+    }
+  }
+
+  /// Versiyon 2: interval_days sütunu eklendi.
+  ///
+  /// Sprint 2'de modele eklenen bu alan eski kurulumda yoktu;
+  /// ALTER TABLE ile mevcut DB'ye ekliyoruz.
+  Future<void> _migrate_v2(Database db) async {
+    // Sütun zaten varsa hata vermemek için try/catch kullan.
+    try {
+      await db.execute(
+        'ALTER TABLE records ADD COLUMN interval_days INTEGER',
+      );
+    } catch (_) {
+      // Sütun zaten mevcutsa görmezden gel.
     }
   }
 

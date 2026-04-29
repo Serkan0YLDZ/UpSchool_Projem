@@ -1,5 +1,6 @@
 // Sprint 2: Veri Katmanı — RecordRepository (abstract + sqflite impl)
 
+import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../database/database_helper.dart';
@@ -73,9 +74,21 @@ class SqfliteRecordRepository implements RecordRepository {
         // Gün seçimi yoksa her gün göster
         return r.repeatDays.isEmpty || r.repeatDays.contains(dayAbbr);
       }
-      // task: bitiş tarihi yoksa veya henüz geçmediyse göster
-      if (r.endDate == null) return true;
-      return !r.endDate!.isBefore(DateTime.parse(date));
+      // task: bitiş tarihi yoksa sadece oluşturulduğu günde göster;
+      // bitiş tarihi varsa, o tarihe kadar (dahil) her gün göster.
+      if (r.type == RecordType.task) {
+        final targetDate = DateTime.parse(date);
+        final startDay = DateTime(r.createdAt.year, r.createdAt.month, r.createdAt.day);
+        
+        if (r.endDate == null) {
+          return targetDate.isAtSameMomentAs(startDay);
+        } else {
+          final endDay = DateTime(r.endDate!.year, r.endDate!.month, r.endDate!.day);
+          return (targetDate.isAtSameMomentAs(startDay) || targetDate.isAfter(startDay)) &&
+                 (targetDate.isAtSameMomentAs(endDay) || targetDate.isBefore(endDay));
+        }
+      }
+      return false;
     }).toList();
   }
 
