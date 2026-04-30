@@ -46,16 +46,16 @@ Bu nedenle plan, **Sprint 4'ten itibaren** tamamen yeni PRD'nin "V1 — MVP" kur
 
 ### Teknik Görevler
 
-- [ ] `Quit` tipi, widget'ları (`QuitCard`), modelleri ve state logic'lerinin tamamen silinmesi.
-- [ ] `RecordModel`'in güncellenmesi: `type` alanı -> `event`, `habit`, `todo` olarak değiştirilmeli.
-- [ ] DB Şeması Güncellemesi: `target_progress`, `scheduled_date`, `end_time`, `due_date`, `description` vb. yeni kolonların `records` tablosuna eklenmesi. `completions` tablosuna `progress` kolonu eklenmesi.
-- [ ] Bottom Sheet Revizyonu 1: "Ne Eklemek İstersin?" kısmında 3 yeni seçeneğin listelenmesi.
-- [ ] Bottom Sheet Revizyonu 2: Seçilen tipe göre sadece ilgili alanların (Örn: Habit için `%` hedefi, Todo için bitiş tarihi) gösterildiği dinamik form yapısının oluşturulması.
+- [x] `Quit` tipi, widget'ları (`QuitCard`), modelleri ve state logic'lerinin tamamen silinmesi.
+- [x] `RecordModel`'in güncellenmesi: `type` alanı -> `event`, `habit`, `todo` olarak değiştirilmeli.
+- [x] DB Şeması Güncellemesi: `target_progress`, `scheduled_date`, `end_time`, `due_date`, `description` vb. yeni kolonların `records` tablosuna eklenmesi. `completions` tablosuna `progress` kolonu eklenmesi.
+- [x] Bottom Sheet Revizyonu 1: "Ne Eklemek İstersin?" kısmında 3 yeni seçeneğin listelenmesi.
+- [x] Bottom Sheet Revizyonu 2: Seçilen tipe göre sadece ilgili alanların (Örn: Habit için `%` hedefi, Todo için bitiş tarihi) gösterildiği dinamik form yapısının oluşturulması.
 
 ### Kabul Kriterleri
 
-- [ ] Kötü alışkanlıklarla ilgili hiçbir kod parçası, model veya arayüz öğesi kalmamıştır.
-- [ ] Yeni modellerle DB'ye sorunsuz bir şekilde Event, Habit, Todo eklenebilmektedir ve `flutter run` hatasız çalışır.
+- [x] Kötü alışkanlıklarla ilgili hiçbir kod parçası, model veya arayüz öğesi kalmamıştır.
+- [x] Yeni modellerle DB'ye sorunsuz bir şekilde Event, Habit, Todo eklenebilmektedir ve `flutter run` hatasız çalışır.
 
 ---
 
