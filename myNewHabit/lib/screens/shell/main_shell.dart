@@ -12,7 +12,6 @@ import 'package:my_new_habit/data/models/record_model.dart';
 import 'package:my_new_habit/modals/add_record_modal.dart';
 import 'package:my_new_habit/modals/habit_details_sheet.dart';
 import 'package:my_new_habit/modals/naming_modal.dart';
-import 'package:my_new_habit/modals/quit_sheet.dart';
 import 'package:my_new_habit/modals/task_timing_sheet.dart';
 import 'package:my_new_habit/providers/record_provider.dart';
 
@@ -69,14 +68,8 @@ class MainShell extends StatelessWidget {
 
     String? title;
 
-    // Kötü Alışkanlık ise isim sormayı (naming modal) atla;
-    // showQuitSheet kendi ismini zaten soruyor.
-    if (selectedType == RecordType.quit) {
-      title = ''; // Quit sheet içerisinde ilk başta boş gelecek.
-    } else {
-      title = await showNamingModal(context, type: selectedType!);
-      if (title == null || !context.mounted) return;
-    }
+    title = await showNamingModal(context, type: selectedType!);
+    if (title == null || !context.mounted) return;
 
     await _openDetailSheet(context, selectedType!, title);
   }
@@ -102,25 +95,24 @@ class MainShell extends StatelessWidget {
           createdAt: DateTime.now(),
         ));
 
-      case RecordType.task:
+      case RecordType.event:
         final timing = await showTaskTimingSheet(context);
         if (timing == null || !context.mounted) return;
         await provider.createRecord(RecordModel(
           id: const Uuid().v4(),
-          type: RecordType.task,
+          type: RecordType.event,
           title: title,
           scheduledTime: timing.startTime,
-          endDate: timing.endDate,
-          createdAt: timing.startDate, // Başlangıç tarihi olarak createdAt kullanıyoruz
+          scheduledDate: DateFormat('yyyy-MM-dd').format(timing.startDate),
+          endTime: timing.endDate != null ? DateFormat('HH:mm').format(timing.endDate!) : null,
+          createdAt: DateTime.now(), 
         ));
 
-      case RecordType.quit:
-        final confirmed = await showQuitSheet(context);
-        if (confirmed == null || !context.mounted) return;
-        title = confirmed; // Final ismi buradan aldık
+      case RecordType.todo:
+        // TODO: Sprint 5'te Todo form sheet eklenecek. Şimdilik düz createdAt ile ekliyoruz.
         await provider.createRecord(RecordModel(
           id: const Uuid().v4(),
-          type: RecordType.quit,
+          type: RecordType.todo,
           title: title,
           createdAt: DateTime.now(),
         ));

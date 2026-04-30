@@ -9,7 +9,7 @@ import 'package:path/path.dart';
 /// bu sayede ilerideki sprint'lerde yeni tablo/sütun eklemek güvendedir.
 class DatabaseHelper {
   static const String _dbName = 'my_new_habit.db';
-  static const int _dbVersion = 2;
+  static const int _dbVersion = 3;
 
   final String? _inMemoryPath;
 
@@ -39,7 +39,7 @@ class DatabaseHelper {
     final String path;
     if (_inMemoryPath != null) {
       // Test ortamı: her DatabaseHelper.forTesting() çağrısı ayrı DB verir.
-      path = _inMemoryPath!;
+      path = _inMemoryPath;
     } else {
       final dbPath = await getDatabasesPath();
       path = join(dbPath, _dbName);
@@ -56,13 +56,15 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    await _migrate_v1(db);
+    await _migrateV1(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     for (var v = oldVersion + 1; v <= newVersion; v++) {
       if (v == 2) {
-        await _migrate_v2(db);
+        await _migrateV2(db);
+      } else if (v == 3) {
+        await _migrateV3(db);
       }
     }
   }
@@ -71,7 +73,7 @@ class DatabaseHelper {
   ///
   /// Sprint 2'de modele eklenen bu alan eski kurulumda yoktu;
   /// ALTER TABLE ile mevcut DB'ye ekliyoruz.
-  Future<void> _migrate_v2(Database db) async {
+  Future<void> _migrateV2(Database db) async {
     // Sütun zaten varsa hata vermemek için try/catch kullan.
     try {
       await db.execute(
@@ -82,21 +84,66 @@ class DatabaseHelper {
     }
   }
 
+  /// Versiyon 3: Sprint 4 PRD revizyonu.
+  ///
+  /// - records: target_progress, scheduled_date, end_time, due_date, description eklendi.
+  /// - completions: progress, note eklendi.
+  /// - type 'task' olanlar 'event' yapıldı.
+  /// - type 'quit' olanlar silindi.
+  Future<void> _migrateV3(Database db) async {
+    // records tablosuna yeni sütunlar ekle
+    final newRecordColumns = [
+      'target_progress INTEGER DEFAULT 100',
+      'scheduled_date TEXT',
+      'end_time TEXT',
+      'due_date TEXT',
+      'description TEXT',
+    ];
+
+    for (final col in newRecordColumns) {
+      try {
+        await db.execute('ALTER TABLE records ADD COLUMN $col');
+      } catch (_) {}
+    }
+
+    // completions tablosuna yeni sütunlar ekle
+    final newCompletionColumns = [
+      'progress INTEGER DEFAULT 0',
+      'note TEXT',
+    ];
+
+    for (final col in newCompletionColumns) {
+      try {
+        await db.execute('ALTER TABLE completions ADD COLUMN $col');
+      } catch (_) {}
+    }
+
+    // Mevcut 'task' tiplerini 'event' yap (PRD'ye göre artık Takvime Ekle = event)
+    await db.rawUpdate("UPDATE records SET type = 'event' WHERE type = 'task'");
+
+    // Mevcut 'quit' tiplerini ve onlara bağlı completion/streak verilerini sil (ON DELETE CASCADE)
+    await db.rawDelete("DELETE FROM records WHERE type = 'quit'");
+  }
+
   /// Versiyon 1 şeması: records, completions, streaks tabloları.
-  Future<void> _migrate_v1(Database db) async {
+  Future<void> _migrateV1(Database db) async {
     await db.execute('''
       CREATE TABLE records (
-        id             TEXT PRIMARY KEY,
-        type           TEXT NOT NULL,
-        title          TEXT NOT NULL,
-        icon           TEXT,
-        priority       TEXT,
-        repeat_days    TEXT,
-        interval_days  INTEGER,
-        scheduled_time TEXT,
-        end_date       TEXT,
-        created_at     TEXT NOT NULL,
-        is_active      INTEGER NOT NULL DEFAULT 1
+        id              TEXT PRIMARY KEY,
+        type            TEXT NOT NULL,
+        title           TEXT NOT NULL,
+        description     TEXT,
+        icon            TEXT,
+        priority        TEXT,
+        repeat_days     TEXT,
+        interval_days   INTEGER,
+        target_progress INTEGER DEFAULT 100,
+        scheduled_date  TEXT,
+        scheduled_time  TEXT,
+        end_time        TEXT,
+        due_date        TEXT,
+        created_at      TEXT NOT NULL,
+        is_active       INTEGER NOT NULL DEFAULT 1
       )
     ''');
 
@@ -106,6 +153,8 @@ class DatabaseHelper {
         record_id  TEXT NOT NULL,
         date       TEXT NOT NULL,
         status     TEXT NOT NULL,
+        progress   INTEGER DEFAULT 0,
+        note       TEXT,
         FOREIGN KEY (record_id) REFERENCES records(id) ON DELETE CASCADE
       )
     ''');

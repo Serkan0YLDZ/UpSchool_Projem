@@ -120,7 +120,7 @@ class _TaskTimingSheetState extends State<_TaskTimingSheet> {
               Switch(
                 value: _showEndDate,
                 onChanged: _toggleEndDate,
-                activeColor: AppColors.tertiary,
+                activeThumbColor: AppColors.tertiary,
               ),
             ],
           ),

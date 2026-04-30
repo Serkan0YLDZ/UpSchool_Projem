@@ -22,8 +22,7 @@ abstract class CompletionRepository {
   /// Alışkanlığı es geçildi olarak işaretler.
   Future<void> markSkipped(String id, String recordId, String date);
 
-  /// Kötü alışkanlık uyumunu bozuldu olarak işaretler (sayacı sıfırlar).
-  Future<void> markRelapsed(String id, String recordId, String date);
+
 
   /// Bir completion kaydını siler (tamamlamayı geri al).
   Future<void> delete(String id);
@@ -84,10 +83,7 @@ class SqfliteCompletionRepository implements CompletionRepository {
     await _upsert(id, recordId, date, CompletionStatus.skipped);
   }
 
-  @override
-  Future<void> markRelapsed(String id, String recordId, String date) async {
-    await _upsert(id, recordId, date, CompletionStatus.relapsed);
-  }
+
 
   @override
   Future<void> delete(String id) async {

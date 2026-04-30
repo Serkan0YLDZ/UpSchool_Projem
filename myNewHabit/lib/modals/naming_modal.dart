@@ -56,18 +56,17 @@ class _NamingSheetState extends State<_NamingSheet> {
             'Meditasyon',
             'Egzersiz',
           ],
-        RecordType.task => [
+        RecordType.event => [
             'Toplantı',
-            'Alışveriş',
-            'Doktor Randevusu',
-            'Fatura Öde',
+            'Randevu',
+            'Sinema',
+            'Kutlama',
           ],
-        RecordType.quit => [
-            'Sigara',
-            'Sosyal Medya',
-            'Şeker',
-            'Alkol',
-            'Kahve',
+        RecordType.todo => [
+            'Alışveriş',
+            'Fatura Öde',
+            'Mail Gönder',
+            'Evi Temizle',
           ],
       };
 
@@ -157,8 +156,8 @@ class _NamingSheetState extends State<_NamingSheet> {
 
   String get _hintText => switch (widget.type) {
         RecordType.habit => 'Örn: Sabah Koşusu...',
-        RecordType.task => 'Örn: Doktor Randevusu...',
-        RecordType.quit => 'Örn: Sigara...',
+        RecordType.event => 'Örn: Toplantı...',
+        RecordType.todo => 'Örn: Alışveriş...',
       };
 
   void _onContinue() {

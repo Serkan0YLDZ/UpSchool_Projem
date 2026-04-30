@@ -107,35 +107,7 @@ void main() {
     },
   );
 
-  // ── markRelapsed (US-307) ─────────────────────────────────────────────────
 
-  test(
-    'markRelapsed should set status to relapsed when called on quit record',
-    () async {
-      // Act (US-307: "Yaptım" butonuna basılınca relapsed kaydedilir)
-      await provider.markRelapsed(recordId, testDate);
-
-      // Assert
-      final completion = provider.completionFor(recordId);
-      expect(completion, isNotNull);
-      expect(completion!.status, CompletionStatus.relapsed);
-    },
-  );
-
-  test(
-    'markRelapsed should override previous done status',
-    () async {
-      // Arrange — önce done
-      await provider.markDone(recordId, testDate);
-
-      // Act — sonra relapsed
-      await provider.markRelapsed(recordId, testDate);
-
-      // Assert — relapsed override eder
-      expect(provider.completionFor(recordId)?.status,
-          CompletionStatus.relapsed);
-    },
-  );
 
   // ── markSkipped ───────────────────────────────────────────────────────────
 

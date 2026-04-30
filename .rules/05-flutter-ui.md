@@ -125,7 +125,7 @@ Add tactile feedback for primary completion actions. Keep it subtle.
 await HapticFeedback.lightImpact();
 ```
 
-Use `lightImpact` for toggles/checkmarks, `mediumImpact` for destructive actions (e.g., "Relapse" reset).
+Use `lightImpact` for toggles/checkmarks, `mediumImpact` for destructive actions (e.g., deleting a record).
 
 ---
 

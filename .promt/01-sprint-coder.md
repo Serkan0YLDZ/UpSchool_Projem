@@ -27,7 +27,7 @@ Aşağıdaki dosyaları kod yazmadan önce oku ve her kararında bu dosyalara da
 **Ne yapar:** Sprint bazlı teknik görevleri, kullanıcı hikayelerini, kabul kriterlerini ve önerilen klasör yapısını içerir. Hangi sprint'te ne yazman gerektiğini bu dosyadan öğrenirsin. Sadece `SPRINT_NUMARASI` parametresinde belirtilen sprint'in görevlerini implement et — diğer sprint'lerin görevlerine dokunma.
 
 ### 2. `/Users/serkan/Github/UpSchool_Projem/prd.md`
-**Ne yapar:** Ürün gereksinim dokümanıdır. Her özelliğin kullanıcı açısından ne yapması gerektiğini, iş kurallarını (streak mantığı, skip hakkı, kötü alışkanlık sayacı vb.) ve MVP kapsamını tanımlar. Kod yazarken "bu özellik kullanıcıya ne yapmalı?" sorusunun cevabını buradan alırsın.
+**Ne yapar:** Ürün gereksinim dokümanıdır. Her özelliğin kullanıcı açısından ne yapması gerektiğini, iş kurallarını (streak mantığı, skip hakkı, 0-100% ilerleme vb.) ve MVP kapsamını tanımlar. Kod yazarken "bu özellik kullanıcıya ne yapmalı?" sorusunun cevabını buradan alırsın.
 
 ### 3. `/Users/serkan/Github/UpSchool_Projem/.rules/`
 **Ne yapar:** LLM için zorunlu kodlama kuralları klasörüdür. Her `.md` dosyası ayrı bir konu içerir:

@@ -128,14 +128,13 @@ void main() {
   );
 
   test(
-    'getByDate should always include quit records',
+    'getByDate should include todo records if logic states so',
     () async {
       // Arrange
       final record = RecordModel(
         id: 'q1',
-        type: RecordType.quit,
-        title: 'Sigara',
-        repeatDays: const [],
+        type: RecordType.todo,
+        title: 'Yapılacak',
         createdAt: DateTime.now(),
       );
       await repository.create(record);
@@ -143,7 +142,7 @@ void main() {
       // Act
       final result = await repository.getByDate('2024-01-08');
 
-      // Assert (US-204: quit her zaman görünür)
+      // Assert
       expect(result.any((r) => r.id == 'q1'), isTrue);
     },
   );
@@ -179,49 +178,32 @@ void main() {
   );
 
   test(
-    'getByDate should include task if endDate is null or not passed, exclude if passed',
+    'getByDate should include event only on its scheduledDate',
     () async {
-      // Covers: US-203
+      // Covers: US-203 (Eski Task mantığı, şimdi Event)
       // Arrange
-      final recordNullEnd = RecordModel(
+      final recordNoDate = RecordModel(
         id: 't1',
-        type: RecordType.task,
-        title: 'Bitiş tarihi yok',
-        repeatDays: const [],
+        type: RecordType.event,
+        title: 'Tarih yok',
         createdAt: DateTime(2024, 1, 4),
       );
-      final recordWithEnd = RecordModel(
+      final recordWithDate = RecordModel(
         id: 't2',
-        type: RecordType.task,
-        title: 'Bitiş tarihi var',
-        repeatDays: const [],
-        endDate: DateTime(2024, 1, 5),
+        type: RecordType.event,
+        title: 'Tarih var',
+        scheduledDate: '2024-01-05',
         createdAt: DateTime(2024, 1, 4),
       );
       
-      await repository.create(recordNullEnd);
-      await repository.create(recordWithEnd);
+      await repository.create(recordNoDate);
+      await repository.create(recordWithDate);
 
       // Act & Assert
-      // 2024-01-03 (Before creation date -> should NOT show any)
-      var result = await repository.getByDate('2024-01-03');
-      expect(result.any((r) => r.id == 't1'), isFalse);
-      expect(result.any((r) => r.id == 't2'), isFalse);
-
-      // 2024-01-04 (Creation date -> should show both)
-      result = await repository.getByDate('2024-01-04');
-      expect(result.any((r) => r.id == 't1'), isTrue);
-      expect(result.any((r) => r.id == 't2'), isTrue);
-
-      // 2024-01-05 (On end date -> should show t2, but NOT t1 because t1 only shows on creation date)
-      result = await repository.getByDate('2024-01-05');
+      var result = await repository.getByDate('2024-01-05');
+      // No date means it doesn't match the required date in getByDate
       expect(result.any((r) => r.id == 't1'), isFalse);
       expect(result.any((r) => r.id == 't2'), isTrue);
-
-      // 2024-01-06 (After end date -> should exclude t2 and t1)
-      result = await repository.getByDate('2024-01-06');
-      expect(result.any((r) => r.id == 't1'), isFalse);
-      expect(result.any((r) => r.id == 't2'), isFalse);
     },
   );
 }

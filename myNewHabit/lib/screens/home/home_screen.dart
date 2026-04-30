@@ -13,7 +13,7 @@ import '../../providers/record_provider.dart';
 import 'widgets/calendar_bar_widget.dart';
 import 'widgets/filter_chip_bar.dart';
 import 'widgets/habit_card.dart';
-import 'widgets/quit_card.dart';
+
 import 'widgets/task_card.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -163,7 +163,7 @@ class _ContentArea extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasAny = provider.scheduledTasks.isNotEmpty ||
         provider.habits.isNotEmpty ||
-        provider.quitRecords.isNotEmpty;
+        provider.todos.isNotEmpty;
 
     if (!hasAny) {
       return const EmptyStateWidget(
@@ -198,12 +198,13 @@ class _ContentArea extends StatelessWidget {
             const SizedBox(height: AppSpacing.lg),
           ],
 
-          // ── Bırakılanlar ────────────────────────────────────────────────
-          if (provider.quitRecords.isNotEmpty) ...[
-            _SectionTitle(title: 'Bırakılanlar', emoji: '🚫'),
+          // ── Yapılacaklar ────────────────────────────────────────────────
+          if (provider.todos.isNotEmpty) ...[
+            _SectionTitle(title: 'Yapılacaklar', emoji: '☑️'),
             const SizedBox(height: AppSpacing.sm),
-            ...provider.quitRecords.map(
-              (r) => QuitCard(record: r, selectedDate: provider.selectedDate),
+            ...provider.todos.map(
+              // TODO: Sprint 5'te TodoCard eklenecek, şimdilik TaskCard (eski) kullanılabilir veya liste render edilebilir.
+              (r) => TaskCard(record: r, selectedDate: provider.selectedDate),
             ),
           ],
 

@@ -66,22 +66,7 @@ void main() {
     },
   );
 
-  // ── markRelapsed ──────────────────────────────────────────────────────────
 
-  test(
-    'markRelapsed should create completion with relapsed status when called',
-    () async {
-      // Arrange — US-204: kötü alışkanlık relapse kaydı
-      const date = '2024-01-17';
-
-      // Act
-      await completionRepo.markRelapsed('c3', 'r1', date);
-      final result = await completionRepo.getForRecordAndDate('r1', date);
-
-      // Assert
-      expect(result?.status.isRelapsed, isTrue);
-    },
-  );
 
   // ── upsert (aynı gün tekrar) ──────────────────────────────────────────────
 

@@ -30,7 +30,7 @@ Analiz yaparken aşağıdaki dosyaları bağlam olarak kullan:
 **Ne yapar:** Her sprint'in kabul kriterlerini, kullanıcı hikayelerini ve teknik beklentilerini tanımlar. Analiz ettiğin kodun bu kriterleri karşılayıp karşılamadığını bu dosyadan kontrol edersin. "Bu özellik doğru mu çalışıyor?" sorusunun cevabı burada.
 
 ### 2. `/Users/serkan/Github/UpSchool_Projem/prd.md`
-**Ne yapar:** İş kurallarının kaynağıdır. Streak'in nasıl hesaplanacağı, skip hakkının hangi koşullarda kullanılacağı, kötü alışkanlık sayacının nasıl çalışacağı gibi domain mantığı burada tanımlanır. Bir metodun "doğru" davranıp davranmadığını bu dosyaya bakarak belirlersin.
+**Ne yapar:** İş kurallarının kaynağıdır. Streak'in nasıl hesaplanacağı, skip hakkının hangi koşullarda kullanılacağı, 0-100% ilerleme mantığının nasıl çalışacağı gibi domain mantığı burada tanımlanır. Bir metodun "doğru" davranıp davranmadığını bu dosyaya bakarak belirlersin.
 
 ### 3. `/Users/serkan/Github/UpSchool_Projem/.rules/`
 **Ne yapar:** Zorunlu kodlama standartları klasörüdür. Analiz sırasında her dosyayı bu kurallar çerçevesinde değerlendirirsin:

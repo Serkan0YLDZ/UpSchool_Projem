@@ -34,7 +34,7 @@ Bug analizi yaparken aşağıdaki dosyaları bağlam olarak kullan:
 **Ne yapar:** Bir davranışın bug mı yoksa tasarım kararı mı olduğunu belirlemek için kullanırsın. Kabul kriterleri, kullanıcı hikayeleri ve sprint teknik görevleri burada tanımlanır. "Bu özellik zaten çalışıyor olmalı mıydı?" sorusunu bu dosyayla cevaplarsın. Hangi sprint'te, hangi US'ye ait bir bug olduğunu da buradan tespit edersin.
 
 ### 2. `/Users/serkan/Github/UpSchool_Projem/prd.md`
-**Ne yapar:** İş kurallarının kaynağıdır. "Doğru davranış nedir?" sorusunu bu dosyayla cevaplarsın. Örneğin: streak'in ne zaman sıfırlanacağı, skip hakkının nasıl çalışacağı, kötü alışkanlık sayacının sıfırlanma koşulları — bunların hepsi burada. Bir bug'ı düzeltirken davranışı bu dokümana göre doğrularsın.
+**Ne yapar:** İş kurallarının kaynağıdır. "Doğru davranış nedir?" sorusunu bu dosyayla cevaplarsın. Örneğin: streak'in ne zaman sıfırlanacağı, skip hakkının nasıl çalışacağı, %100 hedefine ulaşma koşulları — bunların hepsi burada. Bir bug'ı düzeltirken davranışı bu dokümana göre doğrularsın.
 
 ### 3. `/Users/serkan/Github/UpSchool_Projem/.rules/`
 **Ne yapar:** Fix yazarken uyulması gereken kodlama standartları burada. Bug düzeltmesi yeni bir ihlal yaratmamalı:

@@ -65,8 +65,8 @@ lib/
 │   │   └── widgets/              # Screen-private widgets
 │   │       ├── calendar_bar_widget.dart
 │   │       ├── habit_card.dart
-│   │       ├── task_card.dart
-│   │       ├── quit_card.dart
+│   │       ├── event_card.dart
+│   │       ├── todo_card.dart
 │   │       └── filter_chip_bar.dart
 │   ├── onboarding/
 │   │   └── onboarding_screen.dart
@@ -76,8 +76,8 @@ lib/
 │   ├── add_record_modal.dart
 │   ├── naming_modal.dart
 │   ├── habit_details_sheet.dart
-│   ├── task_timing_sheet.dart
-│   └── quit_sheet.dart
+│   ├── event_timing_sheet.dart
+│   └── todo_sheet.dart
 └── main.dart
 ```
 

@@ -176,35 +176,35 @@ void main() {
     },
   );
 
-  // ── quitRecords (US-305) ──────────────────────────────────────────────────
+  // ── todos (US-305) ──────────────────────────────────────────────────
 
   test(
-    'quitRecords should only return quit type records',
+    'todos should only return todo type records',
     () async {
       // Arrange
       stub.recordsToReturn = [
         _habit('h8', 'Rutin'),
-        _quit('q1', 'Sigara'),
-        _task('t1', 'Toplantı'),
+        _todo('q1', 'Yapılacak'),
+        _event('t1', 'Toplantı'),
       ];
       await provider.loadRecords();
 
-      // Act & Assert (US-305: sadece quit tipler)
-      expect(provider.quitRecords.length, 1);
-      expect(provider.quitRecords.first.type, RecordType.quit);
+      // Act & Assert
+      expect(provider.todos.length, 1);
+      expect(provider.todos.first.type, RecordType.todo);
     },
   );
 
   // ── scheduledTasks (US-303) ──────────────────────────────────────────────
 
   test(
-    'scheduledTasks should return only tasks with scheduledTime sorted by time',
+    'scheduledTasks should return only events with scheduledTime sorted by time',
     () async {
       // Arrange
       stub.recordsToReturn = [
-        _taskAt('t2', 'Akşam', '18:00'),
-        _taskAt('t3', 'Sabah', '09:00'),
-        _taskAt('t4', 'Öğle', '13:30'),
+        _eventAt('t2', 'Akşam', '18:00'),
+        _eventAt('t3', 'Sabah', '09:00'),
+        _eventAt('t4', 'Öğle', '13:30'),
       ];
       await provider.loadRecords();
 
@@ -240,27 +240,24 @@ RecordModel _habitAt(String id, String title, DateTime createdAt) => RecordModel
       createdAt: createdAt,
     );
 
-RecordModel _quit(String id, String title) => RecordModel(
+RecordModel _todo(String id, String title) => RecordModel(
       id: id,
-      type: RecordType.quit,
+      type: RecordType.todo,
       title: title,
-      repeatDays: const [],
       createdAt: DateTime.now(),
     );
 
-RecordModel _task(String id, String title) => RecordModel(
+RecordModel _event(String id, String title) => RecordModel(
       id: id,
-      type: RecordType.task,
+      type: RecordType.event,
       title: title,
-      repeatDays: const [],
       createdAt: DateTime.now(),
     );
 
-RecordModel _taskAt(String id, String title, String time) => RecordModel(
+RecordModel _eventAt(String id, String title, String time) => RecordModel(
       id: id,
-      type: RecordType.task,
+      type: RecordType.event,
       title: title,
       scheduledTime: time,
-      repeatDays: const [],
       createdAt: DateTime.now(),
     );

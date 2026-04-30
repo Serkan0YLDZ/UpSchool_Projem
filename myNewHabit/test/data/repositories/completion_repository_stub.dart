@@ -59,15 +59,6 @@ class StubCompletionRepository implements CompletionRepository {
     ));
   }
 
-  @override
-  Future<void> markRelapsed(String id, String recordId, String date) async {
-    _upsert(CompletionModel(
-      id: id,
-      recordId: recordId,
-      date: date,
-      status: CompletionStatus.relapsed,
-    ));
-  }
 
   @override
   Future<void> delete(String id) async {

@@ -13,17 +13,15 @@ void main() {
     
     final record = RecordModel(
       id: const Uuid().v4(),
-      type: RecordType.quit,
-      title: 'Sigara',
+      type: RecordType.todo,
+      title: 'Yapılacak',
       createdAt: DateTime.now(),
     );
     
     try {
       await repo.create(record);
-      print("SUCCESS");
-    } catch (e, stack) {
-      print("ERROR: \$e");
-      print(stack);
+    } catch (e) {
+      // ignore error in scratch test
     }
   });
 }

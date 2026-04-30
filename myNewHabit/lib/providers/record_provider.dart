@@ -40,10 +40,9 @@ class RecordProvider extends ChangeNotifier {
   String get selectedDate => _selectedDate;
   FilterType get activeFilter => _activeFilter;
 
-  /// Saatli görevler — saat etiketine göre sıralar; filtreden etkilenmez
-  /// çünkü zamanlama önceliği sabittir.
+  /// Takvim Etkinlikleri (Event) — saat etiketine göre sıralar; filtreden etkilenmez.
   List<RecordModel> get scheduledTasks => _records
-      .where((r) => r.type == RecordType.task && r.scheduledTime != null)
+      .where((r) => r.type == RecordType.event && r.scheduledTime != null)
       .toList()
     ..sort((a, b) => (a.scheduledTime ?? '').compareTo(b.scheduledTime ?? ''));
 
@@ -52,9 +51,10 @@ class RecordProvider extends ChangeNotifier {
         _records.where((r) => r.type == RecordType.habit).toList(),
       );
 
-  /// Bırakılan alışkanlıklar — filtre uygulanmaz, her zaman aktiftir.
-  List<RecordModel> get quitRecords =>
-      _records.where((r) => r.type == RecordType.quit).toList();
+  /// Yapılacaklar Listesi (Todo) — aktif filtreye göre sıralanır.
+  List<RecordModel> get todos => _applyTodoFilter(
+        _records.where((r) => r.type == RecordType.todo).toList(),
+      );
 
   // ── Actions ──────────────────────────────────────────────────────────────
 
@@ -152,24 +152,19 @@ class RecordProvider extends ChangeNotifier {
         final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
         final endOfWeek = startOfWeek.add(const Duration(days: 6));
         return source.where((r) {
-          if (r.endDate == null) return true;
-          return !r.endDate!.isBefore(startOfWeek) &&
-              !r.endDate!.isAfter(endOfWeek);
+          return !r.createdAt.isBefore(startOfWeek) &&
+              !r.createdAt.isAfter(endOfWeek);
         }).toList()
-          ..sort((a, b) => (a.endDate ?? DateTime(9999))
-              .compareTo(b.endDate ?? DateTime(9999)));
+          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
       case FilterType.thisMonth:
         final now = DateTime.now();
         return source.where((r) {
-          if (r.endDate == null) return true;
-          return r.endDate!.year == now.year && r.endDate!.month == now.month;
+          return r.createdAt.year == now.year && r.createdAt.month == now.month;
         }).toList()
-          ..sort((a, b) => (a.endDate ?? DateTime(9999))
-              .compareTo(b.endDate ?? DateTime(9999)));
+          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
       case FilterType.all:
-      default:
         // Varsayılan: öneme göre sırala (high > medium > low).
         const defOrder = [Priority.high, Priority.medium, Priority.low];
         return source
@@ -178,6 +173,44 @@ class RecordProvider extends ChangeNotifier {
             final bi = defOrder.indexOf(b.priority ?? Priority.low);
             return ai.compareTo(bi);
           });
+    }
+  }
+
+  /// Aktif filtreye göre todo listesini sıralar/filtreler.
+  List<RecordModel> _applyTodoFilter(List<RecordModel> source) {
+    switch (_activeFilter) {
+      case FilterType.mostImportant:
+        const order = [Priority.high, Priority.medium, Priority.low];
+        return source
+          ..sort((a, b) {
+            final ai = order.indexOf(a.priority ?? Priority.low);
+            final bi = order.indexOf(b.priority ?? Priority.low);
+            return ai.compareTo(bi);
+          });
+
+      case FilterType.earliest:
+        return source..sort((a, b) => (a.dueDate ?? DateTime(9999)).compareTo(b.dueDate ?? DateTime(9999)));
+
+      case FilterType.thisWeek:
+        final now = DateTime.now();
+        final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+        final endOfWeek = startOfWeek.add(const Duration(days: 6));
+        return source.where((r) {
+          if (r.dueDate == null) return true; // Tarihsizler 'Tümü' sayılır
+          return !r.dueDate!.isBefore(startOfWeek) && !r.dueDate!.isAfter(endOfWeek);
+        }).toList()
+          ..sort((a, b) => (a.dueDate ?? DateTime(9999)).compareTo(b.dueDate ?? DateTime(9999)));
+
+      case FilterType.thisMonth:
+        final now = DateTime.now();
+        return source.where((r) {
+          if (r.dueDate == null) return true;
+          return r.dueDate!.year == now.year && r.dueDate!.month == now.month;
+        }).toList()
+          ..sort((a, b) => (a.dueDate ?? DateTime(9999)).compareTo(b.dueDate ?? DateTime(9999)));
+
+      case FilterType.all:
+        return source..sort((a, b) => (a.dueDate ?? DateTime(9999)).compareTo(b.dueDate ?? DateTime(9999)));
     }
   }
 

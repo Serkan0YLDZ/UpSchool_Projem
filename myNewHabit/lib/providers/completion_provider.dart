@@ -1,7 +1,7 @@
 // Sprint 2: State Yönetimi — CompletionProvider
 
 import 'package:flutter/foundation.dart';
-import 'package:intl/intl.dart';
+
 import 'package:uuid/uuid.dart';
 
 import '../data/models/completion_model.dart';
@@ -62,10 +62,6 @@ class CompletionProvider extends ChangeNotifier {
     await _mark(recordId, date, CompletionStatus.skipped);
   }
 
-  /// Kötü alışkanlık uyumunu bozuldu olarak işaretler.
-  Future<void> markRelapsed(String recordId, String date) async {
-    await _mark(recordId, date, CompletionStatus.relapsed);
-  }
 
   /// Tamamlamayı geri alır.
   Future<void> undoCompletion(String recordId) async {
@@ -96,8 +92,9 @@ class CompletionProvider extends ChangeNotifier {
           await _repository.markDone(id, recordId, date);
         case CompletionStatus.skipped:
           await _repository.markSkipped(id, recordId, date);
-        case CompletionStatus.relapsed:
-          await _repository.markRelapsed(id, recordId, date);
+        case CompletionStatus.partial:
+          // TODO: partial logic if needed, currently fallback to done in repo or we need to add it?
+          await _repository.markDone(id, recordId, date);
       }
       // Local cache'i güncelle, DB'ye tekrar sorgu atmadan.
       _completions[recordId] = CompletionModel(

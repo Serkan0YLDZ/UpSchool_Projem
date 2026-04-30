@@ -26,11 +26,11 @@ class RecordModel {
   final String id;
   final RecordType type;
   final String title;
-  final String? icon;
+  final String? description;
   final Priority? priority;
-  final List<String> repeatDays;
-  final String? scheduledTime;
-  final DateTime? endDate;
+  final int? targetProgress;
+  final String? scheduledDate;
+  final String? dueDate;
   final DateTime createdAt;
   final bool isActive;
 }
@@ -47,11 +47,11 @@ class RecordModel {
 ```dart
 // ❌ Wrong: Same card padding repeated in every screen
 Padding(padding: EdgeInsets.all(16), child: HabitCard(...))
-Padding(padding: EdgeInsets.all(16), child: TaskCard(...))
+Padding(padding: EdgeInsets.all(16), child: TodoCard(...))
 
 // ✅ Correct: Shared AppCard wraps consistent padding
 AppCard(child: HabitCard(...))
-AppCard(child: TaskCard(...))
+AppCard(child: TodoCard(...))
 ```
 
 ---
@@ -97,10 +97,10 @@ Code must read like prose. If you need a comment to explain what the code does, 
 
 ```dart
 // ❌ Unclear + needs a comment
-int d = DateTime.now().difference(last).inDays; // days since relapse
+int d = due.difference(DateTime.now()).inDays; // days until due date
 
 // ✅ Clear without a comment
-int daysSinceLastRelapse = DateTime.now().difference(lastRelapseDate).inDays;
+int daysUntilDue = dueDate.difference(DateTime.now()).inDays;
 ```
 
 ---

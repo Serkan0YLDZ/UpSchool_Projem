@@ -231,14 +231,14 @@ class _PillCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (record.endDate != null) ...[
+                        if (record.dueDate != null) ...[
                           const SizedBox(height: 2),
                           Row(
                             children: [
                               const Text('📅', style: TextStyle(fontSize: 12)),
                               const SizedBox(width: 4),
                               Text(
-                                DateFormat('d MMM HH:mm', 'tr_TR').format(record.endDate!),
+                                DateFormat('d MMM', 'tr_TR').format(record.dueDate!),
                                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                       color: AppColors.onSurfaceVariant,
                                     ),

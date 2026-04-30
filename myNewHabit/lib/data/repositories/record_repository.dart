@@ -1,6 +1,6 @@
 // Sprint 2: Veri Katmanı — RecordRepository (abstract + sqflite impl)
 
-import 'package:intl/intl.dart';
+
 import 'package:sqflite/sqflite.dart';
 
 import '../database/database_helper.dart';
@@ -55,7 +55,14 @@ class SqfliteRecordRepository implements RecordRepository {
     final dayAbbr = _dayAbbreviation(date);
 
     return all.where((r) {
-      if (r.type == RecordType.quit) return true;
+      if (r.type == RecordType.todo) {
+        // Todo: Eğer bitiş tarihi yoksa veya bitiş tarihi izleyen/öncesi/kendi günü önemli değilse 
+        // aslında todo'lar tüm tarihlerde görünecek. PRD: Todo için "Yapılacaklar Bölümü" 
+        // Filtrelerine göre gösterilir, yani getByDate tüm todoları döndürmeli veya 
+        // bitiş tarihi filtrelemesini RecordProvider'daki _applyTodoFilter yapacak.
+        return true; 
+      }
+      
       if (r.type == RecordType.habit) {
         // X günde bir mantığı:
         if (r.intervalDays != null) {
@@ -74,20 +81,13 @@ class SqfliteRecordRepository implements RecordRepository {
         // Gün seçimi yoksa her gün göster
         return r.repeatDays.isEmpty || r.repeatDays.contains(dayAbbr);
       }
-      // task: bitiş tarihi yoksa sadece oluşturulduğu günde göster;
-      // bitiş tarihi varsa, o tarihe kadar (dahil) her gün göster.
-      if (r.type == RecordType.task) {
-        final targetDate = DateTime.parse(date);
-        final startDay = DateTime(r.createdAt.year, r.createdAt.month, r.createdAt.day);
-        
-        if (r.endDate == null) {
-          return targetDate.isAtSameMomentAs(startDay);
-        } else {
-          final endDay = DateTime(r.endDate!.year, r.endDate!.month, r.endDate!.day);
-          return (targetDate.isAtSameMomentAs(startDay) || targetDate.isAfter(startDay)) &&
-                 (targetDate.isAtSameMomentAs(endDay) || targetDate.isBefore(endDay));
-        }
+
+      // event (eski task): sadece planlandığı tarihte göster.
+      if (r.type == RecordType.event) {
+        if (r.scheduledDate == null) return false;
+        return r.scheduledDate == date;
       }
+      
       return false;
     }).toList();
   }
