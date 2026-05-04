@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../providers/completion_provider.dart';
 import '../../../providers/record_provider.dart';
 
 /// 7 günlük yatay kaydırılabilir takvim barı.
@@ -37,7 +38,10 @@ class _CalendarRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final today = DateTime.now();
     // Dün (index 0), Bugün (index 1), Gelecek 5 Gün (index 2–6) = 7 gün toplam.
-    final days = List.generate(7, (i) => today.subtract(const Duration(days: 1)).add(Duration(days: i)));
+    final days = List.generate(
+      7,
+      (i) => today.subtract(const Duration(days: 1)).add(Duration(days: i)),
+    );
 
     return SizedBox(
       height: 84,
@@ -49,11 +53,7 @@ class _CalendarRow extends StatelessWidget {
           final day = days[index];
           final dateStr = DateFormat('yyyy-MM-dd').format(day);
           final isSelected = dateStr == selectedDate;
-          return _DayCell(
-            day: day,
-            dateStr: dateStr,
-            isSelected: isSelected,
-          );
+          return _DayCell(day: day, dateStr: dateStr, isSelected: isSelected);
         },
       ),
     );
@@ -80,7 +80,10 @@ class _DayCell extends StatelessWidget {
     final dayLabel = _dayNames[day.weekday - 1];
 
     return GestureDetector(
-      onTap: () => context.read<RecordProvider>().selectDate(dateStr),
+      onTap: () {
+        context.read<RecordProvider>().selectDate(dateStr);
+        context.read<CompletionProvider>().loadForDate(dateStr);
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
         child: AnimatedContainer(
@@ -107,20 +110,20 @@ class _DayCell extends StatelessWidget {
               Text(
                 dayLabel.toUpperCase(),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: isSelected
-                          ? Colors.white.withValues(alpha: 0.85)
-                          : AppColors.onSurfaceVariant.withValues(alpha: 0.7),
-                      letterSpacing: 0.8,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  color: isSelected
+                      ? Colors.white.withValues(alpha: 0.85)
+                      : AppColors.onSurfaceVariant.withValues(alpha: 0.7),
+                  letterSpacing: 0.8,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 '${day.day}',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: isSelected ? Colors.white : AppColors.onSurface,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  color: isSelected ? Colors.white : AppColors.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),

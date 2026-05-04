@@ -75,18 +75,18 @@ Bu nedenle plan, **Sprint 4'ten itibaren** tamamen yeni PRD'nin "V1 — MVP" kur
 
 ### Teknik Görevler
 
-- [ ] **Takvim Etkinlikleri Bölümü:** Saat/tarih etiketli, Event modeline uygun yeni kart tasarımı (Checkbox'lı).
-- [ ] **Alışkanlık Takibi Bölümü:** Kart üzerinde `Slider` veya ilerleme butonlarıyla `%` değerinin güncellenebilmesi. Tamamlanma durumunun `%100` eşiğine bağlanması (Eski Checkbox'ın kaldırılması).
-- [ ] **Yapılacaklar Listesi Bölümü:** Sadece `Todo`'ların gösterildiği yapı. Sağ üstte 2 boyutlu (Sıralama x Zaman Aralığı) filtrenin UI ve logic olarak eklenmesi.
-- [ ] Tüm kartlarda **Uzun Basma (Long Press)** etkileşiminin eklenmesi:
+- [x] **Takvim Etkinlikleri Bölümü:** Saat/tarih etiketli, Event modeline uygun yeni kart tasarımı (Checkbox'lı).
+- [x] **Alışkanlık Takibi Bölümü:** Kart üzerinde `Slider` veya ilerleme butonlarıyla `%` değerinin güncellenebilmesi. Tamamlanma durumunun `%100` eşiğine bağlanması (Eski Checkbox'ın kaldırılması).
+- [x] **Yapılacaklar Listesi Bölümü:** Sadece `Todo`'ların gösterildiği yapı. Sağ üstte 2 boyutlu (Sıralama x Zaman Aralığı) filtrenin UI ve logic olarak eklenmesi.
+- [x] Tüm kartlarda **Uzun Basma (Long Press)** etkileşiminin eklenmesi:
   - Uzun basınca "Düzenle" için dolu formun (Bottom Sheet) açılması.
   - "Sil" tıklandığında uygulamanın en önünde açılan tam ekran onay modalının tasarlanması.
 
 ### Kabul Kriterleri
 
-- [ ] Alışkanlıklar %100 olmadan "Tamamlandı" statüsüne geçmez, %100 olunca yeşil/tamamlandı durumuna geçer.
-- [ ] Todo filtreleri veri anında yenilenecek şekilde tıklandığında çalışır.
-- [ ] Her kart uzun basılarak güvenli şekilde silinebilir/düzenlenebilir. UI kırılmaz.
+- [x] Alışkanlıklar %100 olmadan "Tamamlandı" statüsüne geçmez, %100 olunca yeşil/tamamlandı durumuna geçer.
+- [x] Todo filtreleri veri anında yenilenecek şekilde tıklandığında çalışır.
+- [x] Her kart uzun basılarak güvenli şekilde silinebilir/düzenlenebilir. UI kırılmaz.
 
 ---
 

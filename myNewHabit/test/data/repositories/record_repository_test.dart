@@ -127,25 +127,22 @@ void main() {
     },
   );
 
-  test(
-    'getByDate should include todo records if logic states so',
-    () async {
-      // Arrange
-      final record = RecordModel(
-        id: 'q1',
-        type: RecordType.todo,
-        title: 'Yapılacak',
-        createdAt: DateTime.now(),
-      );
-      await repository.create(record);
+  test('getByDate should include todo records if logic states so', () async {
+    // Arrange
+    final record = RecordModel(
+      id: 'q1',
+      type: RecordType.todo,
+      title: 'Yapılacak',
+      createdAt: DateTime.now(),
+    );
+    await repository.create(record);
 
-      // Act
-      final result = await repository.getByDate('2024-01-08');
+    // Act
+    final result = await repository.getByDate('2024-01-08');
 
-      // Assert
-      expect(result.any((r) => r.id == 'q1'), isTrue);
-    },
-  );
+    // Assert
+    expect(result.any((r) => r.id == 'q1'), isTrue);
+  });
 
   test(
     'getByDate should handle intervalDays correctly (e.g. every 3 days)',
@@ -177,35 +174,32 @@ void main() {
     },
   );
 
-  test(
-    'getByDate should include event only on its scheduledDate',
-    () async {
-      // Covers: US-203 (Eski Task mantığı, şimdi Event)
-      // Arrange
-      final recordNoDate = RecordModel(
-        id: 't1',
-        type: RecordType.event,
-        title: 'Tarih yok',
-        createdAt: DateTime(2024, 1, 4),
-      );
-      final recordWithDate = RecordModel(
-        id: 't2',
-        type: RecordType.event,
-        title: 'Tarih var',
-        scheduledDate: '2024-01-05',
-        createdAt: DateTime(2024, 1, 4),
-      );
-      
-      await repository.create(recordNoDate);
-      await repository.create(recordWithDate);
+  test('getByDate should include event only on its scheduledDate', () async {
+    // Covers: US-203 (Eski Task mantığı, şimdi Event)
+    // Arrange
+    final recordNoDate = RecordModel(
+      id: 't1',
+      type: RecordType.event,
+      title: 'Tarih yok',
+      createdAt: DateTime(2024, 1, 4),
+    );
+    final recordWithDate = RecordModel(
+      id: 't2',
+      type: RecordType.event,
+      title: 'Tarih var',
+      scheduledDate: '2024-01-05',
+      createdAt: DateTime(2024, 1, 4),
+    );
 
-      // Act & Assert
-      var result = await repository.getByDate('2024-01-05');
-      // No date means it doesn't match the required date in getByDate
-      expect(result.any((r) => r.id == 't1'), isFalse);
-      expect(result.any((r) => r.id == 't2'), isTrue);
-    },
-  );
+    await repository.create(recordNoDate);
+    await repository.create(recordWithDate);
+
+    // Act & Assert
+    var result = await repository.getByDate('2024-01-05');
+    // No date means it doesn't match the required date in getByDate
+    expect(result.any((r) => r.id == 't1'), isFalse);
+    expect(result.any((r) => r.id == 't2'), isTrue);
+  });
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

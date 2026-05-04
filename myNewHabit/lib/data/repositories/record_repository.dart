@@ -1,6 +1,5 @@
 // Sprint 2: Veri Katmanı — RecordRepository (abstract + sqflite impl)
 
-
 import 'package:sqflite/sqflite.dart';
 
 import '../database/database_helper.dart';
@@ -56,13 +55,13 @@ class SqfliteRecordRepository implements RecordRepository {
 
     return all.where((r) {
       if (r.type == RecordType.todo) {
-        // Todo: Eğer bitiş tarihi yoksa veya bitiş tarihi izleyen/öncesi/kendi günü önemli değilse 
-        // aslında todo'lar tüm tarihlerde görünecek. PRD: Todo için "Yapılacaklar Bölümü" 
-        // Filtrelerine göre gösterilir, yani getByDate tüm todoları döndürmeli veya 
+        // Todo: Eğer bitiş tarihi yoksa veya bitiş tarihi izleyen/öncesi/kendi günü önemli değilse
+        // aslında todo'lar tüm tarihlerde görünecek. PRD: Todo için "Yapılacaklar Bölümü"
+        // Filtrelerine göre gösterilir, yani getByDate tüm todoları döndürmeli veya
         // bitiş tarihi filtrelemesini RecordProvider'daki _applyTodoFilter yapacak.
-        return true; 
+        return true;
       }
-      
+
       if (r.type == RecordType.habit) {
         // X günde bir mantığı:
         if (r.intervalDays != null) {
@@ -85,9 +84,14 @@ class SqfliteRecordRepository implements RecordRepository {
       // event (eski task): sadece planlandığı tarihte göster.
       if (r.type == RecordType.event) {
         if (r.scheduledDate == null) return false;
-        return r.scheduledDate == date;
+
+        final targetDate = DateTime.parse(date);
+        final startDate = DateTime.parse(r.scheduledDate!);
+        final end = r.endDate != null ? DateTime.parse(r.endDate!) : startDate;
+
+        return !targetDate.isBefore(startDate) && !targetDate.isAfter(end);
       }
-      
+
       return false;
     }).toList();
   }
@@ -141,5 +145,3 @@ class SqfliteRecordRepository implements RecordRepository {
     return abbrs[weekday - 1];
   }
 }
-
-

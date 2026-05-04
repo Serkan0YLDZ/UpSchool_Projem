@@ -54,7 +54,9 @@ abstract final class AppTheme {
               fontWeight: FontWeight.w700,
             );
           }
-          return AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant);
+          return AppTypography.labelSm.copyWith(
+            color: AppColors.onSurfaceVariant,
+          );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -150,7 +152,10 @@ abstract final class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          borderSide: const BorderSide(color: AppColors.primaryContainer, width: 2),
+          borderSide: const BorderSide(
+            color: AppColors.primaryContainer,
+            width: 2,
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,

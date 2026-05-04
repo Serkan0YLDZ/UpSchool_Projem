@@ -29,15 +29,13 @@ Widget _buildApp() {
         routes: [
           GoRoute(
             path: AppRoutes.home,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: HomeScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: HomeScreen()),
           ),
           GoRoute(
             path: AppRoutes.profile,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: ProfileScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: ProfileScreen()),
           ),
         ],
       ),
@@ -53,10 +51,7 @@ Widget _buildApp() {
         create: (_) => CompletionProvider(StubCompletionRepository()),
       ),
     ],
-    child: MaterialApp.router(
-      theme: AppTheme.light,
-      routerConfig: router,
-    ),
+    child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
   );
 }
 
@@ -69,48 +64,41 @@ void main() {
   });
 
   group('Navigation — Sprint 1 kabul kriterleri', () {
-    testWidgets(
-      'should show 3 navigation destinations',
-      (tester) async {
-        // Arrange
-        await tester.pumpWidget(_buildApp());
-        await tester.pumpAndSettle();
+    testWidgets('should show 3 navigation destinations', (tester) async {
+      // Arrange
+      await tester.pumpWidget(_buildApp());
+      await tester.pumpAndSettle();
 
-        // Assert — 3 NavigationIcon görünmeli
-        expect(find.byIcon(Icons.home_rounded), findsOneWidget);
-        expect(find.byIcon(Icons.add_rounded), findsOneWidget);
-        expect(find.byIcon(Icons.person_rounded), findsOneWidget);
-      },
-    );
+      // Assert — 3 NavigationIcon görünmeli
+      expect(find.byIcon(Icons.home_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.add_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.person_rounded), findsOneWidget);
+    });
 
-    testWidgets(
-      'should navigate to Profile tab when Profil tapped',
-      (tester) async {
-        // Arrange
-        await tester.pumpWidget(_buildApp());
-        await tester.pumpAndSettle();
+    testWidgets('should navigate to Profile tab when Profil tapped', (
+      tester,
+    ) async {
+      // Arrange
+      await tester.pumpWidget(_buildApp());
+      await tester.pumpAndSettle();
 
-        // Act — sağdaki (person) ikonuna tıkla
-        await tester.tap(find.byIcon(Icons.person_rounded));
-        await tester.pumpAndSettle();
+      // Act — sağdaki (person) ikonuna tıkla
+      await tester.tap(find.byIcon(Icons.person_rounded));
+      await tester.pumpAndSettle();
 
-        // Assert — Profil ekranı başlığı görünmeli
-        expect(find.text('Profil'), findsAtLeastNWidgets(1));
-      },
-    );
+      // Assert — Profil ekranı başlığı görünmeli
+      expect(find.text('Profil'), findsAtLeastNWidgets(1));
+    });
 
-    testWidgets(
-      'should show home screen by default on launch',
-      (tester) async {
-        // Arrange
-        await tester.pumpWidget(_buildApp());
-        await tester.pumpAndSettle();
+    testWidgets('should show home screen by default on launch', (tester) async {
+      // Arrange
+      await tester.pumpWidget(_buildApp());
+      await tester.pumpAndSettle();
 
-        // Assert — Ev (home) ikonu aktif; LoadingIndicator veya EmptyState görünür.
-        // HomeScreen yüklendi = Scaffold hazır.
-        expect(find.byIcon(Icons.home_rounded), findsOneWidget);
-      },
-    );
+      // Assert — Ev (home) ikonu aktif; LoadingIndicator veya EmptyState görünür.
+      // HomeScreen yüklendi = Scaffold hazır.
+      expect(find.byIcon(Icons.home_rounded), findsOneWidget);
+    });
   });
 
   group('AppTheme — typography', () {

@@ -7,13 +7,17 @@ import 'package:uuid/uuid.dart';
 import '../data/models/record_model.dart';
 import '../data/repositories/record_repository.dart';
 
-/// Ana sayfadaki liste filtreleme seçenekleri (US-308).
+/// Ana sayfadaki liste filtreleme seçenekleri (US-308 + US-503/504).
 enum FilterType {
-  all,
+  // Sıralama (Kendi içinde exculusive)
   mostImportant,
-  earliest,
+  earliest, // Todo için: En Yakın Bitiş Tarihi
+  // Zaman Aralığı (Kendi içinde exclusive)
   thisWeek,
   thisMonth,
+  // Durum (Kendi içinde exclusive)
+  todoDone,
+  todoTodo,
 }
 
 /// Kayıt listesi state'ini yönetir ve UI'ya sunar.
@@ -27,7 +31,7 @@ class RecordProvider extends ChangeNotifier {
   List<RecordModel> _records = [];
   bool _isLoading = false;
   String? _errorMessage;
-  FilterType _activeFilter = FilterType.all;
+  final Set<FilterType> _activeFilters = {};
 
   /// Seçili tarih ('yyyy-MM-dd') — default: bugün.
   String _selectedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -38,23 +42,26 @@ class RecordProvider extends ChangeNotifier {
   bool get hasError => _errorMessage != null;
   String? get errorMessage => _errorMessage;
   String get selectedDate => _selectedDate;
-  FilterType get activeFilter => _activeFilter;
+  Set<FilterType> get activeFilters => _activeFilters;
 
   /// Takvim Etkinlikleri (Event) — saat etiketine göre sıralar; filtreden etkilenmez.
-  List<RecordModel> get scheduledTasks => _records
-      .where((r) => r.type == RecordType.event && r.scheduledTime != null)
-      .toList()
-    ..sort((a, b) => (a.scheduledTime ?? '').compareTo(b.scheduledTime ?? ''));
+  List<RecordModel> get scheduledTasks =>
+      _records
+          .where((r) => r.type == RecordType.event && r.scheduledTime != null)
+          .toList()
+        ..sort(
+          (a, b) => (a.scheduledTime ?? '').compareTo(b.scheduledTime ?? ''),
+        );
 
   /// Rutin alışkanlıklar — aktif filtreye göre sıralanır.
   List<RecordModel> get habits => _applyHabitFilter(
-        _records.where((r) => r.type == RecordType.habit).toList(),
-      );
+    _records.where((r) => r.type == RecordType.habit).toList(),
+  );
 
   /// Yapılacaklar Listesi (Todo) — aktif filtreye göre sıralanır.
   List<RecordModel> get todos => _applyTodoFilter(
-        _records.where((r) => r.type == RecordType.todo).toList(),
-      );
+    _records.where((r) => r.type == RecordType.todo).toList(),
+  );
 
   // ── Actions ──────────────────────────────────────────────────────────────
 
@@ -78,14 +85,32 @@ class RecordProvider extends ChangeNotifier {
   }
 
   /// Filtreyi değiştirir; anlık `notifyListeners` ile UI güncellenir.
-  void applyFilter(FilterType filter) {
-    _errorMessage = null; // Filtre değiştiğinde hata durumunu sıfırla
-    if (_activeFilter == filter) {
-      // Aynı filtreye tekrar basılırsa sıfırla (toggle davranışı).
-      _activeFilter = FilterType.all;
+  void toggleFilter(FilterType filter) {
+    _errorMessage = null;
+
+    if (_activeFilters.contains(filter)) {
+      _activeFilters.remove(filter);
     } else {
-      _activeFilter = filter;
+      // Exclusivity logic
+      if (filter == FilterType.mostImportant || filter == FilterType.earliest) {
+        _activeFilters.remove(FilterType.mostImportant);
+        _activeFilters.remove(FilterType.earliest);
+      } else if (filter == FilterType.thisWeek ||
+          filter == FilterType.thisMonth) {
+        _activeFilters.remove(FilterType.thisWeek);
+        _activeFilters.remove(FilterType.thisMonth);
+      } else if (filter == FilterType.todoDone ||
+          filter == FilterType.todoTodo) {
+        _activeFilters.remove(FilterType.todoDone);
+        _activeFilters.remove(FilterType.todoTodo);
+      }
+      _activeFilters.add(filter);
     }
+    notifyListeners();
+  }
+
+  void clearFilters() {
+    _activeFilters.clear();
     notifyListeners();
   }
 
@@ -133,85 +158,96 @@ class RecordProvider extends ChangeNotifier {
 
   /// Aktif filtreye göre habit listesini sıralar/filtreler.
   List<RecordModel> _applyHabitFilter(List<RecordModel> source) {
-    switch (_activeFilter) {
-      case FilterType.mostImportant:
-        const order = [Priority.high, Priority.medium, Priority.low];
-        return source
-          ..sort((a, b) {
-            final ai = order.indexOf(a.priority ?? Priority.low);
-            final bi = order.indexOf(b.priority ?? Priority.low);
-            return ai.compareTo(bi);
-          });
-
-      case FilterType.earliest:
-        // Oluşturulma tarihine göre en eskiden yeniye sıralar.
-        return source..sort((a, b) => a.createdAt.compareTo(b.createdAt));
-
-      case FilterType.thisWeek:
-        final now = DateTime.now();
-        final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-        final endOfWeek = startOfWeek.add(const Duration(days: 6));
-        return source.where((r) {
-          return !r.createdAt.isBefore(startOfWeek) &&
-              !r.createdAt.isAfter(endOfWeek);
-        }).toList()
-          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
-
-      case FilterType.thisMonth:
-        final now = DateTime.now();
-        return source.where((r) {
-          return r.createdAt.year == now.year && r.createdAt.month == now.month;
-        }).toList()
-          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
-
-      case FilterType.all:
-        // Varsayılan: öneme göre sırala (high > medium > low).
-        const defOrder = [Priority.high, Priority.medium, Priority.low];
-        return source
-          ..sort((a, b) {
-            final ai = defOrder.indexOf(a.priority ?? Priority.low);
-            final bi = defOrder.indexOf(b.priority ?? Priority.low);
-            return ai.compareTo(bi);
-          });
+    if (_activeFilters.contains(FilterType.mostImportant)) {
+      const order = [Priority.high, Priority.medium, Priority.low];
+      source.sort((a, b) {
+        final ai = order.indexOf(a.priority ?? Priority.low);
+        final bi = order.indexOf(b.priority ?? Priority.low);
+        return ai.compareTo(bi);
+      });
+    } else if (_activeFilters.contains(FilterType.earliest)) {
+      source.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    } else {
+      const defOrder = [Priority.high, Priority.medium, Priority.low];
+      source.sort((a, b) {
+        final ai = defOrder.indexOf(a.priority ?? Priority.low);
+        final bi = defOrder.indexOf(b.priority ?? Priority.low);
+        return ai.compareTo(bi);
+      });
     }
+
+    if (_activeFilters.contains(FilterType.thisWeek)) {
+      final now = DateTime.now();
+      final startOfWeek = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: now.weekday - 1));
+      final endOfWeek = startOfWeek.add(
+        const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
+      );
+      return source.where((r) {
+        return !r.createdAt.isBefore(startOfWeek) &&
+            !r.createdAt.isAfter(endOfWeek);
+      }).toList();
+    } else if (_activeFilters.contains(FilterType.thisMonth)) {
+      final now = DateTime.now();
+      return source.where((r) {
+        return r.createdAt.year == now.year && r.createdAt.month == now.month;
+      }).toList();
+    }
+
+    return source;
   }
 
   /// Aktif filtreye göre todo listesini sıralar/filtreler.
   List<RecordModel> _applyTodoFilter(List<RecordModel> source) {
-    switch (_activeFilter) {
-      case FilterType.mostImportant:
-        const order = [Priority.high, Priority.medium, Priority.low];
-        return source
-          ..sort((a, b) {
-            final ai = order.indexOf(a.priority ?? Priority.low);
-            final bi = order.indexOf(b.priority ?? Priority.low);
-            return ai.compareTo(bi);
-          });
-
-      case FilterType.earliest:
-        return source..sort((a, b) => (a.dueDate ?? DateTime(9999)).compareTo(b.dueDate ?? DateTime(9999)));
-
-      case FilterType.thisWeek:
-        final now = DateTime.now();
-        final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-        final endOfWeek = startOfWeek.add(const Duration(days: 6));
-        return source.where((r) {
-          if (r.dueDate == null) return true; // Tarihsizler 'Tümü' sayılır
-          return !r.dueDate!.isBefore(startOfWeek) && !r.dueDate!.isAfter(endOfWeek);
-        }).toList()
-          ..sort((a, b) => (a.dueDate ?? DateTime(9999)).compareTo(b.dueDate ?? DateTime(9999)));
-
-      case FilterType.thisMonth:
-        final now = DateTime.now();
-        return source.where((r) {
-          if (r.dueDate == null) return true;
-          return r.dueDate!.year == now.year && r.dueDate!.month == now.month;
-        }).toList()
-          ..sort((a, b) => (a.dueDate ?? DateTime(9999)).compareTo(b.dueDate ?? DateTime(9999)));
-
-      case FilterType.all:
-        return source..sort((a, b) => (a.dueDate ?? DateTime(9999)).compareTo(b.dueDate ?? DateTime(9999)));
+    if (_activeFilters.contains(FilterType.mostImportant)) {
+      const order = [Priority.high, Priority.medium, Priority.low];
+      source.sort((a, b) {
+        final ai = order.indexOf(a.priority ?? Priority.low);
+        final bi = order.indexOf(b.priority ?? Priority.low);
+        return ai.compareTo(bi);
+      });
+    } else if (_activeFilters.contains(FilterType.earliest)) {
+      source.sort(
+        (a, b) => (a.dueDate ?? DateTime(9999)).compareTo(
+          b.dueDate ?? DateTime(9999),
+        ),
+      );
+    } else {
+      const defOrder = [Priority.high, Priority.medium, Priority.low];
+      source.sort((a, b) {
+        final ai = defOrder.indexOf(a.priority ?? Priority.low);
+        final bi = defOrder.indexOf(b.priority ?? Priority.low);
+        return ai.compareTo(bi);
+      });
     }
+
+    if (_activeFilters.contains(FilterType.thisWeek)) {
+      final now = DateTime.now();
+      final startOfWeek = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: now.weekday - 1));
+      final endOfWeek = startOfWeek.add(
+        const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
+      );
+      source = source.where((r) {
+        if (r.dueDate == null) return true; // Tarihsizler 'Tümü' sayılır
+        return !r.dueDate!.isBefore(startOfWeek) &&
+            !r.dueDate!.isAfter(endOfWeek);
+      }).toList();
+    } else if (_activeFilters.contains(FilterType.thisMonth)) {
+      final now = DateTime.now();
+      source = source.where((r) {
+        if (r.dueDate == null) return true;
+        return r.dueDate!.year == now.year && r.dueDate!.month == now.month;
+      }).toList();
+    }
+
+    return source;
   }
 
   void _setLoading(bool value) {

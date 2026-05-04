@@ -61,24 +61,12 @@ class PriorityBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO(sprint-2): Priority enum tanımlandıktan sonra String karşılaştırması enum'a çevrilecek.
     final (color, textColor) = switch (priorityLabel.toLowerCase()) {
-      'high' || 'yüksek' => (
-          AppColors.error.withAlpha(26),
-          AppColors.error,
-        ),
-      'medium' || 'orta' => (
-          AppColors.streakFire.withAlpha(26),
-          AppColors.streakFire,
-        ),
-      _ => (
-          AppColors.surfaceContainerHigh,
-          AppColors.onSurfaceVariant,
-        ),
+      'high' || 'yüksek' => (AppColors.error.withAlpha(26), AppColors.error),
+      'medium' ||
+      'orta' => (AppColors.streakFire.withAlpha(26), AppColors.streakFire),
+      _ => (AppColors.surfaceContainerHigh, AppColors.onSurfaceVariant),
     };
 
-    return AppBadge(
-      label: priorityLabel,
-      color: color,
-      textColor: textColor,
-    );
+    return AppBadge(label: priorityLabel, color: color, textColor: textColor);
   }
 }

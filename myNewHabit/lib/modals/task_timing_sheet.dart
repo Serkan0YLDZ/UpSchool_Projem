@@ -7,7 +7,8 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 
 /// Görev ekleme akışının son adımı: başlangıç tarihi/saati ve bitiş tarihi/saati.
-Future<({DateTime startDate, String startTime, DateTime? endDate})?> showTaskTimingSheet(
+Future<({DateTime startDate, String startTime, DateTime? endDate})?>
+showTaskTimingSheet(
   BuildContext context, {
   DateTime? initialStartDate,
   String? initialStartTime,
@@ -53,7 +54,7 @@ class _TaskTimingSheetState extends State<_TaskTimingSheet> {
   void initState() {
     super.initState();
     _startDate = widget.initialStartDate ?? DateTime.now();
-    
+
     if (widget.initialStartTime != null) {
       final parts = widget.initialStartTime!.split(':');
       _startTime = TimeOfDay(
@@ -96,9 +97,9 @@ class _TaskTimingSheetState extends State<_TaskTimingSheet> {
           const SizedBox(height: AppSpacing.md),
           Text(
             'Başlangıç',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(color: AppColors.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.smMd),
           _DateTimeSelector(
@@ -114,8 +115,8 @@ class _TaskTimingSheetState extends State<_TaskTimingSheet> {
               Text(
                 'Bitiş Tarihi (Opsiyonel)',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: AppColors.onSurfaceVariant,
-                    ),
+                  color: AppColors.onSurfaceVariant,
+                ),
               ),
               Switch(
                 value: _showEndDate,
@@ -206,8 +207,9 @@ class _TaskTimingSheetState extends State<_TaskTimingSheet> {
   }
 
   void _onSave() {
-    final startT = '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}';
-    
+    final startT =
+        '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}';
+
     DateTime? finalEndDate;
     if (_showEndDate && _endDate != null && _endTime != null) {
       finalEndDate = DateTime(
@@ -219,11 +221,9 @@ class _TaskTimingSheetState extends State<_TaskTimingSheet> {
       );
     }
 
-    Navigator.of(context).pop((
-      startDate: _startDate,
-      startTime: startT,
-      endDate: finalEndDate,
-    ));
+    Navigator.of(
+      context,
+    ).pop((startDate: _startDate, startTime: startT, endDate: finalEndDate));
   }
 }
 
@@ -276,7 +276,11 @@ class _DateTimeSelector extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_month_rounded, color: AppColors.tertiary, size: 20),
+                  const Icon(
+                    Icons.calendar_month_rounded,
+                    color: AppColors.tertiary,
+                    size: 20,
+                  ),
                   const SizedBox(width: AppSpacing.smMd),
                   Expanded(
                     child: Text(
@@ -304,12 +308,13 @@ class _DateTimeSelector extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.access_time_rounded, color: AppColors.tertiary, size: 20),
-                  const SizedBox(width: AppSpacing.smMd),
-                  Text(
-                    '$h:$m',
-                    style: Theme.of(context).textTheme.labelLarge,
+                  const Icon(
+                    Icons.access_time_rounded,
+                    color: AppColors.tertiary,
+                    size: 20,
                   ),
+                  const SizedBox(width: AppSpacing.smMd),
+                  Text('$h:$m', style: Theme.of(context).textTheme.labelLarge),
                 ],
               ),
             ),

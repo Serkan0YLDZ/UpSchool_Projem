@@ -13,6 +13,7 @@ import 'package:my_new_habit/modals/add_record_modal.dart';
 import 'package:my_new_habit/modals/habit_details_sheet.dart';
 import 'package:my_new_habit/modals/naming_modal.dart';
 import 'package:my_new_habit/modals/task_timing_sheet.dart';
+import 'package:my_new_habit/modals/todo_details_sheet.dart';
 import 'package:my_new_habit/providers/record_provider.dart';
 
 /// Ana navigasyon kabuğu.
@@ -85,37 +86,54 @@ class MainShell extends StatelessWidget {
       case RecordType.habit:
         final details = await showHabitDetailsSheet(context);
         if (details == null || !context.mounted) return;
-        await provider.createRecord(RecordModel(
-          id: const Uuid().v4(),
-          type: RecordType.habit,
-          title: title,
-          repeatDays: details.repeatDays,
-          intervalDays: details.intervalDays,
-          priority: details.priority,
-          createdAt: DateTime.now(),
-        ));
+        await provider.createRecord(
+          RecordModel(
+            id: const Uuid().v4(),
+            type: RecordType.habit,
+            title: title,
+            repeatDays: details.repeatDays,
+            intervalDays: details.intervalDays,
+            targetProgress: 100,
+            createdAt: DateTime.now(),
+          ),
+        );
 
       case RecordType.event:
         final timing = await showTaskTimingSheet(context);
         if (timing == null || !context.mounted) return;
-        await provider.createRecord(RecordModel(
-          id: const Uuid().v4(),
-          type: RecordType.event,
-          title: title,
-          scheduledTime: timing.startTime,
-          scheduledDate: DateFormat('yyyy-MM-dd').format(timing.startDate),
-          endTime: timing.endDate != null ? DateFormat('HH:mm').format(timing.endDate!) : null,
-          createdAt: DateTime.now(), 
-        ));
+        await provider.createRecord(
+          RecordModel(
+            id: const Uuid().v4(),
+            type: RecordType.event,
+            title: title,
+            scheduledTime: timing.startTime,
+            scheduledDate: DateFormat('yyyy-MM-dd').format(timing.startDate),
+            endDate: timing.endDate != null
+                ? DateFormat('yyyy-MM-dd').format(timing.endDate!)
+                : null,
+            endTime: timing.endDate != null
+                ? DateFormat('HH:mm').format(timing.endDate!)
+                : null,
+            createdAt: DateTime.now(),
+          ),
+        );
 
       case RecordType.todo:
         // TODO: Sprint 5'te Todo form sheet eklenecek. Şimdilik düz createdAt ile ekliyoruz.
-        await provider.createRecord(RecordModel(
-          id: const Uuid().v4(),
-          type: RecordType.todo,
-          title: title,
-          createdAt: DateTime.now(),
-        ));
+        final todoDetails = await showTodoDetailsSheet(context);
+        if (todoDetails == null || !context.mounted) return;
+
+        await provider.createRecord(
+          RecordModel(
+            id: const Uuid().v4(),
+            type: RecordType.todo,
+            title: title,
+            priority: todoDetails.priority,
+            dueDate: todoDetails.dueDate,
+            createdAt: DateTime.now(),
+          ),
+        );
+        break;
     }
 
     if (context.mounted) {

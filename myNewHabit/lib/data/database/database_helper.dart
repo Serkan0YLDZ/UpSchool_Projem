@@ -9,7 +9,7 @@ import 'package:path/path.dart';
 /// bu sayede ilerideki sprint'lerde yeni tablo/sütun eklemek güvendedir.
 class DatabaseHelper {
   static const String _dbName = 'my_new_habit.db';
-  static const int _dbVersion = 3;
+  static const int _dbVersion = 4;
 
   final String? _inMemoryPath;
 
@@ -20,12 +20,11 @@ class DatabaseHelper {
   ///
   /// sqflite'da ':memory:' path'i her açışta yeni, boş bir veritabanı verir;
   /// bu sayede testler birbirini etkilemez.
-  factory DatabaseHelper.forTesting() => DatabaseHelper._internal(
-        inMemoryPath: inMemoryDatabasePath,
-      );
+  factory DatabaseHelper.forTesting() =>
+      DatabaseHelper._internal(inMemoryPath: inMemoryDatabasePath);
 
   DatabaseHelper._internal({String? inMemoryPath})
-      : _inMemoryPath = inMemoryPath;
+    : _inMemoryPath = inMemoryPath;
 
   Database? _db;
 
@@ -65,6 +64,8 @@ class DatabaseHelper {
         await _migrateV2(db);
       } else if (v == 3) {
         await _migrateV3(db);
+      } else if (v == 4) {
+        await _migrateV4(db);
       }
     }
   }
@@ -76,9 +77,7 @@ class DatabaseHelper {
   Future<void> _migrateV2(Database db) async {
     // Sütun zaten varsa hata vermemek için try/catch kullan.
     try {
-      await db.execute(
-        'ALTER TABLE records ADD COLUMN interval_days INTEGER',
-      );
+      await db.execute('ALTER TABLE records ADD COLUMN interval_days INTEGER');
     } catch (_) {
       // Sütun zaten mevcutsa görmezden gel.
     }
@@ -107,10 +106,7 @@ class DatabaseHelper {
     }
 
     // completions tablosuna yeni sütunlar ekle
-    final newCompletionColumns = [
-      'progress INTEGER DEFAULT 0',
-      'note TEXT',
-    ];
+    final newCompletionColumns = ['progress INTEGER DEFAULT 0', 'note TEXT'];
 
     for (final col in newCompletionColumns) {
       try {
@@ -123,6 +119,15 @@ class DatabaseHelper {
 
     // Mevcut 'quit' tiplerini ve onlara bağlı completion/streak verilerini sil (ON DELETE CASCADE)
     await db.rawDelete("DELETE FROM records WHERE type = 'quit'");
+  }
+
+  /// Versiyon 4: Sprint 5 PRD revizyonu.
+  ///
+  /// - records: end_date eklendi (çok günlü etkinlikler için).
+  Future<void> _migrateV4(Database db) async {
+    try {
+      await db.execute('ALTER TABLE records ADD COLUMN end_date TEXT');
+    } catch (_) {}
   }
 
   /// Versiyon 1 şeması: records, completions, streaks tabloları.
@@ -141,6 +146,7 @@ class DatabaseHelper {
         scheduled_date  TEXT,
         scheduled_time  TEXT,
         end_time        TEXT,
+        end_date        TEXT,
         due_date        TEXT,
         created_at      TEXT NOT NULL,
         is_active       INTEGER NOT NULL DEFAULT 1
@@ -182,4 +188,3 @@ class DatabaseHelper {
     _db = null;
   }
 }
-

@@ -40,10 +40,7 @@ class AppCard extends StatelessWidget {
         onTap: onTap,
         splashColor: AppColors.primaryContainer.withAlpha(20),
         highlightColor: AppColors.primaryContainer.withAlpha(10),
-        child: Padding(
-          padding: padding,
-          child: child,
-        ),
+        child: Padding(padding: padding, child: child),
       ),
     );
   }

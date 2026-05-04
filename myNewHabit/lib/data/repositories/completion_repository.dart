@@ -17,12 +17,23 @@ abstract class CompletionRepository {
   Future<CompletionModel?> getForRecordAndDate(String recordId, String date);
 
   /// Alışkanlığı tamamlandı olarak işaretler.
-  Future<void> markDone(String id, String recordId, String date);
+  Future<void> markDone(
+    String id,
+    String recordId,
+    String date, {
+    int progress = 100,
+  });
 
   /// Alışkanlığı es geçildi olarak işaretler.
   Future<void> markSkipped(String id, String recordId, String date);
 
-
+  /// Alışkanlığı kısmi olarak ilerletir.
+  Future<void> markPartial(
+    String id,
+    String recordId,
+    String date,
+    int progress,
+  );
 
   /// Bir completion kaydını siler (tamamlamayı geri al).
   Future<void> delete(String id);
@@ -74,16 +85,41 @@ class SqfliteCompletionRepository implements CompletionRepository {
   }
 
   @override
-  Future<void> markDone(String id, String recordId, String date) async {
-    await _upsert(id, recordId, date, CompletionStatus.done);
+  Future<void> markDone(
+    String id,
+    String recordId,
+    String date, {
+    int progress = 100,
+  }) async {
+    await _upsert(
+      id,
+      recordId,
+      date,
+      CompletionStatus.done,
+      progress: progress,
+    );
   }
 
   @override
   Future<void> markSkipped(String id, String recordId, String date) async {
-    await _upsert(id, recordId, date, CompletionStatus.skipped);
+    await _upsert(id, recordId, date, CompletionStatus.skipped, progress: 0);
   }
 
-
+  @override
+  Future<void> markPartial(
+    String id,
+    String recordId,
+    String date,
+    int progress,
+  ) async {
+    await _upsert(
+      id,
+      recordId,
+      date,
+      CompletionStatus.partial,
+      progress: progress,
+    );
+  }
 
   @override
   Future<void> delete(String id) async {
@@ -96,14 +132,16 @@ class SqfliteCompletionRepository implements CompletionRepository {
     String id,
     String recordId,
     String date,
-    CompletionStatus status,
-  ) async {
+    CompletionStatus status, {
+    int progress = 0,
+  }) async {
     final db = await _dbHelper.database;
     final model = CompletionModel(
       id: id,
       recordId: recordId,
       date: date,
       status: status,
+      progress: progress,
     );
     await db.insert(
       'completions',

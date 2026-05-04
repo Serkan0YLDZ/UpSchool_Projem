@@ -37,23 +37,23 @@ class AppButton extends StatelessWidget {
       height: AppSpacing.buttonHeight,
       child: switch (variant) {
         AppButtonVariant.primary => _PrimaryButton(
-            label: label,
-            onPressed: _wrappedCallback,
-            icon: icon,
-            isLoading: isLoading,
-          ),
+          label: label,
+          onPressed: _wrappedCallback,
+          icon: icon,
+          isLoading: isLoading,
+        ),
         AppButtonVariant.secondary => _SecondaryButton(
-            label: label,
-            onPressed: _wrappedCallback,
-            icon: icon,
-            isLoading: isLoading,
-          ),
+          label: label,
+          onPressed: _wrappedCallback,
+          icon: icon,
+          isLoading: isLoading,
+        ),
         AppButtonVariant.danger => _DangerButton(
-            label: label,
-            onPressed: _wrappedCallback,
-            icon: icon,
-            isLoading: isLoading,
-          ),
+          label: label,
+          onPressed: _wrappedCallback,
+          icon: icon,
+          isLoading: isLoading,
+        ),
       },
     );
   }

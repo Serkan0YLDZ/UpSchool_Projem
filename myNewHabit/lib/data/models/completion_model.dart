@@ -70,7 +70,7 @@ class CompletionModel {
       'note': note,
     };
   }
-  
+
   CompletionModel copyWith({
     String? id,
     String? recordId,

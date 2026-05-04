@@ -17,7 +17,7 @@ class FilterChipBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<RecordProvider>(
       builder: (context, provider, _) {
-        return _ChipRow(activeFilter: provider.activeFilter);
+        return _ChipRow(activeFilters: provider.activeFilters);
       },
     );
   }
@@ -26,9 +26,9 @@ class FilterChipBar extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ChipRow extends StatelessWidget {
-  const _ChipRow({required this.activeFilter});
+  const _ChipRow({required this.activeFilters});
 
-  final FilterType activeFilter;
+  final Set<FilterType> activeFilters;
 
   static const _filters = [
     (FilterType.mostImportant, '⭐ En Önemli'),
@@ -45,7 +45,7 @@ class _ChipRow extends StatelessWidget {
       child: Row(
         children: _filters.map((entry) {
           final (type, label) = entry;
-          final isActive = activeFilter == type;
+          final isActive = activeFilters.contains(type);
           return Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: _FilterItem(type: type, label: label, isActive: isActive),
@@ -74,13 +74,13 @@ class _FilterItem extends StatelessWidget {
     return FilterChip(
       label: Text(label),
       selected: isActive,
-      onSelected: (_) => context.read<RecordProvider>().applyFilter(type),
+      onSelected: (_) => context.read<RecordProvider>().toggleFilter(type),
       selectedColor: AppColors.primary,
       checkmarkColor: Colors.white,
       labelStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: isActive ? Colors.white : AppColors.onSurfaceVariant,
-            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-          ),
+        color: isActive ? Colors.white : AppColors.onSurfaceVariant,
+        fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+      ),
       backgroundColor: AppColors.surfaceContainerLow,
       side: BorderSide(
         color: isActive ? AppColors.primary : AppColors.outlineVariant,

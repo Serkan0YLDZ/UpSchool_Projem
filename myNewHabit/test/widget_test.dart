@@ -26,56 +26,50 @@ void main() {
     await initializeDateFormatting('tr_TR', null);
   });
 
-  testWidgets(
-    'app should launch without errors (smoke test)',
-    (WidgetTester tester) async {
-      // Arrange & Act — router + theme ile direkt başlat
-      final router = GoRouter(
-        initialLocation: AppRoutes.home,
-        routes: [
-          ShellRoute(
-            builder: (context, state, child) => MainShell(child: child),
-            routes: [
-              GoRoute(
-                path: AppRoutes.home,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: HomeScreen(),
-                ),
-              ),
-              GoRoute(
-                path: AppRoutes.profile,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: ProfileScreen(),
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-
-      await tester.pumpWidget(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider<RecordProvider>(
-              create: (_) => RecordProvider(StubRecordRepository()),
+  testWidgets('app should launch without errors (smoke test)', (
+    WidgetTester tester,
+  ) async {
+    // Arrange & Act — router + theme ile direkt başlat
+    final router = GoRouter(
+      initialLocation: AppRoutes.home,
+      routes: [
+        ShellRoute(
+          builder: (context, state, child) => MainShell(child: child),
+          routes: [
+            GoRoute(
+              path: AppRoutes.home,
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: HomeScreen()),
             ),
-            ChangeNotifierProvider<CompletionProvider>(
-              create: (_) => CompletionProvider(StubCompletionRepository()),
+            GoRoute(
+              path: AppRoutes.profile,
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: ProfileScreen()),
             ),
           ],
-          child: MaterialApp.router(
-            theme: AppTheme.light,
-            routerConfig: router,
-          ),
         ),
-      );
-      await tester.pumpAndSettle();
+      ],
+    );
 
-      // Assert — herhangi bir exception olmamalı
-      expect(tester.takeException(), isNull);
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<RecordProvider>(
+            create: (_) => RecordProvider(StubRecordRepository()),
+          ),
+          ChangeNotifierProvider<CompletionProvider>(
+            create: (_) => CompletionProvider(StubCompletionRepository()),
+          ),
+        ],
+        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      // Özel Navigation bar ikonları görünmeli
-      expect(find.byIcon(Icons.home_rounded), findsOneWidget);
-    },
-  );
+    // Assert — herhangi bir exception olmamalı
+    expect(tester.takeException(), isNull);
+
+    // Özel Navigation bar ikonları görünmeli
+    expect(find.byIcon(Icons.home_rounded), findsOneWidget);
+  });
 }

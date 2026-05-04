@@ -49,26 +49,21 @@ class _NamingSheetState extends State<_NamingSheet> {
   }
 
   List<String> get _suggestions => switch (widget.type) {
-        RecordType.habit => [
-            'Sabah Koşusu',
-            'Kitap Oku',
-            'Su İç',
-            'Meditasyon',
-            'Egzersiz',
-          ],
-        RecordType.event => [
-            'Toplantı',
-            'Randevu',
-            'Sinema',
-            'Kutlama',
-          ],
-        RecordType.todo => [
-            'Alışveriş',
-            'Fatura Öde',
-            'Mail Gönder',
-            'Evi Temizle',
-          ],
-      };
+    RecordType.habit => [
+      'Sabah Koşusu',
+      'Kitap Oku',
+      'Su İç',
+      'Meditasyon',
+      'Egzersiz',
+    ],
+    RecordType.event => ['Toplantı', 'Randevu', 'Sinema', 'Kutlama'],
+    RecordType.todo => [
+      'Alışveriş',
+      'Fatura Öde',
+      'Mail Gönder',
+      'Evi Temizle',
+    ],
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -99,9 +94,9 @@ class _NamingSheetState extends State<_NamingSheet> {
               child: Text(
                 'Adım 2',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: AppColors.primaryContainer,
-                      letterSpacing: 2,
-                    ),
+                  color: AppColors.primaryContainer,
+                  letterSpacing: 2,
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
@@ -155,10 +150,10 @@ class _NamingSheetState extends State<_NamingSheet> {
   }
 
   String get _hintText => switch (widget.type) {
-        RecordType.habit => 'Örn: Sabah Koşusu...',
-        RecordType.event => 'Örn: Toplantı...',
-        RecordType.todo => 'Örn: Alışveriş...',
-      };
+    RecordType.habit => 'Örn: Sabah Koşusu...',
+    RecordType.event => 'Örn: Toplantı...',
+    RecordType.todo => 'Örn: Alışveriş...',
+  };
 
   void _onContinue() {
     final title = _controller.text.trim();
@@ -187,10 +182,7 @@ class _SuggestionChips extends StatelessWidget {
   final List<String> suggestions;
   final void Function(String) onSelected;
 
-  const _SuggestionChips({
-    required this.suggestions,
-    required this.onSelected,
-  });
+  const _SuggestionChips({required this.suggestions, required this.onSelected});
 
   @override
   Widget build(BuildContext context) {

@@ -4,14 +4,12 @@ import 'package:flutter/material.dart';
 
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
-import '../data/models/record_model.dart';
 
-/// Alışkanlık ekleme akışının son adımı: gün + önem seçimi.
-Future<({List<String> repeatDays, int? intervalDays, Priority priority})?> showHabitDetailsSheet(
+/// Alışkanlık ekleme akışının son adımı: gün seçimi.
+Future<({List<String> repeatDays, int? intervalDays})?> showHabitDetailsSheet(
   BuildContext context, {
   List<String> initialRepeatDays = const [],
   int? initialIntervalDays,
-  Priority initialPriority = Priority.medium,
 }) {
   return showModalBottomSheet(
     context: context,
@@ -20,7 +18,6 @@ Future<({List<String> repeatDays, int? intervalDays, Priority priority})?> showH
     builder: (_) => _HabitDetailsSheet(
       initialRepeatDays: initialRepeatDays,
       initialIntervalDays: initialIntervalDays,
-      initialPriority: initialPriority,
     ),
   );
 }
@@ -28,12 +25,10 @@ Future<({List<String> repeatDays, int? intervalDays, Priority priority})?> showH
 class _HabitDetailsSheet extends StatefulWidget {
   final List<String> initialRepeatDays;
   final int? initialIntervalDays;
-  final Priority initialPriority;
 
   const _HabitDetailsSheet({
     required this.initialRepeatDays,
     this.initialIntervalDays,
-    required this.initialPriority,
   });
 
   @override
@@ -43,14 +38,12 @@ class _HabitDetailsSheet extends StatefulWidget {
 class _HabitDetailsSheetState extends State<_HabitDetailsSheet> {
   late Set<String> _selectedDays;
   int? _intervalDays;
-  late Priority _priority;
 
   @override
   void initState() {
     super.initState();
     _selectedDays = widget.initialRepeatDays.toSet();
     _intervalDays = widget.initialIntervalDays;
-    _priority = widget.initialPriority;
   }
 
   @override
@@ -93,9 +86,9 @@ class _HabitDetailsSheetState extends State<_HabitDetailsSheet> {
           const SizedBox(height: AppSpacing.md),
           Text(
             'Tekrar Sıklığı',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(color: AppColors.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.smMd),
           _DaySelector(
@@ -105,16 +98,17 @@ class _HabitDetailsSheetState extends State<_HabitDetailsSheet> {
                 _selectedDays.remove(code);
               } else {
                 _selectedDays.add(code);
-                _intervalDays = null; // Gün seçildiğinde aralık sıfırlanır (XOR)
+                _intervalDays =
+                    null; // Gün seçildiğinde aralık sıfırlanır (XOR)
               }
             }),
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
             'Veya "X" günde bir tekrarla',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(color: AppColors.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.smMd),
           _IntervalSelector(
@@ -123,22 +117,11 @@ class _HabitDetailsSheetState extends State<_HabitDetailsSheet> {
               setState(() {
                 _intervalDays = val;
                 if (val != null) {
-                  _selectedDays.clear(); // Aralık seçildiğinde günler sıfırlanır (XOR)
+                  _selectedDays
+                      .clear(); // Aralık seçildiğinde günler sıfırlanır (XOR)
                 }
               });
             },
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'Önem Derecesi',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                ),
-          ),
-          const SizedBox(height: AppSpacing.smMd),
-          _PrioritySelector(
-            selected: _priority,
-            onChanged: (p) => setState(() => _priority = p),
           ),
           const SizedBox(height: AppSpacing.lg),
           SizedBox(
@@ -159,11 +142,9 @@ class _HabitDetailsSheetState extends State<_HabitDetailsSheet> {
   bool get _isValid => _selectedDays.isNotEmpty || _intervalDays != null;
 
   void _onSave() {
-    Navigator.of(context).pop((
-      repeatDays: _selectedDays.toList(),
-      intervalDays: _intervalDays,
-      priority: _priority,
-    ));
+    Navigator.of(
+      context,
+    ).pop((repeatDays: _selectedDays.toList(), intervalDays: _intervalDays));
   }
 }
 
@@ -238,11 +219,11 @@ class _DayChip extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: isSelected
-                    ? AppColors.onPrimaryContainer
-                    : AppColors.outline,
-                fontWeight: FontWeight.w600,
-              ),
+            color: isSelected
+                ? AppColors.onPrimaryContainer
+                : AppColors.outline,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -276,15 +257,17 @@ class _IntervalSelector extends StatelessWidget {
             Text(
               value == null ? 'Seçilmedi' : '$value günde bir tekrarla',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: value == null
-                        ? AppColors.onSurfaceVariant
-                        : AppColors.onSurface,
-                    fontWeight: value == null ? FontWeight.normal : FontWeight.w600,
-                  ),
+                color: value == null
+                    ? AppColors.onSurfaceVariant
+                    : AppColors.onSurface,
+                fontWeight: value == null ? FontWeight.normal : FontWeight.w600,
+              ),
             ),
             Icon(
               Icons.unfold_more_rounded,
-              color: value != null ? AppColors.tertiary : AppColors.onSurfaceVariant,
+              color: value != null
+                  ? AppColors.tertiary
+                  : AppColors.onSurfaceVariant,
             ),
           ],
         ),
@@ -302,7 +285,9 @@ class _IntervalSelector extends StatelessWidget {
           height: MediaQuery.of(context).size.height * 0.5, // Ekranın yarısı
           decoration: const BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusXl)),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppSpacing.radiusXl),
+            ),
           ),
           padding: const EdgeInsets.only(top: AppSpacing.sm),
           child: Column(
@@ -316,7 +301,10 @@ class _IntervalSelector extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              Text('Tekrar Sıklığı', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Tekrar Sıklığı',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: AppSpacing.md),
               Expanded(
                 child: ListView.builder(
@@ -328,12 +316,21 @@ class _IntervalSelector extends StatelessWidget {
                         title: Text(
                           'Seçilmedi',
                           style: TextStyle(
-                            color: isSelected ? AppColors.tertiary : AppColors.onSurface,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                            color: isSelected
+                                ? AppColors.tertiary
+                                : AppColors.onSurface,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
                           ),
                         ),
                         subtitle: const Text('Haftanın günleri ile devam et'),
-                        trailing: isSelected ? const Icon(Icons.check_rounded, color: AppColors.tertiary) : null,
+                        trailing: isSelected
+                            ? const Icon(
+                                Icons.check_rounded,
+                                color: AppColors.tertiary,
+                              )
+                            : null,
                         onTap: () {
                           onChanged(null);
                           Navigator.pop(ctx);
@@ -346,11 +343,20 @@ class _IntervalSelector extends StatelessWidget {
                       title: Text(
                         '$val günde bir tekrarla',
                         style: TextStyle(
-                          color: isSelected ? AppColors.tertiary : AppColors.onSurface,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                          color: isSelected
+                              ? AppColors.tertiary
+                              : AppColors.onSurface,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                         ),
                       ),
-                      trailing: isSelected ? const Icon(Icons.check_rounded, color: AppColors.tertiary) : null,
+                      trailing: isSelected
+                          ? const Icon(
+                              Icons.check_rounded,
+                              color: AppColors.tertiary,
+                            )
+                          : null,
                       onTap: () {
                         onChanged(val);
                         Navigator.pop(ctx);
@@ -363,79 +369,6 @@ class _IntervalSelector extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _PrioritySelector extends StatelessWidget {
-  final Priority selected;
-  final void Function(Priority) onChanged;
-
-  const _PrioritySelector({required this.selected, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-      ),
-      padding: const EdgeInsets.all(AppSpacing.xs),
-      child: Row(
-        children: Priority.values
-            .map(
-              (p) => Expanded(
-                child: _PriorityOption(
-                  priority: p,
-                  isSelected: selected == p,
-                  onTap: () => onChanged(p),
-                ),
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
-}
-
-class _PriorityOption extends StatelessWidget {
-  final Priority priority;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _PriorityOption({
-    required this.priority,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  String get _label => switch (priority) {
-        Priority.low => 'Düşük',
-        Priority.medium => 'Orta',
-        Priority.high => 'Yüksek',
-      };
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.tertiary : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          _label,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: isSelected
-                    ? AppColors.onTertiary
-                    : AppColors.onSurfaceVariant,
-              ),
-        ),
-      ),
     );
   }
 }

@@ -1,7 +1,6 @@
 // Sprint 3: Ana Sayfa & Takvim — HabitCard (US-303, US-304, US-306)
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -9,6 +8,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/record_model.dart';
 import '../../../providers/completion_provider.dart';
 import '../../../providers/record_provider.dart';
+import '../../../modals/edit_record_sheet.dart';
 
 /// Rutin alışkanlık kartı.
 ///
@@ -25,34 +25,93 @@ class HabitCard extends StatelessWidget {
   final RecordModel record;
   final String selectedDate;
 
+  void _showContextMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit, color: AppColors.primary),
+              title: const Text('Düzenle'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final updated = await showEditRecordSheet(context, record);
+                if (updated != null && context.mounted) {
+                  context.read<RecordProvider>().updateRecord(updated);
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: AppColors.relapseDanger),
+              title: const Text(
+                'Sil',
+                style: TextStyle(color: AppColors.relapseDanger),
+              ),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showDeleteDialog(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<CompletionProvider>(
       builder: (context, completionProvider, _) {
         final isDone = completionProvider.isDone(record.id);
+        final currentProgress =
+            completionProvider.completionFor(record.id)?.progress ?? 0;
         return _CardBody(
           record: record,
           isDone: isDone,
-          onToggle: () => _handleToggle(context, completionProvider, isDone),
-          onLongPress: () => _showDeleteDialog(context),
+          progress: currentProgress,
+          onProgressChanged: (val) {
+            completionProvider.updateProgress(
+              record.id,
+              selectedDate,
+              val.toInt(),
+              record.targetProgress,
+            );
+          },
+          onLongPress: () => _showContextMenu(context),
         );
       },
     );
   }
+
   void _showDeleteDialog(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: true,
       builder: (ctx) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 40,
+          ),
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.delete_forever, color: AppColors.relapseDanger, size: 40),
+                const Icon(
+                  Icons.delete_forever,
+                  color: AppColors.relapseDanger,
+                  size: 40,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Bu alışkanlığı silmek istediğine emin misin?',
@@ -92,35 +151,23 @@ class HabitCard extends StatelessWidget {
       },
     );
   }
-
-  Future<void> _handleToggle(
-    BuildContext context,
-    CompletionProvider provider,
-    bool isDone,
-  ) async {
-    await HapticFeedback.lightImpact();
-    if (isDone) {
-      await provider.undoCompletion(record.id);
-    } else {
-      await provider.markDone(record.id, selectedDate);
-    }
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-
 
 class _CardBody extends StatelessWidget {
   const _CardBody({
     required this.record,
     required this.isDone,
-    required this.onToggle,
+    required this.progress,
+    required this.onProgressChanged,
     required this.onLongPress,
   });
 
   final RecordModel record;
   final bool isDone;
-  final VoidCallback onToggle;
+  final int progress;
+  final ValueChanged<double> onProgressChanged;
 
   final VoidCallback onLongPress;
 
@@ -135,9 +182,7 @@ class _CardBody extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(20),
-          border: Border(
-            left: BorderSide(color: borderColor, width: 4),
-          ),
+          border: Border(left: BorderSide(color: borderColor, width: 4)),
           boxShadow: const [
             BoxShadow(
               color: AppColors.ambientShadow,
@@ -150,26 +195,126 @@ class _CardBody extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(20),
-            onTap: onToggle,
             onLongPress: onLongPress,
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.sm,
               ),
-              child: Row(
+              child: Column(
                 children: [
-                  _IconBubble(icon: record.icon),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(child: _TitleArea(record: record, isDone: isDone)),
-                  const SizedBox(width: AppSpacing.sm),
-                  _CheckCircle(isDone: isDone),
+                  Row(
+                    children: [
+                      _IconBubble(icon: record.icon),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: _TitleArea(record: record, isDone: isDone),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          _showProgressSheet(context, progress);
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDone
+                                ? Colors.green.withAlpha(30)
+                                : AppColors.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '%$progress',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: isDone
+                                      ? Colors.green
+                                      : AppColors.primary,
+                                ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  void _showProgressSheet(BuildContext context, int currentProgress) {
+    int tempProgress = currentProgress;
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'İlerlemeyi Güncelle',
+                      style: Theme.of(ctx).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      '%$tempProgress',
+                      style: Theme.of(ctx).textTheme.displaySmall?.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Slider(
+                      value: tempProgress.toDouble(),
+                      min: 0,
+                      max: 100, // as was in the current card
+                      divisions: 10,
+                      activeColor: AppColors.primary,
+                      inactiveColor: AppColors.primary.withValues(alpha: 0.2),
+                      onChanged: (val) {
+                        setState(() => tempProgress = val.toInt());
+                        onProgressChanged(val);
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('Tamam'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -203,10 +348,7 @@ class _IconBubble extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
-      child: Text(
-        icon ?? '✨',
-        style: const TextStyle(fontSize: 20),
-      ),
+      child: Text(icon ?? '✨', style: const TextStyle(fontSize: 20)),
     );
   }
 }
@@ -228,10 +370,10 @@ class _TitleArea extends StatelessWidget {
         Text(
           record.title,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.onSurface,
-                decoration: isDone ? TextDecoration.lineThrough : null,
-                decorationColor: AppColors.onSurface.withValues(alpha: 0.4),
-              ),
+            color: AppColors.onSurface,
+            decoration: isDone ? TextDecoration.lineThrough : null,
+            decorationColor: AppColors.onSurface.withValues(alpha: 0.4),
+          ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
@@ -262,38 +404,11 @@ class _StreakBadge extends StatelessWidget {
         Text(
           '$days Gün',
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.streakFire,
-                fontWeight: FontWeight.w700,
-              ),
+            color: AppColors.streakFire,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _CheckCircle extends StatelessWidget {
-  const _CheckCircle({required this.isDone});
-
-  final bool isDone;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: isDone ? AppColors.primary : Colors.transparent,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: isDone ? AppColors.primary : AppColors.outlineVariant,
-          width: 2,
-        ),
-      ),
-      child: isDone
-          ? const Icon(Icons.check_rounded, size: 16, color: Colors.white)
-          : null,
     );
   }
 }

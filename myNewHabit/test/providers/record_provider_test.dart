@@ -35,20 +35,17 @@ void main() {
     },
   );
 
-  test(
-    'loadRecords should set hasError when repository throws',
-    () async {
-      // Arrange
-      stub.shouldThrow = true;
+  test('loadRecords should set hasError when repository throws', () async {
+    // Arrange
+    stub.shouldThrow = true;
 
-      // Act
-      await provider.loadRecords();
+    // Act
+    await provider.loadRecords();
 
-      // Assert
-      expect(provider.hasError, isTrue);
-      expect(provider.errorMessage, isNotNull);
-    },
-  );
+    // Assert
+    expect(provider.hasError, isTrue);
+    expect(provider.errorMessage, isNotNull);
+  });
 
   // ── createRecord ──────────────────────────────────────────────────────────
 
@@ -108,20 +105,17 @@ void main() {
 
   // ── selectDate (US-302) ───────────────────────────────────────────────────
 
-  test(
-    'selectDate should reload records for new date',
-    () async {
-      // Arrange
-      const newDate = '2024-06-15';
+  test('selectDate should reload records for new date', () async {
+    // Arrange
+    const newDate = '2024-06-15';
 
-      // Act
-      await provider.selectDate(newDate);
+    // Act
+    await provider.selectDate(newDate);
 
-      // Assert (US-302: farklı güne tıklanınca kayıtlar yüklenmeli)
-      expect(provider.selectedDate, newDate);
-      expect(stub.lastQueriedDate, newDate);
-    },
-  );
+    // Assert (US-302: farklı güne tıklanınca kayıtlar yüklenmeli)
+    expect(provider.selectedDate, newDate);
+    expect(stub.lastQueriedDate, newDate);
+  });
 
   // ── applyFilter (US-308) ─────────────────────────────────────────────────
 
@@ -136,7 +130,7 @@ void main() {
       await provider.loadRecords();
 
       // Act
-      provider.applyFilter(FilterType.mostImportant);
+      provider.toggleFilter(FilterType.mostImportant);
       final habits = provider.habits;
 
       // Assert (US-308: En Önemli filtresi high önce getirir)
@@ -148,20 +142,20 @@ void main() {
     'applyFilter should toggle off when same filter applied twice',
     () async {
       // Arrange
-      provider.applyFilter(FilterType.thisWeek);
-      expect(provider.activeFilter, FilterType.thisWeek);
+        provider.toggleFilter(FilterType.thisWeek);
+        expect(provider.activeFilters.contains(FilterType.thisWeek), isTrue);
 
-      // Act — aynı filtreye tekrar bas
-      provider.applyFilter(FilterType.thisWeek);
+        // Act — aynı filtreye tekrar bas
+        provider.toggleFilter(FilterType.thisWeek);
 
-      // Assert — all'a döner (toggle davranışı)
-      expect(provider.activeFilter, FilterType.all);
-    },
-  );
+        // Assert — all'a döner (toggle davranışı)
+        expect(provider.activeFilters.contains(FilterType.thisWeek), isFalse);
+      },
+    );
 
-  test(
-    'applyFilter earliest should sort habits by createdAt ascending',
-    () async {
+    test(
+      'applyFilter earliest should sort habits by createdAt ascending',
+      () async {
       // Arrange
       final older = _habitAt('hC', 'Eski', DateTime(2024, 1, 1));
       final newer = _habitAt('hD', 'Yeni', DateTime(2024, 6, 1));
@@ -169,7 +163,7 @@ void main() {
       await provider.loadRecords();
 
       // Act
-      provider.applyFilter(FilterType.earliest);
+      provider.toggleFilter(FilterType.earliest);
 
       // Assert (En Erken filtresi: createdAt küçük olan önce)
       expect(provider.habits.first.id, 'hC');
@@ -178,22 +172,19 @@ void main() {
 
   // ── todos (US-305) ──────────────────────────────────────────────────
 
-  test(
-    'todos should only return todo type records',
-    () async {
-      // Arrange
-      stub.recordsToReturn = [
-        _habit('h8', 'Rutin'),
-        _todo('q1', 'Yapılacak'),
-        _event('t1', 'Toplantı'),
-      ];
-      await provider.loadRecords();
+  test('todos should only return todo type records', () async {
+    // Arrange
+    stub.recordsToReturn = [
+      _habit('h8', 'Rutin'),
+      _todo('q1', 'Yapılacak'),
+      _event('t1', 'Toplantı'),
+    ];
+    await provider.loadRecords();
 
-      // Act & Assert
-      expect(provider.todos.length, 1);
-      expect(provider.todos.first.type, RecordType.todo);
-    },
-  );
+    // Act & Assert
+    expect(provider.todos.length, 1);
+    expect(provider.todos.first.type, RecordType.todo);
+  });
 
   // ── scheduledTasks (US-303) ──────────────────────────────────────────────
 
@@ -221,17 +212,21 @@ void main() {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-RecordModel _habit(String id, String title, {Priority priority = Priority.medium}) =>
-    RecordModel(
-      id: id,
-      type: RecordType.habit,
-      title: title,
-      priority: priority,
-      repeatDays: const [],
-      createdAt: DateTime.now(),
-    );
+RecordModel _habit(
+  String id,
+  String title, {
+  Priority priority = Priority.medium,
+}) => RecordModel(
+  id: id,
+  type: RecordType.habit,
+  title: title,
+  priority: priority,
+  repeatDays: const [],
+  createdAt: DateTime.now(),
+);
 
-RecordModel _habitAt(String id, String title, DateTime createdAt) => RecordModel(
+RecordModel _habitAt(String id, String title, DateTime createdAt) =>
+    RecordModel(
       id: id,
       type: RecordType.habit,
       title: title,
@@ -241,23 +236,23 @@ RecordModel _habitAt(String id, String title, DateTime createdAt) => RecordModel
     );
 
 RecordModel _todo(String id, String title) => RecordModel(
-      id: id,
-      type: RecordType.todo,
-      title: title,
-      createdAt: DateTime.now(),
-    );
+  id: id,
+  type: RecordType.todo,
+  title: title,
+  createdAt: DateTime.now(),
+);
 
 RecordModel _event(String id, String title) => RecordModel(
-      id: id,
-      type: RecordType.event,
-      title: title,
-      createdAt: DateTime.now(),
-    );
+  id: id,
+  type: RecordType.event,
+  title: title,
+  createdAt: DateTime.now(),
+);
 
 RecordModel _eventAt(String id, String title, String time) => RecordModel(
-      id: id,
-      type: RecordType.event,
-      title: title,
-      scheduledTime: time,
-      createdAt: DateTime.now(),
-    );
+  id: id,
+  type: RecordType.event,
+  title: title,
+  scheduledTime: time,
+  createdAt: DateTime.now(),
+);

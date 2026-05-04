@@ -10,14 +10,14 @@ void main() {
     WidgetsFlutterBinding.ensureInitialized();
     final dbHelper = DatabaseHelper.forTesting();
     final repo = SqfliteRecordRepository(dbHelper);
-    
+
     final record = RecordModel(
       id: const Uuid().v4(),
       type: RecordType.todo,
       title: 'Yapılacak',
       createdAt: DateTime.now(),
     );
-    
+
     try {
       await repo.create(record);
     } catch (e) {

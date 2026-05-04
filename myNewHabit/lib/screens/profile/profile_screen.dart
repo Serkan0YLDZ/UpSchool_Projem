@@ -15,12 +15,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        title: Text(
-          'Profil',
-          style: AppTypography.headlineSm,
-        ),
-      ),
+      appBar: AppBar(title: Text('Profil', style: AppTypography.headlineSm)),
       body: const EmptyStateWidget(
         emoji: '👤',
         message:

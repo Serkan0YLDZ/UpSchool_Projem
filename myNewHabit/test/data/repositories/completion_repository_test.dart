@@ -66,8 +66,6 @@ void main() {
     },
   );
 
-
-
   // ── upsert (aynı gün tekrar) ──────────────────────────────────────────────
 
   test(
@@ -88,21 +86,18 @@ void main() {
 
   // ── getByDate ─────────────────────────────────────────────────────────────
 
-  test(
-    'getByDate should return only completions for given date',
-    () async {
-      // Arrange
-      await completionRepo.markDone('c5', 'r1', '2024-02-01');
-      await completionRepo.markDone('c6', 'r1', '2024-02-02');
+  test('getByDate should return only completions for given date', () async {
+    // Arrange
+    await completionRepo.markDone('c5', 'r1', '2024-02-01');
+    await completionRepo.markDone('c6', 'r1', '2024-02-02');
 
-      // Act
-      final result = await completionRepo.getByDate('2024-02-01');
+    // Act
+    final result = await completionRepo.getByDate('2024-02-01');
 
-      // Assert
-      expect(result.length, 1);
-      expect(result.first.date, '2024-02-01');
-    },
-  );
+    // Assert
+    expect(result.length, 1);
+    expect(result.first.date, '2024-02-01');
+  });
 
   // ── delete ────────────────────────────────────────────────────────────────
 
@@ -126,9 +121,9 @@ void main() {
 // ── Helper ────────────────────────────────────────────────────────────────────
 
 RecordModel _record(String id) => RecordModel(
-      id: id,
-      type: RecordType.habit,
-      title: 'Test Alışkanlık',
-      repeatDays: const [],
-      createdAt: DateTime.now(),
-    );
+  id: id,
+  type: RecordType.habit,
+  title: 'Test Alışkanlık',
+  repeatDays: const [],
+  createdAt: DateTime.now(),
+);

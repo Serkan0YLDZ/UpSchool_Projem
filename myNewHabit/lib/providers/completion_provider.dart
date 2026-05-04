@@ -52,16 +52,39 @@ class CompletionProvider extends ChangeNotifier {
     }
   }
 
-  /// Alışkanlığı tamamlandı olarak işaretler.
-  Future<void> markDone(String recordId, String date) async {
-    await _mark(recordId, date, CompletionStatus.done);
+  /// Alışkanlığı veya görevi tamamlandı olarak işaretler.
+  Future<void> markDone(
+    String recordId,
+    String date, {
+    int progress = 100,
+  }) async {
+    await _mark(recordId, date, CompletionStatus.done, progress: progress);
   }
 
   /// Alışkanlığı es geçer.
   Future<void> markSkipped(String recordId, String date) async {
-    await _mark(recordId, date, CompletionStatus.skipped);
+    await _mark(recordId, date, CompletionStatus.skipped, progress: 0);
   }
 
+  /// Alışkanlığı kısmi ilerletir. Hedef değere ulaşıp ulaşmadığı
+  /// UI katmanından hesaplanıp `markDone` çağrılabilir veya doğrudan burada kullanılabilir.
+  Future<void> markPartial(String recordId, String date, int progress) async {
+    await _mark(recordId, date, CompletionStatus.partial, progress: progress);
+  }
+
+  /// İlerleme değerini günceller (targetProgress kontrolü).
+  Future<void> updateProgress(
+    String recordId,
+    String date,
+    int progress,
+    int targetProgress,
+  ) async {
+    if (progress >= targetProgress) {
+      await markDone(recordId, date, progress: progress);
+    } else {
+      await markPartial(recordId, date, progress);
+    }
+  }
 
   /// Tamamlamayı geri alır.
   Future<void> undoCompletion(String recordId) async {
@@ -82,19 +105,19 @@ class CompletionProvider extends ChangeNotifier {
   Future<void> _mark(
     String recordId,
     String date,
-    CompletionStatus status,
-  ) async {
+    CompletionStatus status, {
+    int progress = 0,
+  }) async {
     _setLoading(true);
     try {
       final id = const Uuid().v4();
       switch (status) {
         case CompletionStatus.done:
-          await _repository.markDone(id, recordId, date);
+          await _repository.markDone(id, recordId, date, progress: progress);
         case CompletionStatus.skipped:
           await _repository.markSkipped(id, recordId, date);
         case CompletionStatus.partial:
-          // TODO: partial logic if needed, currently fallback to done in repo or we need to add it?
-          await _repository.markDone(id, recordId, date);
+          await _repository.markPartial(id, recordId, date, progress);
       }
       // Local cache'i güncelle, DB'ye tekrar sorgu atmadan.
       _completions[recordId] = CompletionModel(
@@ -102,6 +125,7 @@ class CompletionProvider extends ChangeNotifier {
         recordId: recordId,
         date: date,
         status: status,
+        progress: progress,
       );
       _errorMessage = null;
     } catch (e) {

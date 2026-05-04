@@ -21,62 +21,47 @@ void main() {
 
   // ── loadForDate ───────────────────────────────────────────────────────────
 
-  test(
-    'loadForDate should populate completions map for given date',
-    () async {
-      // Arrange
-      await stub.markDone('c1', recordId, testDate);
+  test('loadForDate should populate completions map for given date', () async {
+    // Arrange
+    await stub.markDone('c1', recordId, testDate);
 
-      // Act
-      await provider.loadForDate(testDate);
+    // Act
+    await provider.loadForDate(testDate);
 
-      // Assert (US-302: geçmiş güne tıklanınca completion durumları görünür)
-      expect(provider.completionFor(recordId), isNotNull);
-      expect(provider.isDone(recordId), isTrue);
-    },
-  );
+    // Assert (US-302: geçmiş güne tıklanınca completion durumları görünür)
+    expect(provider.completionFor(recordId), isNotNull);
+    expect(provider.isDone(recordId), isTrue);
+  });
 
-  test(
-    'loadForDate should set hasError when repository throws',
-    () async {
-      // Arrange
-      stub.shouldThrow = true;
+  test('loadForDate should set hasError when repository throws', () async {
+    // Arrange
+    stub.shouldThrow = true;
 
-      // Act
-      await provider.loadForDate(testDate);
+    // Act
+    await provider.loadForDate(testDate);
 
-      // Assert
-      expect(provider.hasError, isTrue);
-    },
-  );
+    // Assert
+    expect(provider.hasError, isTrue);
+  });
 
   // ── markDone (US-306) ─────────────────────────────────────────────────────
 
-  test(
-    'markDone should set isDone true for record when called',
-    () async {
-      // Act (US-306: alışkanlığı tamamlandı işaretleyebilir)
-      await provider.markDone(recordId, testDate);
+  test('markDone should set isDone true for record when called', () async {
+    // Act (US-306: alışkanlığı tamamlandı işaretleyebilir)
+    await provider.markDone(recordId, testDate);
 
-      // Assert
-      expect(provider.isDone(recordId), isTrue);
-      expect(provider.hasError, isFalse);
-    },
-  );
+    // Assert
+    expect(provider.isDone(recordId), isTrue);
+    expect(provider.hasError, isFalse);
+  });
 
-  test(
-    'markDone should not throw when called twice on same record',
-    () async {
-      // Arrange — önce done, sonra tekrar done
-      await provider.markDone(recordId, testDate);
+  test('markDone should not throw when called twice on same record', () async {
+    // Arrange — önce done, sonra tekrar done
+    await provider.markDone(recordId, testDate);
 
-      // Act & Assert — exception atmamalı
-      expect(
-        () async => provider.markDone(recordId, testDate),
-        returnsNormally,
-      );
-    },
-  );
+    // Act & Assert — exception atmamalı
+    expect(() async => provider.markDone(recordId, testDate), returnsNormally);
+  });
 
   // ── undoCompletion (US-306: geri alma) ───────────────────────────────────
 
@@ -95,33 +80,19 @@ void main() {
     },
   );
 
-  test(
-    'undoCompletion should do nothing when no completion exists',
-    () async {
-      // Act & Assert — exception atmamalı, state temiz kalmalı
-      expect(
-        () async => provider.undoCompletion('nonexistent'),
-        returnsNormally,
-      );
-      expect(provider.hasError, isFalse);
-    },
-  );
-
-
+  test('undoCompletion should do nothing when no completion exists', () async {
+    // Act & Assert — exception atmamalı, state temiz kalmalı
+    expect(() async => provider.undoCompletion('nonexistent'), returnsNormally);
+    expect(provider.hasError, isFalse);
+  });
 
   // ── markSkipped ───────────────────────────────────────────────────────────
 
-  test(
-    'markSkipped should set status to skipped when called',
-    () async {
-      // Act
-      await provider.markSkipped(recordId, testDate);
+  test('markSkipped should set status to skipped when called', () async {
+    // Act
+    await provider.markSkipped(recordId, testDate);
 
-      // Assert
-      expect(
-        provider.completionFor(recordId)?.status,
-        CompletionStatus.skipped,
-      );
-    },
-  );
+    // Assert
+    expect(provider.completionFor(recordId)?.status, CompletionStatus.skipped);
+  });
 }

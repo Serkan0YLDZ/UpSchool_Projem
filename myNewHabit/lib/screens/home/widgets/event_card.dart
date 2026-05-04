@@ -1,74 +1,21 @@
-import '../../../providers/record_provider.dart';
-// Sprint 3: Ana Sayfa & Takvim — TaskCard (US-303, US-306)
+// Sprint 3: Ana Sayfa & Takvim — EventCard (US-303, US-306)
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/record_model.dart';
 import '../../../providers/completion_provider.dart';
+import '../../../providers/record_provider.dart';
+import '../../../modals/edit_record_sheet.dart';
 
-/// Saatli görev kartı — kronolojik sırayla üst bölümde render edilir.
+/// Saatli etkinlik kartı — kronolojik sırayla üst bölümde render edilir.
 ///
 /// Tasarım: pill-shape kart, solda saat etiketi, sağda tamamlama toggle.
-class TaskCard extends StatelessWidget {
-    void _showDeleteDialog(BuildContext context) {
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (ctx) {
-          return Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.delete_forever, color: AppColors.relapseDanger, size: 40),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Bu takvim kaydını silmek istediğine emin misin?',
-                    style: Theme.of(context).textTheme.titleMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.of(ctx).pop(),
-                          child: const Text('Vazgeç'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.relapseDanger,
-                            foregroundColor: Colors.white,
-                          ),
-                          onPressed: () async {
-                            Navigator.of(ctx).pop();
-                            final provider = context.read<RecordProvider>();
-                            await provider.deleteRecord(record.id);
-                          },
-                          child: const Text('Sil'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    }
-  const TaskCard({
+class EventCard extends StatelessWidget {
+  const EventCard({
     super.key,
     required this.record,
     required this.selectedDate,
@@ -77,16 +24,118 @@ class TaskCard extends StatelessWidget {
   final RecordModel record;
   final String selectedDate;
 
+  void _showContextMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit, color: AppColors.primary),
+              title: const Text('Düzenle'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final updated = await showEditRecordSheet(context, record);
+                if (updated != null && context.mounted) {
+                  context.read<RecordProvider>().updateRecord(updated);
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: AppColors.relapseDanger),
+              title: const Text(
+                'Sil',
+                style: TextStyle(color: AppColors.relapseDanger),
+              ),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showDeleteDialog(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 40,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.delete_forever,
+                  color: AppColors.relapseDanger,
+                  size: 40,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Bu takvim kaydını silmek istediğine emin misin?',
+                  style: Theme.of(context).textTheme.titleMedium,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text('Vazgeç'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.relapseDanger,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () async {
+                          Navigator.of(ctx).pop();
+                          final provider = context.read<RecordProvider>();
+                          await provider.deleteRecord(record.id);
+                        },
+                        child: const Text('Sil'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<CompletionProvider>(
       builder: (context, provider, _) {
         final isDone = provider.isDone(record.id);
-        return _TaskCardBody(
+        return _EventCardBody(
           record: record,
           isDone: isDone,
           onToggle: () => _handleToggle(context, provider, isDone),
-          onLongPress: () => _showDeleteDialog(context),
+          onLongPress: () => _showContextMenu(context),
         );
       },
     );
@@ -108,9 +157,8 @@ class TaskCard extends StatelessWidget {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-
-class _TaskCardBody extends StatelessWidget {
-  const _TaskCardBody({
+class _EventCardBody extends StatelessWidget {
+  const _EventCardBody({
     required this.record,
     required this.isDone,
     required this.onToggle,
@@ -128,7 +176,10 @@ class _TaskCardBody extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(
         children: [
-          _TimeLabel(time: record.scheduledTime ?? ''),
+          _TimeLabel(
+            startTime: record.scheduledTime ?? '',
+            endTime: record.endTime,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: _PillCard(
@@ -147,21 +198,28 @@ class _TaskCardBody extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _TimeLabel extends StatelessWidget {
-  const _TimeLabel({required this.time});
+  const _TimeLabel({required this.startTime, this.endTime});
 
-  final String time;
+  final String startTime;
+  final String? endTime;
 
   @override
   Widget build(BuildContext context) {
+    String displayTime = startTime;
+    if (endTime != null && endTime!.isNotEmpty) {
+      displayTime += '\n$endTime';
+    }
+
     return SizedBox(
       width: 48,
       child: Text(
-        time,
+        displayTime,
         textAlign: TextAlign.right,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.onSurfaceVariant,
-              letterSpacing: 0.5,
-            ),
+          color: AppColors.onSurfaceVariant,
+          letterSpacing: 0.5,
+          height: 1.5,
+        ),
       ),
     );
   }
@@ -220,30 +278,28 @@ class _PillCard extends StatelessWidget {
                       children: [
                         Text(
                           record.title,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
                                 color: AppColors.onSurface,
                                 decoration: isDone
                                     ? TextDecoration.lineThrough
                                     : null,
-                                decorationColor:
-                                    AppColors.onSurface.withValues(alpha: 0.4),
+                                decorationColor: AppColors.onSurface.withValues(
+                                  alpha: 0.4,
+                                ),
                               ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (record.dueDate != null) ...[
+                        if (record.description != null &&
+                            record.description!.isNotEmpty) ...[
                           const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              const Text('📅', style: TextStyle(fontSize: 12)),
-                              const SizedBox(width: 4),
-                              Text(
-                                DateFormat('d MMM', 'tr_TR').format(record.dueDate!),
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                      color: AppColors.onSurfaceVariant,
-                                    ),
-                              ),
-                            ],
+                          Text(
+                            record.description!,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppColors.onSurfaceVariant),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ],

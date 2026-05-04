@@ -12,7 +12,10 @@ enum RecordType {
   String get value => name; // 'event' | 'habit' | 'todo'
 
   static RecordType fromValue(String value) {
-    return RecordType.values.firstWhere((e) => e.name == value, orElse: () => RecordType.habit);
+    return RecordType.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => RecordType.habit,
+    );
   }
 }
 
@@ -67,6 +70,9 @@ class RecordModel {
   /// 'HH:mm' formatında zamanlanmış saat (sadece event)
   final String? scheduledTime;
 
+  /// 'yyyy-MM-dd' formatında bitiş tarihi (sadece event)
+  final String? endDate;
+
   /// 'HH:mm' formatında bitiş saati (sadece event)
   final String? endTime;
 
@@ -88,6 +94,7 @@ class RecordModel {
     this.targetProgress = 100,
     this.scheduledDate,
     this.scheduledTime,
+    this.endDate,
     this.endTime,
     this.dueDate,
     required this.createdAt,
@@ -112,6 +119,7 @@ class RecordModel {
       targetProgress: map['target_progress'] as int? ?? 100,
       scheduledDate: map['scheduled_date'] as String?,
       scheduledTime: map['scheduled_time'] as String?,
+      endDate: map['end_date'] as String?,
       endTime: map['end_time'] as String?,
       dueDate: map['due_date'] != null
           ? DateTime.tryParse(map['due_date'] as String)
@@ -136,6 +144,7 @@ class RecordModel {
       'target_progress': targetProgress,
       'scheduled_date': scheduledDate,
       'scheduled_time': scheduledTime,
+      'end_date': endDate,
       'end_time': endTime,
       'due_date': dueDate?.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
@@ -155,6 +164,7 @@ class RecordModel {
     int? targetProgress,
     String? scheduledDate,
     String? scheduledTime,
+    String? endDate,
     String? endTime,
     DateTime? dueDate,
     DateTime? createdAt,
@@ -172,6 +182,7 @@ class RecordModel {
       targetProgress: targetProgress ?? this.targetProgress,
       scheduledDate: scheduledDate ?? this.scheduledDate,
       scheduledTime: scheduledTime ?? this.scheduledTime,
+      endDate: endDate ?? this.endDate,
       endTime: endTime ?? this.endTime,
       dueDate: dueDate ?? this.dueDate,
       createdAt: createdAt ?? this.createdAt,

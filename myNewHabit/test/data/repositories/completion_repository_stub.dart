@@ -40,25 +40,52 @@ class StubCompletionRepository implements CompletionRepository {
   }
 
   @override
-  Future<void> markDone(String id, String recordId, String date) async {
-    _upsert(CompletionModel(
-      id: id,
-      recordId: recordId,
-      date: date,
-      status: CompletionStatus.done,
-    ));
+  Future<void> markDone(
+    String id,
+    String recordId,
+    String date, {
+    int progress = 100,
+  }) async {
+    _upsert(
+      CompletionModel(
+        id: id,
+        recordId: recordId,
+        date: date,
+        status: CompletionStatus.done,
+        progress: progress,
+      ),
+    );
+  }
+
+  @override
+  Future<void> markPartial(
+    String id,
+    String recordId,
+    String date,
+    int progress,
+  ) async {
+    _upsert(
+      CompletionModel(
+        id: id,
+        recordId: recordId,
+        date: date,
+        status: CompletionStatus.partial,
+        progress: progress,
+      ),
+    );
   }
 
   @override
   Future<void> markSkipped(String id, String recordId, String date) async {
-    _upsert(CompletionModel(
-      id: id,
-      recordId: recordId,
-      date: date,
-      status: CompletionStatus.skipped,
-    ));
+    _upsert(
+      CompletionModel(
+        id: id,
+        recordId: recordId,
+        date: date,
+        status: CompletionStatus.skipped,
+      ),
+    );
   }
-
 
   @override
   Future<void> delete(String id) async {
