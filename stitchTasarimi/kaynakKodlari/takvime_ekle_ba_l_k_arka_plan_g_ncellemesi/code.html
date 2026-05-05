@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Adım 1 - Etkinliğe İsim Ver</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-fixed-dim": "#e7c365",
+                        "surface-tint": "#6750a4",
+                        "surface-bright": "#fdf7ff",
+                        "secondary": "#63597c",
+                        "background": "#fdf7ff",
+                        "inverse-on-surface": "#f5eff7",
+                        "tertiary": "#765b00",
+                        "on-background": "#1d1b20",
+                        "inverse-surface": "#322f35",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#e9ddff",
+                        "on-tertiary-container": "#503d00",
+                        "primary-container": "#6750a4",
+                        "secondary-fixed-dim": "#cdc0e9",
+                        "tertiary-fixed": "#ffdf93",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#ece6ee",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#494551",
+                        "on-secondary-fixed": "#1f1635",
+                        "tertiary-container": "#c9a74d",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f8f2fa",
+                        "on-tertiary-fixed": "#241a00",
+                        "surface-container": "#f2ecf4",
+                        "primary-fixed-dim": "#cfbcff",
+                        "secondary-container": "#e1d4fd",
+                        "inverse-primary": "#cfbcff",
+                        "outline": "#7a7582",
+                        "on-tertiary-fixed-variant": "#594400",
+                        "surface-variant": "#e6e0e9",
+                        "surface": "#fdf7ff",
+                        "on-primary-fixed-variant": "#4f378a",
+                        "outline-variant": "#cbc4d2",
+                        "on-surface": "#1d1b20",
+                        "on-primary-fixed": "#22005d",
+                        "primary": "#4f378a",
+                        "secondary-fixed": "#e9ddff",
+                        "on-secondary-container": "#645a7d",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#e0d2ff",
+                        "surface-container-highest": "#e6e0e9",
+                        "surface-dim": "#ded8e0",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#4b4263",
+                        "brand-blue": "#0077B6",
+                        "brand-bg": "#F8FBFF",
+                        "brand-cyan": "#9feffe"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "unit": "4px",
+                        "xl": "32px",
+                        "gutter": "20px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "margin": "24px",
+                        "lg": "24px",
+                        "md": "16px"
+                    },
+                    fontFamily: {
+                        "display-lg": ["Plus Jakarta Sans", "sans-serif"],
+                        "headline-lg": ["Plus Jakarta Sans", "sans-serif"],
+                        "body-lg": ["Plus Jakarta Sans", "sans-serif"],
+                        "title-lg": ["Plus Jakarta Sans", "sans-serif"],
+                        "headline-md": ["Plus Jakarta Sans", "sans-serif"],
+                        "body-md": ["Plus Jakarta Sans", "sans-serif"],
+                        "label-lg": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'hard': '6px 6px 0px 0px rgba(0,0,0,1)',
+                        'hard-sm': '4px 4px 0px 0px rgba(0,0,0,1)',
+                        'hard-active': '2px 2px 0px 0px rgba(0,0,0,1)',
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-brand-bg text-on-background min-h-screen flex flex-col relative pb-32 overflow-x-hidden">
+<!-- Excluded Shared TopAppBar because this is a Focused View (Booking Flow/Step 1) -->
+<!-- Minimal Header for Focused View -->
+<header class="flex items-center justify-between p-margin pt-8">
+<button class="w-12 h-12 bg-white border-[3px] border-black rounded-xl shadow-hard flex items-center justify-center -rotate-2 active:shadow-hard-active active:translate-y-1 active:translate-x-1 transition-all">
+<span class="material-symbols-outlined text-black font-bold">arrow_back</span>
+</button>
+<div class="flex gap-2">
+<div class="w-4 h-4 rounded-full bg-[#0088cc] border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"></div>
+<div class="w-4 h-4 rounded-full bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"></div>
+<div class="w-4 h-4 rounded-full bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"></div>
+</div>
+</header>
+<main class="flex-1 px-margin flex flex-col gap-8 mt-4">
+<!-- Title Area -->
+<div class="rotate-1 bg-tertiary-fixed border-[3px] border-black p-6 rounded-xl shadow-hard relative">
+<h1 class="text-4xl font-[800] leading-tight text-black tracking-tighter mt-2">Etkinliğe isim ver!</h1>
+<p class="text-on-surface-variant font-medium mt-2"><br></p>
+</div>
+<!-- Event Title Input Area -->
+<div class="relative mt-4">
+<div class="absolute -top-6 right-2 bg-brand-blue text-white px-4 py-1.5 border-[3px] border-black rounded-full shadow-hard-sm text-sm font-bold rotate-6 z-10">
+                Örn: Toplantı
+            </div>
+<input class="w-full h-16 bg-white border-[3px] border-black rounded-xl shadow-hard -rotate-1 px-4 font-bold text-lg focus:outline-none focus:ring-0 placeholder:text-outline-variant placeholder:font-medium transition-all focus:-rotate-0" placeholder="Etkinlik adını yazın..." type="text">
+</div>
+<!-- Description Area -->
+<div class="flex flex-col gap-2 mt-4 rotate-1">
+<label class="font-bold text-sm px-1">Açıklama (opsiyonel)</label>
+<textarea class="w-full h-24 bg-white border-[3px] border-black rounded-xl shadow-hard-sm px-4 py-3 font-medium resize-none focus:outline-none focus:ring-0 placeholder:text-outline-variant transition-all focus:rotate-0" placeholder="Detaylar..."></textarea>
+</div>
+<!-- Quick Suggestions -->
+<div class="mt-6 flex flex-col gap-3">
+<h3 class="font-bold text-sm px-1">Hızlı Öneriler</h3>
+<div class="flex flex-wrap gap-3">
+<button class="bg-white border-[3px] border-black rounded-xl px-4 py-2 shadow-hard-sm font-bold flex items-center gap-2 -rotate-2 active:shadow-hard-active active:translate-y-1 transition-all">
+<span class="">📅</span> Toplantı
+                </button>
+<button class="bg-white border-[3px] border-black rounded-xl px-4 py-2 shadow-hard-sm font-bold flex items-center gap-2 rotate-1 active:shadow-hard-active active:translate-y-1 transition-all">
+<span class="">🏥</span> Doktor Randevusu
+                </button>
+<button class="bg-white border-[3px] border-black rounded-xl px-4 py-2 shadow-hard-sm font-bold flex items-center gap-2 -rotate-1 active:shadow-hard-active active:translate-y-1 transition-all">
+<span class="">🏃</span> Spor
+                </button>
+<button class="bg-white border-[3px] border-black rounded-xl px-4 py-2 shadow-hard-sm font-bold flex items-center gap-2 rotate-2 active:shadow-hard-active active:translate-y-1 transition-all">
+<span class="">✈️</span> Seyahat
+                </button>
+<button class="bg-white border-[3px] border-black rounded-xl px-4 py-2 shadow-hard-sm font-bold flex items-center gap-2 -rotate-3 active:shadow-hard-active active:translate-y-1 transition-all">
+<span class="">🎂</span> Doğum Günü
+                </button>
+</div>
+</div>
+</main>
+<!-- Fixed Bottom Button -->
+<div class="fixed bottom-0 left-0 w-full p-margin bg-gradient-to-t from-brand-bg via-brand-bg to-transparent pb-8">
+<button class="w-full h-16 bg-brand-blue text-white border-[3px] border-black rounded-xl shadow-hard font-bold text-lg flex items-center justify-center gap-2 -rotate-1 active:shadow-hard-active active:translate-y-1 active:translate-x-1 transition-all">
+            Devam Et <span class="material-symbols-outlined font-bold">arrow_forward</span>
+</button>
+</div>
+
+
+</body></html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<html lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Alışkanlık Ekle - Adım 1</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="custom-fonts">
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background-color: #f8f9fa;
+    }
+  </style>
+<style data-purpose="neobrutalism-styles">
+    /* Custom styles for the neo-brutalism aesthetic */
+    .neo-shadow {
+      box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+      border: 3px solid black;
+    }
+    .neo-shadow-sm {
+      box-shadow: 3px 3px 0px 0px rgba(0,0,0,1);
+      border: 2px solid black;
+    }
+    .neo-input:focus {
+      outline: none;
+      box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+    }
+    .neo-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<main class="w-full max-w-md bg-[#f8f9fa] flex flex-col gap-6 relative pb-24">
+<!-- BEGIN: Top Navigation Bar -->
+<header class="flex justify-between items-center py-4">
+<!-- Back Button -->
+<button aria-label="Geri Dön" class="bg-white p-3 rounded-xl neo-shadow-sm neo-btn transition-transform">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Step Indicator (Copied from Step 2 request) -->
+<div class="flex gap-1">
+<div class="w-4 h-4 rounded-full bg-[#0088cc] border-2 border-black"></div>
+<div class="w-4 h-4 rounded-full border-2 border-black"></div>
+<div class="w-4 h-4 rounded-full border-2 border-black"></div>
+</div>
+</header>
+<!-- END: Top Navigation Bar -->
+<!-- BEGIN: Main Title Card -->
+<section class="bg-[#ffe599] rounded-xl p-6 neo-shadow -rotate-1">
+<h1 class="text-3xl font-bold text-gray-900 leading-tight uppercase tracking-wide">
+        ALIŞKANLIĞINA BİR<br/>İSİM VER!
+      </h1>
+</section>
+<!-- END: Main Title Card -->
+<!-- BEGIN: Habit Name Input -->
+<section class="relative"><div class="absolute -top-3 -right-2 z-10 bg-[#0077B6] text-white text-[10px] font-bold px-2 py-1 rounded border-2 border-black neo-shadow-sm rotate-6 pointer-events-none uppercase">Örn: Kitap Oku</div>
+<input class="w-full bg-white text-lg font-bold p-4 rounded-xl neo-shadow neo-input text-gray-800 placeholder-gray-400 rotate-1" placeholder="Alışkanlık adı..." type="text"/>
+</section>
+<!-- END: Habit Name Input -->
+<!-- BEGIN: Quick Suggestions Section -->
+<section class="flex flex-col gap-3">
+<div class="flex items-center gap-2 font-bold text-sm uppercase tracking-wider text-gray-900 mb-1">
+<svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M14.615 1.595a.75.75 0 01.359.852L12.982 9.75h7.268a.75.75 0 01.548 1.262l-10.5 11.25a.75.75 0 01-1.272-.71l1.992-7.302H3.75a.75.75 0 01-.548-1.262l10.5-11.25a.75.75 0 01.913-.143z" fill-rule="evenodd"></path>
+</svg>
+        Hızlı Öneriler
+      </div>
+<div class="flex flex-wrap gap-3">
+<!-- Suggestion Badges -->
+<button class="bg-white px-4 py-2 rounded-xl neo-shadow-sm font-bold text-gray-800 flex items-center gap-2 neo-btn transition-transform -rotate-2">
+          Su İç 💧
+        </button>
+<button class="bg-white px-4 py-2 rounded-xl neo-shadow-sm font-bold text-gray-800 flex items-center gap-2 neo-btn transition-transform rotate-1">
+          Kitap Oku 📚
+        </button>
+<button class="bg-white px-4 py-2 rounded-xl neo-shadow-sm font-bold text-gray-800 flex items-center gap-2 neo-btn transition-transform -rotate-1">
+          Spor Yap 🏃
+        </button>
+<button class="bg-white px-4 py-2 rounded-xl neo-shadow-sm font-bold text-gray-800 flex items-center gap-2 neo-btn transition-transform rotate-2">
+          Meditasyon 🧘
+        </button>
+<button class="bg-white px-4 py-2 rounded-xl neo-shadow-sm font-bold text-gray-800 flex items-center gap-2 neo-btn transition-transform -rotate-2">
+          Erken Uyan ⏰
+        </button>
+</div>
+</section>
+<!-- END: Quick Suggestions Section -->
+<!-- BEGIN: Goal Input Section -->
+<section class="mt-4">
+<label class="block text-sm font-bold uppercase tracking-wider text-gray-900 mb-2">HEDEF</label>
+<input class="w-full bg-white text-base font-medium p-4 rounded-xl neo-shadow-sm neo-input text-gray-800 placeholder-gray-400 -rotate-1" placeholder="Hedefini gir... (örn: 30 dakika)" type="text"/>
+</section>
+<!-- END: Goal Input Section -->
+<!-- BEGIN: Bottom Fixed Action Button -->
+<div class="fixed bottom-0 left-0 w-full p-4 bg-[#f8f9fa] flex justify-center pb-8">
+<button class="w-full max-w-md bg-[#0088cc] text-white text-xl font-bold py-4 rounded-xl neo-shadow flex justify-center items-center gap-2 neo-btn transition-transform uppercase tracking-wider rotate-1">
+        Devam Et
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+<!-- END: Bottom Fixed Action Button -->
+</main>
+</body></html>

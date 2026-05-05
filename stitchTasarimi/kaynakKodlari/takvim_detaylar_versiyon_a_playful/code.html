@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Takvim Detayları</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="custom-utilities">
+    :root {
+      --font-plus-jakarta: 'Plus Jakarta Sans', sans-serif;
+    }
+    body {
+      font-family: var(--font-plus-jakarta);
+      background-color: #F8FBFF;
+      color: #000;
+    }
+    .neo-border {
+      border: 4px solid #000;
+    }
+    .neo-shadow {
+      box-shadow: 6px 6px 0px 0px #000;
+    }
+    .neo-shadow-sm {
+      box-shadow: 4px 4px 0px 0px #000;
+    }
+    .neo-shadow-xs {
+      box-shadow: 2px 2px 0px 0px #000;
+    }
+    .rot-1 { transform: rotate(-1deg); }
+    .rot-2 { transform: rotate(1deg); }
+  </style>
+</head>
+<body class="antialiased min-h-screen pb-8">
+<!-- BEGIN: MainHeader -->
+<header class="px-6 pt-12 pb-6 flex items-center justify-between">
+<!-- Back Button -->
+<button aria-label="Geri" class="w-12 h-12 bg-white rounded-lg flex items-center justify-center neo-border neo-shadow-sm active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Progress Indicator -->
+<div class="flex space-x-2 items-center">
+<div class="w-2.5 h-2.5 rounded-full border-2 border-black bg-white"></div>
+<div class="w-2.5 h-2.5 rounded-full border-2 border-black bg-white"></div>
+<div class="w-4 h-2.5 rounded-full border-2 border-black bg-[#0077B6]"></div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<main class="px-6 flex flex-col gap-6">
+<!-- BEGIN: Page Title Section -->
+<section>
+<!-- Title -->
+<h1 class="text-4xl font-extrabold tracking-tight mb-3">Zamanlama</h1>
+<!-- Subtitle -->
+<p class="text-gray-700 font-medium text-lg leading-snug pr-8">
+        Projenizin ne zaman başlayıp biteceğini seçin.
+      </p>
+</section>
+<!-- END: Page Title Section -->
+<!-- BEGIN: Start Date Card -->
+<section class="bg-[#D1E9FF] p-5 relative mt-4 neo-border neo-shadow rot-1">
+<h2 class="text-2xl font-extrabold mb-4">Başlangıç</h2>
+<div class="flex flex-col gap-4">
+<!-- Date Input -->
+<div class="relative bg-white h-14 flex items-center px-4 neo-border neo-shadow-sm -rot-1">
+<span class="font-bold flex-1 text-lg">12 Ekim 2023, Perşembe</span>
+<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div class="flex gap-4">
+<!-- Time Input -->
+<div class="relative bg-white h-14 flex items-center px-4 neo-border neo-shadow-sm flex-1 rot-1">
+<span class="font-bold flex-1 text-lg">09:00</span>
+<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<!-- Now Button -->
+<button class="bg-[#FDE093] px-6 h-14 font-bold text-lg neo-border neo-shadow-sm active:translate-x-1 active:translate-y-1 active:shadow-none transition-all rot-2">
+            Şu an
+          </button>
+</div>
+</div>
+</section>
+<!-- END: Start Date Card -->
+<!-- BEGIN: End Date Toggle Row -->
+<section class="bg-[#F8FBFF] p-5 relative flex items-center justify-between neo-border neo-shadow -rot-1 mt-2">
+<div>
+<h3 class="text-xl font-extrabold">Bitiş Tarihi</h3>
+<p class="text-gray-400 font-medium text-sm">(İsteğe Bağlı)</p>
+</div>
+<!-- Toggle Switch -->
+<div class="w-14 h-8 bg-white neo-border flex items-center p-1 cursor-pointer">
+<!-- Active state thumb -->
+<div class="w-5 h-5 bg-[#0077B6] border-2 border-black ml-auto"></div>
+</div>
+</section>
+<!-- END: End Date Toggle Row -->
+<!-- BEGIN: End Date Card -->
+<section class="bg-[#D1E9FF] p-5 relative mt-2 neo-border neo-shadow rot-2">
+<h2 class="text-2xl font-extrabold mb-4">Bitiş</h2>
+<div class="flex flex-col gap-4">
+<!-- Date Input -->
+<div class="relative bg-white h-14 flex items-center px-4 neo-border neo-shadow-sm rot-1">
+<span class="font-bold flex-1 text-lg">15 Ekim 2023, Pazar</span>
+<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<!-- Time Input -->
+<div class="relative bg-white h-14 flex items-center px-4 neo-border neo-shadow-sm -rot-1">
+<span class="font-bold flex-1 text-lg">17:00</span>
+<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+</div>
+</section>
+<!-- END: End Date Card -->
+<!-- BEGIN: Action Button -->
+<div class="mt-4 pb-4">
+<button class="w-full bg-[#0077B6] text-white h-16 text-2xl font-extrabold flex items-center justify-center gap-2 relative neo-border neo-shadow active:translate-x-1 active:translate-y-1 transition-all rot-1">
+        Oluştur
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+<!-- END: Action Button -->
+</main>
+</body></html>

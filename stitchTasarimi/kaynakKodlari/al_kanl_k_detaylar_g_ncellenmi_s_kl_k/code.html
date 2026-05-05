@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Alışkanlık Detayları</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="custom-styles">
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background-color: #F8FBFC;
+    }
+    
+    /* Custom utility for the cartoonish shadow effect */
+    .brutal-shadow {
+      box-shadow: 4px 4px 0px #000000;
+    }
+    .brutal-shadow-sm {
+      box-shadow: 2px 2px 0px #000000;
+    }
+    .brutal-shadow-lg {
+      box-shadow: 6px 6px 0px #000000;
+    }
+    
+    /* Custom border radius for slightly imperfect look */
+    .brutal-rounded {
+      border-radius: 12px;
+    }
+    .brutal-rounded-full {
+      border-radius: 9999px;
+    }
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+  </style>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'brand-blue': '#0088CC',
+            'brand-bg': '#F8FBFC',
+            'brand-cyan': '#A5F3FC'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="antialiased text-gray-900 bg-brand-bg min-h-screen flex flex-col px-6 py-8 pb-12 max-w-md mx-auto">
+<!-- BEGIN: Header -->
+<header class="flex items-center justify-between mb-8" data-purpose="top-navigation">
+<!-- Back Button -->
+<button aria-label="Geri" class="w-10 h-10 border-2 border-black brutal-rounded bg-white flex items-center justify-center brutal-shadow-sm">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Progress Indicator -->
+<div class="flex space-x-1.5" data-purpose="progress-dots">
+<div class="w-3 h-3 rounded-full border-2 border-black bg-white"></div>
+<div class="w-3 h-3 rounded-full border-2 border-black bg-white"></div>
+<div class="w-6 h-3 rounded-full border-2 border-black bg-brand-blue brutal-shadow-sm transform -rotate-2"></div>
+</div>
+</header>
+<!-- END: Header -->
+<!-- BEGIN: Main Content -->
+<main class="flex-grow flex flex-col space-y-8" data-purpose="main-content">
+<!-- Title Section -->
+<section data-purpose="title-section">
+<h1 class="text-4xl font-bold leading-tight mb-4 tracking-tight">Alışkanlık<br/>Detayları</h1>
+<p class="text-gray-600 text-lg leading-relaxed">
+        Hangi günler bu alışkanlığı yerine getireceksin? Sana en uygun düzeni oluştur.
+      </p>
+</section>
+<!-- Weekly Plan Section -->
+<section data-purpose="weekly-plan">
+<h2 class="text-xl font-bold mb-4">Haftalık Plan</h2>
+<!-- Days Grid -->
+<div class="flex flex-wrap justify-center gap-3 px-2">
+<!-- Pzt (Selected) -->
+<button class="w-14 h-14 border-2 border-black rounded-full bg-brand-blue text-white font-bold brutal-shadow flex items-center justify-center transform -rotate-2">
+          Pzt
+        </button>
+<!-- Sal (Selected) -->
+<button class="w-14 h-14 border-2 border-black rounded-full bg-brand-blue text-white font-bold brutal-shadow flex items-center justify-center transform rotate-3">
+          Sal
+        </button>
+<!-- Çar (Unselected) -->
+<button class="w-14 h-14 border-2 border-black rounded-full bg-white text-black font-bold brutal-shadow flex items-center justify-center transform -rotate-1">
+          Çar
+        </button>
+<!-- Per (Selected) -->
+<button class="w-14 h-14 border-2 border-black rounded-full bg-brand-blue text-white font-bold brutal-shadow flex items-center justify-center transform rotate-2">
+          Per
+        </button>
+<!-- Cum (Unselected) -->
+<button class="w-14 h-14 border-2 border-black rounded-full bg-white text-black font-bold brutal-shadow flex items-center justify-center transform -rotate-3">
+          Cum
+        </button>
+<!-- Cts (Unselected) -->
+<button class="w-14 h-14 border-2 border-black rounded-full bg-white text-black font-bold brutal-shadow flex items-center justify-center transform rotate-1 mt-2">
+          Cts
+        </button>
+<!-- Paz (Unselected) -->
+<button class="w-14 h-14 border-2 border-black rounded-full bg-white text-black font-bold brutal-shadow flex items-center justify-center transform -rotate-2 mt-2">
+          Paz
+        </button>
+</div>
+</section>
+<!-- Frequency Section -->
+<section class="border-2 border-black brutal-rounded-lg bg-white p-5 brutal-shadow-lg transform -rotate-1" data-purpose="frequency-card">
+<div class="transform rotate-1">
+<h3 class="block text-sm font-bold mb-3">Tekrar Sıklığı <span class="font-normal text-gray-500">(İsteğe Bağlı)</span></h3>
+<div class="flex overflow-x-auto gap-3 pb-2 px-1 pt-1 no-scrollbar snap-x">
+<!-- 1 (Selected) -->
+<button class="w-12 h-12 shrink-0 border-2 border-black rounded-full bg-brand-blue text-white text-lg font-bold brutal-shadow flex items-center justify-center transform -rotate-1 snap-center">
+            1
+          </button>
+<!-- 2 (Unselected) -->
+<button class="w-12 h-12 shrink-0 border-2 border-black rounded-full bg-white text-black text-lg font-bold brutal-shadow flex items-center justify-center transform rotate-2 snap-center">
+            2
+          </button>
+<!-- 3 (Unselected) -->
+<button class="w-12 h-12 shrink-0 border-2 border-black rounded-full bg-white text-black text-lg font-bold brutal-shadow flex items-center justify-center transform -rotate-2 snap-center">
+            3
+          </button>
+<!-- 4 (Unselected) -->
+<button class="w-12 h-12 shrink-0 border-2 border-black rounded-full bg-white text-black text-lg font-bold brutal-shadow flex items-center justify-center transform rotate-1 snap-center">
+            4
+          </button>
+<!-- 5 (Unselected) -->
+<button class="w-12 h-12 shrink-0 border-2 border-black rounded-full bg-white text-black text-lg font-bold brutal-shadow flex items-center justify-center transform -rotate-1 snap-center">
+            5
+          </button>
+<!-- 6 (Unselected) -->
+<button class="w-12 h-12 shrink-0 border-2 border-black rounded-full bg-white text-black text-lg font-bold brutal-shadow flex items-center justify-center transform rotate-3 snap-center">
+            6
+          </button>
+<!-- 7 (Unselected) -->
+<button class="w-12 h-12 shrink-0 border-2 border-black rounded-full bg-white text-black text-lg font-bold brutal-shadow flex items-center justify-center transform -rotate-2 snap-center">
+            7
+          </button>
+</div>
+</div>
+</section>
+</main>
+<!-- END: Main Content -->
+<!-- BEGIN: Footer / Action -->
+<footer class="mt-8 pt-4" data-purpose="bottom-action">
+<button class="w-full border-2 border-black brutal-rounded-lg bg-brand-blue text-white text-xl font-bold py-4 brutal-shadow-lg transform rotate-1 hover:-translate-y-1 hover:shadow-xl transition-all">
+<span class="inline-block transform -rotate-1">Oluştur <span class="ml-2 font-bold">→</span></span>
+</button>
+</footer>
+<!-- END: Footer / Action -->
+</body></html>
