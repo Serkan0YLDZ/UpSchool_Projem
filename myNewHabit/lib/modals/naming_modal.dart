@@ -11,20 +11,34 @@ Future<({String title, int target, String? targetUnit, bool goBack})?> showNamin
   BuildContext context, {
   required RecordType type,
   String? initialTitle,
+  int? initialTarget,
+  String? initialTargetUnit,
 }) {
   return showModalBottomSheet<({String title, int target, String? targetUnit, bool goBack})>(
     context: context,
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
-    builder: (_) => _NamingSheet(type: type, initialTitle: initialTitle),
+    builder: (_) => _NamingSheet(
+      type: type, 
+      initialTitle: initialTitle,
+      initialTarget: initialTarget,
+      initialTargetUnit: initialTargetUnit,
+    ),
   );
 }
 
 class _NamingSheet extends StatefulWidget {
   final RecordType type;
   final String? initialTitle;
+  final int? initialTarget;
+  final String? initialTargetUnit;
 
-  const _NamingSheet({required this.type, this.initialTitle});
+  const _NamingSheet({
+    required this.type, 
+    this.initialTitle,
+    this.initialTarget,
+    this.initialTargetUnit,
+  });
 
   @override
   State<_NamingSheet> createState() => _NamingSheetState();
@@ -39,8 +53,8 @@ class _NamingSheetState extends State<_NamingSheet> {
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialTitle ?? '');
-    _targetController = TextEditingController();
-    _unitController = TextEditingController();
+    _targetController = TextEditingController(text: widget.initialTarget?.toString() ?? '');
+    _unitController = TextEditingController(text: widget.initialTargetUnit ?? '');
     _controller.addListener(_onTextChanged);
   }
 
@@ -120,28 +134,28 @@ class _NamingSheetState extends State<_NamingSheet> {
                   Row(
                     children: [
                       Container(
-                        width: 16, height: 16,
+                        width: 12, height: 12,
                         decoration: BoxDecoration(
                           color: AppColors.brutalistWhite,
                           shape: BoxShape.circle,
                           border: Border.all(color: AppColors.brutalistBlack, width: 2),
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 6),
                       Transform.rotate(
                         angle: -0.05,
                         child: Container(
-                          width: 24, height: 16,
+                          width: 20, height: 12,
                           decoration: BoxDecoration(
                             color: blueBtnBg,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppColors.brutalistBlack, width: 2),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 6),
                       Container(
-                        width: 16, height: 16,
+                        width: 12, height: 12,
                         decoration: BoxDecoration(
                           color: AppColors.brutalistWhite,
                           shape: BoxShape.circle,

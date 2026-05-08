@@ -64,6 +64,10 @@ class MainShell extends StatelessWidget {
     while (currentStep > 0 && currentStep <= 3 && context.mounted) {
       if (currentStep == 1) {
         selectedType = null;
+        title = null;
+        target = null;
+        targetUnit = null;
+        
         await showAddRecordModal(
           context,
           onTypeSelected: (type) {
@@ -77,7 +81,13 @@ class MainShell extends StatelessWidget {
           currentStep = 2;
         }
       } else if (currentStep == 2) {
-        final result = await showNamingModal(context, type: selectedType!);
+        final result = await showNamingModal(
+          context,
+          type: selectedType!,
+          initialTitle: title,
+          initialTarget: target,
+          initialTargetUnit: targetUnit,
+        );
         if (result == null) {
           return;
         } else if (result.goBack) {
@@ -131,6 +141,8 @@ class MainShell extends StatelessWidget {
       case RecordType.event:
         final timing = await showTaskTimingSheet(context);
         if (timing == null || !context.mounted) return null;
+        if (timing.goBack) return false;
+        
         await provider.createRecord(
           RecordModel(
             id: const Uuid().v4(),

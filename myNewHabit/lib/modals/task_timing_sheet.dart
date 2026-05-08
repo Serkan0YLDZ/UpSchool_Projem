@@ -7,7 +7,7 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 
 /// Görev ekleme akışının son adımı: başlangıç tarihi/saati ve bitiş tarihi/saati.
-Future<({DateTime startDate, String startTime, DateTime? endDate})?>
+Future<({DateTime startDate, String startTime, DateTime? endDate, bool goBack})?>
 showTaskTimingSheet(
   BuildContext context, {
   DateTime? initialStartDate,
@@ -74,76 +74,292 @@ class _TaskTimingSheetState extends State<_TaskTimingSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusXl),
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+    const bgColor = Color(0xFFF8FBFF);
+    const yellowTitleBg = Color(0xFFFFE599);
+    const blueBtnBg = Color(0xFF0077B6);
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          border: Border(top: BorderSide(color: AppColors.brutalistBlack, width: 4)),
         ),
-      ),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.cardPadding,
-        AppSpacing.sm,
-        AppSpacing.cardPadding,
-        AppSpacing.marginMobile,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Center(child: _DragHandle()),
-          const SizedBox(height: AppSpacing.md),
-          Text('Zamanlama', style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'Başlangıç',
-            style: Theme.of(
-              context,
-            ).textTheme.labelLarge?.copyWith(color: AppColors.onSurfaceVariant),
-          ),
-          const SizedBox(height: AppSpacing.smMd),
-          _DateTimeSelector(
-            date: _startDate,
-            time: _startTime,
-            onDateTap: _pickStartDate,
-            onTimeTap: _pickStartTime,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        padding: EdgeInsets.fromLTRB(
+          24,
+          16,
+          24,
+          24 + bottomPadding,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Bitiş Tarihi (Opsiyonel)',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.onSurfaceVariant,
+              // Header row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context, (startDate: _startDate, startTime: '', endDate: null, goBack: true)),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.brutalistWhite,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.brutalistBlack, width: 2),
+                        boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(3, 3))],
+                      ),
+                      child: const Icon(Icons.arrow_back, color: AppColors.brutalistBlack),
+                    ),
+                  ),
+                  // Progress indicator (Step 3)
+                  Row(
+                    children: [
+                      Container(
+                        width: 12, height: 12,
+                        decoration: BoxDecoration(
+                          color: AppColors.brutalistWhite,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.brutalistBlack, width: 2),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        width: 12, height: 12,
+                        decoration: BoxDecoration(
+                          color: AppColors.brutalistWhite,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.brutalistBlack, width: 2),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Transform.rotate(
+                        angle: -0.05,
+                        child: Container(
+                          width: 20, height: 12,
+                          decoration: BoxDecoration(
+                            color: blueBtnBg,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.brutalistBlack, width: 2),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Title Card
+              Transform.rotate(
+                angle: -0.02,
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: yellowTitleBg,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.brutalistBlack, width: 3),
+                    boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(4, 4))],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'ZAMANLAMA',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.brutalistBlack,
+                          height: 1.2,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Projenizin ne zaman başlayıp biteceğini seçin.',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.brutalistBlack,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              Switch(
-                value: _showEndDate,
-                onChanged: _toggleEndDate,
-                activeThumbColor: AppColors.tertiary,
+              const SizedBox(height: 24),
+
+              // Start Date Section
+              Transform.rotate(
+                angle: -0.01,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD1E9FF),
+                    border: Border.all(color: AppColors.brutalistBlack, width: 4),
+                    boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(6, 6))],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Başlangıç',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.brutalistBlack,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _DateTimeSelector(
+                        date: _startDate,
+                        time: _startTime,
+                        onDateTap: _pickStartDate,
+                        onTimeTap: _pickStartTime,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // End Date Toggle Row
+              Transform.rotate(
+                angle: -0.01,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.brutalistWhite,
+                    border: Border.all(color: AppColors.brutalistBlack, width: 4),
+                    boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(6, 6))],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Bitiş Tarihi',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.brutalistBlack,
+                            ),
+                          ),
+                          Text(
+                            '(İsteğe Bağlı)',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () => _toggleEndDate(!_showEndDate),
+                        child: Container(
+                          width: 56,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: AppColors.brutalistWhite,
+                            border: Border.all(color: AppColors.brutalistBlack, width: 2),
+                          ),
+                          padding: const EdgeInsets.all(4),
+                          child: Align(
+                            alignment: _showEndDate ? Alignment.centerRight : Alignment.centerLeft,
+                            child: Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: _showEndDate ? blueBtnBg : Colors.grey,
+                                border: Border.all(color: AppColors.brutalistBlack, width: 2),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              if (_showEndDate) ...[
+                const SizedBox(height: 24),
+                Transform.rotate(
+                  angle: 0.01,
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD1E9FF),
+                      border: Border.all(color: AppColors.brutalistBlack, width: 4),
+                      boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(6, 6))],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Bitiş',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.brutalistBlack,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _DateTimeSelector(
+                          date: _endDate ?? DateTime.now(),
+                          time: _endTime ?? const TimeOfDay(hour: 23, minute: 59),
+                          onDateTap: _pickEndDate,
+                          onTimeTap: _pickEndTime,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+              
+              const SizedBox(height: 32),
+
+              // Create Button
+              Transform.rotate(
+                angle: 0.01,
+                child: GestureDetector(
+                  onTap: _onSave,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: blueBtnBg,
+                      border: Border.all(color: AppColors.brutalistBlack, width: 4),
+                      boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(6, 6))],
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'OLUŞTUR',
+                          style: TextStyle(
+                            color: AppColors.brutalistWhite,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(Icons.arrow_forward, color: AppColors.brutalistWhite, size: 28),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
-          if (_showEndDate) ...[
-            const SizedBox(height: AppSpacing.smMd),
-            _DateTimeSelector(
-              date: _endDate ?? DateTime.now(),
-              time: _endTime ?? const TimeOfDay(hour: 23, minute: 59),
-              onDateTap: _pickEndDate,
-              onTimeTap: _pickEndTime,
-            ),
-          ],
-          const SizedBox(height: AppSpacing.lg),
-          SizedBox(
-            width: double.infinity,
-            height: AppSpacing.buttonHeight,
-            child: ElevatedButton(
-              onPressed: _onSave,
-              child: const Text('Oluştur'),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -223,7 +439,7 @@ class _TaskTimingSheetState extends State<_TaskTimingSheet> {
 
     Navigator.of(
       context,
-    ).pop((startDate: _startDate, startTime: startT, endDate: finalEndDate));
+    ).pop((startDate: _startDate, startTime: startT, endDate: finalEndDate, goBack: false));
   }
 }
 
@@ -264,58 +480,76 @@ class _DateTimeSelector extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          flex: 3,
+          flex: 5,
           child: GestureDetector(
             onTap: onDateTap,
-            child: Container(
-              height: 56,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.calendar_month_rounded,
-                    color: AppColors.tertiary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: AppSpacing.smMd),
-                  Expanded(
-                    child: Text(
-                      DateFormat('d MMM yyyy', 'tr').format(date),
-                      style: Theme.of(context).textTheme.labelLarge,
+            child: Transform.rotate(
+              angle: -0.01,
+              child: Container(
+                height: 56,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.brutalistWhite,
+                  border: Border.all(color: AppColors.brutalistBlack, width: 3),
+                  boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(3, 3))],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        DateFormat('d MMM yyyy', 'tr').format(date),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.brutalistBlack,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ],
+                    const Icon(
+                      Icons.calendar_today,
+                      color: AppColors.brutalistBlack,
+                      size: 20,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-        const SizedBox(width: AppSpacing.smMd),
+        const SizedBox(width: 12),
         Expanded(
-          flex: 2,
+          flex: 3,
           child: GestureDetector(
             onTap: onTimeTap,
-            child: Container(
-              height: 56,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.access_time_rounded,
-                    color: AppColors.tertiary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: AppSpacing.smMd),
-                  Text('$h:$m', style: Theme.of(context).textTheme.labelLarge),
-                ],
+            child: Transform.rotate(
+              angle: 0.01,
+              child: Container(
+                height: 56,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.brutalistWhite,
+                  border: Border.all(color: AppColors.brutalistBlack, width: 3),
+                  boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(3, 3))],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '$h:$m',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.brutalistBlack,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.access_time_filled,
+                      color: AppColors.brutalistBlack,
+                      size: 20,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

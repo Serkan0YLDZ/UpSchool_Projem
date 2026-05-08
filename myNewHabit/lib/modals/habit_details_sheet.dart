@@ -134,16 +134,21 @@ class _HabitDetailsSheetState extends State<_HabitDetailsSheet> {
                   border: Border.all(color: AppColors.brutalistBlack, width: 3),
                   boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(3, 3))],
                 ),
-                child: const Text(
-                  'Alışkanlık\nDetayları',
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, height: 1.1, color: AppColors.brutalistBlack),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Alışkanlık\nDetayları',
+                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, height: 1.1, color: AppColors.brutalistBlack),
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      'Hangi günler bu alışkanlığı yerine getireceksin? Sana en uygun düzeni oluştur.',
+                      style: TextStyle(fontSize: 16, color: AppColors.brutalistBlack, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Hangi günler bu alışkanlığı yerine getireceksin? Sana en uygun düzeni oluştur.',
-              style: TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 32),
             
