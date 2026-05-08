@@ -52,40 +52,68 @@ class MainShell extends StatelessWidget {
     }
   }
 
-  /// Sprint 2 ekleme akışı:
+  /// Sprint 5 ekleme akışı:
   /// Adım 1 → tip seç · Adım 2 → isim gir · Adım 3 → tipine göre detay
   Future<void> _openAddFlow(BuildContext context) async {
+    int currentStep = 1;
     RecordType? selectedType;
-
-    await showAddRecordModal(
-      context,
-      onTypeSelected: (type) {
-        selectedType = type;
-        Navigator.of(context).pop();
-      },
-    );
-
-    if (selectedType == null || !context.mounted) return;
-
     String? title;
+    int? target;
+    String? targetUnit;
 
-    title = await showNamingModal(context, type: selectedType!);
-    if (title == null || !context.mounted) return;
-
-    await _openDetailSheet(context, selectedType!, title);
+    while (currentStep > 0 && currentStep <= 3 && context.mounted) {
+      if (currentStep == 1) {
+        selectedType = null;
+        await showAddRecordModal(
+          context,
+          onTypeSelected: (type) {
+            selectedType = type;
+            Navigator.of(context).pop();
+          },
+        );
+        if (selectedType == null) {
+          return;
+        } else {
+          currentStep = 2;
+        }
+      } else if (currentStep == 2) {
+        final result = await showNamingModal(context, type: selectedType!);
+        if (result == null) {
+          return;
+        } else if (result.goBack) {
+          currentStep = 1;
+        } else {
+          title = result.title;
+          target = result.target;
+          targetUnit = result.targetUnit;
+          currentStep = 3;
+        }
+      } else if (currentStep == 3) {
+        final success = await _openDetailSheet(context, selectedType!, title!, target, targetUnit);
+        if (success == false) {
+          currentStep = 2;
+        } else {
+          return;
+        }
+      }
+    }
   }
 
-  Future<void> _openDetailSheet(
+  Future<bool?> _openDetailSheet(
     BuildContext context,
     RecordType type,
     String title,
+    int? target,
+    String? targetUnit,
   ) async {
     final provider = context.read<RecordProvider>();
 
     switch (type) {
       case RecordType.habit:
         final details = await showHabitDetailsSheet(context);
-        if (details == null || !context.mounted) return;
+        if (details == null || !context.mounted) return null; // dismissed
+        if (details.goBack) return false; // go back
+
         await provider.createRecord(
           RecordModel(
             id: const Uuid().v4(),
@@ -93,14 +121,16 @@ class MainShell extends StatelessWidget {
             title: title,
             repeatDays: details.repeatDays,
             intervalDays: details.intervalDays,
-            targetProgress: 100,
+            targetProgress: target ?? 100,
+            targetUnit: targetUnit,
             createdAt: DateTime.now(),
           ),
         );
+        break;
 
       case RecordType.event:
         final timing = await showTaskTimingSheet(context);
-        if (timing == null || !context.mounted) return;
+        if (timing == null || !context.mounted) return null;
         await provider.createRecord(
           RecordModel(
             id: const Uuid().v4(),
@@ -117,11 +147,12 @@ class MainShell extends StatelessWidget {
             createdAt: DateTime.now(),
           ),
         );
+        break;
 
       case RecordType.todo:
         // TODO: Sprint 5'te Todo form sheet eklenecek. Şimdilik düz createdAt ile ekliyoruz.
         final todoDetails = await showTodoDetailsSheet(context);
-        if (todoDetails == null || !context.mounted) return;
+        if (todoDetails == null || !context.mounted) return null;
 
         await provider.createRecord(
           RecordModel(
@@ -145,6 +176,7 @@ class MainShell extends StatelessWidget {
         ),
       );
     }
+    return true;
   }
 
   int _locationToIndex(String location) {

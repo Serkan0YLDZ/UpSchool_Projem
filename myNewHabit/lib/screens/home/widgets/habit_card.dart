@@ -276,28 +276,12 @@ class _CardBody extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '$progress / $currentTarget',
+                      '$progress / $currentTarget ${record.targetUnit ?? ''}'.trim(),
                       style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    isDone
-                        ? const Text(
-                            'Done!',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.purple,
-                            ),
-                          )
-                        : Text(
-                            '${(progressPercent * 100).toInt()}%',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
                   ],
                 ),
                 const SizedBox(height: 4),

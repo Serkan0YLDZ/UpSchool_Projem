@@ -64,6 +64,9 @@ class RecordModel {
   /// Tamamlanmış sayılan % eşiği (0-100) (sadece habit)
   final int targetProgress;
 
+  /// Hedef birimi (örn: lt, km, sayfa) (sadece habit)
+  final String? targetUnit;
+
   /// 'yyyy-MM-dd' formatında zamanlanmış tarih (sadece event)
   final String? scheduledDate;
 
@@ -92,6 +95,7 @@ class RecordModel {
     this.repeatDays = const [],
     this.intervalDays,
     this.targetProgress = 100,
+    this.targetUnit,
     this.scheduledDate,
     this.scheduledTime,
     this.endDate,
@@ -117,6 +121,7 @@ class RecordModel {
           : [],
       intervalDays: map['interval_days'] as int?,
       targetProgress: map['target_progress'] as int? ?? 100,
+      targetUnit: map['target_unit'] as String?,
       scheduledDate: map['scheduled_date'] as String?,
       scheduledTime: map['scheduled_time'] as String?,
       endDate: map['end_date'] as String?,
@@ -142,6 +147,7 @@ class RecordModel {
       'repeat_days': repeatDays.isNotEmpty ? jsonEncode(repeatDays) : null,
       'interval_days': intervalDays,
       'target_progress': targetProgress,
+      'target_unit': targetUnit,
       'scheduled_date': scheduledDate,
       'scheduled_time': scheduledTime,
       'end_date': endDate,
@@ -162,6 +168,7 @@ class RecordModel {
     List<String>? repeatDays,
     int? intervalDays,
     int? targetProgress,
+    String? targetUnit,
     String? scheduledDate,
     String? scheduledTime,
     String? endDate,
@@ -180,6 +187,7 @@ class RecordModel {
       repeatDays: repeatDays ?? this.repeatDays,
       intervalDays: intervalDays ?? this.intervalDays,
       targetProgress: targetProgress ?? this.targetProgress,
+      targetUnit: targetUnit ?? this.targetUnit,
       scheduledDate: scheduledDate ?? this.scheduledDate,
       scheduledTime: scheduledTime ?? this.scheduledTime,
       endDate: endDate ?? this.endDate,

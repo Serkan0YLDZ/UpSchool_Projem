@@ -1,4 +1,4 @@
-// Sprint 2: Modal — Adım 1: "Ne Eklemek İstersin?" tip seçimi
+// Sprint 5: Modal — Adım 1: "Ne Eklemek İstersin?" tip seçimi (Neo-Brutalism)
 
 import 'package:flutter/material.dart';
 
@@ -33,46 +33,55 @@ class _AddRecordSheet extends StatelessWidget {
       decoration: const BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusXl),
+          top: Radius.circular(32),
         ),
       ),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.marginMobile,
-        AppSpacing.sm,
+        AppSpacing.md,
         AppSpacing.marginMobile,
         AppSpacing.lg,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const _DragHandle(),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'Ne Eklemek İstersin?',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: AppSpacing.cardPadding),
-          _TypeTile(
-            icon: '🔄',
-            label: 'Yeni Alışkanlık',
-            subtitle: 'Her gün tekrarlayan rutinler',
-            onTap: () => onTypeSelected(RecordType.habit),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          _TypeTile(
-            icon: '📅',
-            label: 'Takvime Ekle',
-            subtitle: 'Belirli tarihe bağlı tek seferlik işler',
-            onTap: () => onTypeSelected(RecordType.event),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          _TypeTile(
-            icon: '☑️',
-            label: 'Yapılacak Ekle',
-            subtitle: 'Bitiş tarihi olan yapılacaklar listesi',
-            onTap: () => onTypeSelected(RecordType.todo),
-          ),
-        ],
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const _DragHandle(),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Ne Eklemek İstersin?',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: AppColors.brutalistBlack,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.cardPadding),
+            _TypeTile(
+              icon: Icons.calendar_today_rounded,
+              label: 'TAKVİME\nEKLE',
+              subtitle: 'Etkinlik veya randevunu kaydet',
+              backgroundColor: const Color(0xFFC4EDF8), // Takvim blue
+              onTap: () => onTypeSelected(RecordType.event),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _TypeTile(
+              icon: Icons.star_border_rounded,
+              label: 'ALIŞKANLIK\nEKLE',
+              subtitle: 'Günlük rutinini şekillendir',
+              backgroundColor: const Color(0xFFFDE074), // Habit yellow
+              onTap: () => onTypeSelected(RecordType.habit),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _TypeTile(
+              icon: Icons.check_box_outlined,
+              label: 'YAPILACAK\nEKLE',
+              subtitle: 'Hızlı görev oluştur',
+              backgroundColor: const Color(0xFFD0BCFF), // Todo purple
+              onTap: () => onTypeSelected(RecordType.todo),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+          ],
+        ),
       ),
     );
   }
@@ -85,10 +94,10 @@ class _DragHandle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: 40,
-        height: 4,
+        width: 48,
+        height: 6,
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
+          color: AppColors.outlineVariant,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         ),
       ),
@@ -97,55 +106,74 @@ class _DragHandle extends StatelessWidget {
 }
 
 class _TypeTile extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String label;
   final String subtitle;
+  final Color backgroundColor;
   final VoidCallback onTap;
 
   const _TypeTile({
     required this.icon,
     required this.label,
     required this.subtitle,
+    required this.backgroundColor,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.smMd,
-          ),
-          child: Row(
-            children: [
-              Text(icon, style: const TextStyle(fontSize: 28)),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(label, style: Theme.of(context).textTheme.titleMedium),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          border: Border.all(color: AppColors.brutalistBlack, width: 4),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: const [
+            BoxShadow(
+              color: AppColors.brutalistBlack,
+              offset: Offset(6, 6),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.brutalistWhite,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.brutalistBlack, width: 4),
               ),
-              const Icon(
-                Icons.chevron_right_rounded,
+              child: Icon(icon, size: 32, color: AppColors.brutalistBlack),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                color: AppColors.brutalistBlack,
+                height: 1.2,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
                 color: AppColors.onSurfaceVariant,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

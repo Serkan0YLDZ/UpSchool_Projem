@@ -9,7 +9,7 @@ import 'package:path/path.dart';
 /// bu sayede ilerideki sprint'lerde yeni tablo/sütun eklemek güvendedir.
 class DatabaseHelper {
   static const String _dbName = 'my_new_habit.db';
-  static const int _dbVersion = 4;
+  static const int _dbVersion = 5;
 
   final String? _inMemoryPath;
 
@@ -66,6 +66,8 @@ class DatabaseHelper {
         await _migrateV3(db);
       } else if (v == 4) {
         await _migrateV4(db);
+      } else if (v == 5) {
+        await _migrateV5(db);
       }
     }
   }
@@ -130,6 +132,15 @@ class DatabaseHelper {
     } catch (_) {}
   }
 
+  /// Versiyon 5: Sprint 5 PRD revizyonu.
+  ///
+  /// - records: target_unit eklendi (örn: 'lt', 'km').
+  Future<void> _migrateV5(Database db) async {
+    try {
+      await db.execute('ALTER TABLE records ADD COLUMN target_unit TEXT');
+    } catch (_) {}
+  }
+
   /// Versiyon 1 şeması: records, completions, streaks tabloları.
   Future<void> _migrateV1(Database db) async {
     await db.execute('''
@@ -143,6 +154,7 @@ class DatabaseHelper {
         repeat_days     TEXT,
         interval_days   INTEGER,
         target_progress INTEGER DEFAULT 100,
+        target_unit     TEXT,
         scheduled_date  TEXT,
         scheduled_time  TEXT,
         end_time        TEXT,
