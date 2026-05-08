@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -10,6 +11,7 @@ import '../../../data/models/record_model.dart';
 import '../../../providers/completion_provider.dart';
 import '../../../providers/record_provider.dart';
 import '../../../modals/edit_record_sheet.dart';
+import '../../../core/widgets/brutalist_container.dart';
 
 /// Saatli etkinlik kartı — kronolojik sırayla üst bölümde render edilir.
 ///
@@ -173,14 +175,40 @@ class _EventCardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _TimeLabel(
-            startTime: record.scheduledTime ?? '',
-            endTime: record.endTime,
+          // Time Label (48px width)
+          SizedBox(
+            width: 48,
+            child: _TimeLabel(
+              startTime: record.scheduledTime ?? '',
+              endTime: record.endTime,
+            ),
           ),
+
+          // Timeline node centered perfectly at left: 56
+          // (48 + 16/2 = 56)
+          SizedBox(
+            width: 16,
+            child: Center(
+              child: Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: isDone
+                      ? AppColors.brutalistBlack
+                      : AppColors.brutalistWhite,
+                  border: Border.all(color: AppColors.brutalistBlack, width: 3),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+
           const SizedBox(width: AppSpacing.sm),
+
           Expanded(
             child: _PillCard(
               record: record,
@@ -205,21 +233,16 @@ class _TimeLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String displayTime = startTime;
-    if (endTime != null && endTime!.isNotEmpty) {
-      displayTime += '\n$endTime';
-    }
-
-    return SizedBox(
-      width: 48,
-      child: Text(
-        displayTime,
-        textAlign: TextAlign.right,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: AppColors.onSurfaceVariant,
-          letterSpacing: 0.5,
-          height: 1.5,
-        ),
+    // Only show the start time on the left column (HH:mm)
+    final display = startTime;
+    return Text(
+      display,
+      textAlign: TextAlign.right,
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+        color: AppColors.brutalistBlack,
+        fontWeight: FontWeight.w900,
+        letterSpacing: -0.5,
+        height: 1.2,
       ),
     );
   }
@@ -243,98 +266,68 @@ class _PillCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Opacity(
-      opacity: isDone ? 0.55 : 1.0,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(50),
-          boxShadow: const [
-            BoxShadow(
-              color: AppColors.ambientShadow,
-              blurRadius: 12,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(50),
-            onTap: onTap,
-            onLongPress: onLongPress,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.sm,
-              ),
-              child: Row(
-                children: [
-                  _IconBubble(icon: record.icon),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          record.title,
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(
-                                color: AppColors.onSurface,
-                                decoration: isDone
-                                    ? TextDecoration.lineThrough
-                                    : null,
-                                decorationColor: AppColors.onSurface.withValues(
-                                  alpha: 0.4,
-                                ),
-                              ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (record.description != null &&
-                            record.description!.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            record.description!,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: AppColors.onSurfaceVariant),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ],
+      opacity: isDone ? 0.6 : 1.0,
+      child: GestureDetector(
+        onLongPress: onLongPress,
+        behavior: HitTestBehavior.opaque,
+        child: BrutalistContainer(
+          backgroundColor: isDone
+              ? AppColors.tertiaryFixed
+              : AppColors.brutalistWhite,
+          borderWidth: 3.0,
+          shadowOffset: 4.0,
+          borderRadius: 8.0,
+          onTap: onTap,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.smMd,
+            vertical: AppSpacing.smMd,
+          ),
+          child: Row(
+            children: [
+              // Icon removed for calendar event list items (design requirement)
+              const SizedBox(width: AppSpacing.smMd),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      record.title.toUpperCase(),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: AppColors.brutalistBlack,
+                        fontWeight: FontWeight.w900,
+                        decoration: isDone ? TextDecoration.lineThrough : null,
+                        decorationThickness: 2.0,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  _DoneIndicator(isDone: isDone),
-                ],
+                    if (record.description != null &&
+                        record.description!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        record.description!,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.brutalistBlack,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+
+                    // Date / time line under the title (optional)
+                    const SizedBox(height: 6),
+                    _EventDateLine(record: record),
+                  ],
+                ),
               ),
-            ),
+              const SizedBox(width: AppSpacing.sm),
+              _DoneIndicator(isDone: isDone),
+            ],
           ),
         ),
       ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _IconBubble extends StatelessWidget {
-  const _IconBubble({required this.icon});
-
-  final String? icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceContainer,
-        shape: BoxShape.circle,
-      ),
-      alignment: Alignment.center,
-      child: Text(icon ?? '📋', style: const TextStyle(fontSize: 20)),
     );
   }
 }
@@ -352,14 +345,97 @@ class _DoneIndicator extends StatelessWidget {
       width: 28,
       height: 28,
       decoration: BoxDecoration(
-        color: isDone ? AppColors.primary : AppColors.surfaceContainerHigh,
-        shape: BoxShape.circle,
+        color: isDone ? AppColors.brutalistBlack : AppColors.brutalistWhite,
+        border: Border.all(color: AppColors.brutalistBlack, width: 2.5),
+        borderRadius: BorderRadius.circular(6.0),
       ),
       child: Icon(
-        isDone ? Icons.check_rounded : Icons.chevron_right_rounded,
+        isDone ? Icons.check : Icons.chevron_right,
         size: 18,
-        color: isDone ? Colors.white : AppColors.onSurfaceVariant,
+        color: isDone ? AppColors.brutalistWhite : AppColors.brutalistBlack,
       ),
+    );
+  }
+}
+
+// Helper widget to format and display start/end date-time under the event title.
+class _EventDateLine extends StatelessWidget {
+  const _EventDateLine({required this.record});
+
+  final RecordModel record;
+
+  String _formatDate(String ymd) {
+    try {
+      final d = DateTime.parse(ymd);
+      final now = DateTime.now();
+      // Omit year if same as current year
+      if (d.year == now.year) {
+        return DateFormat('d MMM', 'tr_TR').format(d);
+      }
+      return DateFormat('d MMM yyyy', 'tr_TR').format(d);
+    } catch (_) {
+      return ymd;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final startDateStr = record.scheduledDate;
+    final endDateStr = record.endDate;
+    final startTime = record.scheduledTime ?? '';
+    final endTime = record.endTime ?? '';
+
+    String line = '';
+    if (startDateStr != null && startDateStr.isNotEmpty) {
+      if (endDateStr != null &&
+          endDateStr.isNotEmpty &&
+          endDateStr != startDateStr) {
+        // Different days -> show full dates with times
+        final s = _formatDate(startDateStr);
+        final e = _formatDate(endDateStr);
+        line =
+            '$s ${startTime.isNotEmpty ? startTime : ''} – $e ${endTime.isNotEmpty ? endTime : ''}';
+      } else {
+        // Same day or no end date -> show time range or single time
+        if (endTime.isNotEmpty) {
+          line = '$startTime – $endTime';
+        } else {
+          line = startTime;
+        }
+      }
+    } else {
+      // Fallback: show times if available
+      if (startTime.isNotEmpty && endTime.isNotEmpty) {
+        line = '$startTime – $endTime';
+      } else {
+        line = startTime.isNotEmpty ? startTime : endTime;
+      }
+    }
+
+    if (line.isEmpty) return const SizedBox.shrink();
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(
+          Icons.access_time,
+          size: 14,
+          color: AppColors.brutalistBlack,
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            line,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.brutalistBlack,
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }

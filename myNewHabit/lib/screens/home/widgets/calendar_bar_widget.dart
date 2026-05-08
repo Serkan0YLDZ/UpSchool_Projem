@@ -44,16 +44,24 @@ class _CalendarRow extends StatelessWidget {
     );
 
     return SizedBox(
-      height: 84,
+      height: 96,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: 8.0,
+        ),
         itemCount: days.length,
         itemBuilder: (context, index) {
           final day = days[index];
           final dateStr = DateFormat('yyyy-MM-dd').format(day);
           final isSelected = dateStr == selectedDate;
-          return _DayCell(day: day, dateStr: dateStr, isSelected: isSelected);
+          return _DayCell(
+            day: day,
+            dateStr: dateStr,
+            isSelected: isSelected,
+            index: index,
+          );
         },
       ),
     );
@@ -67,17 +75,20 @@ class _DayCell extends StatelessWidget {
     required this.day,
     required this.dateStr,
     required this.isSelected,
+    required this.index,
   });
 
   final DateTime day;
   final String dateStr;
   final bool isSelected;
+  final int index;
 
-  static const _dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cts', 'Paz'];
+  static const _dayNames = ['PZT', 'SAL', 'ÇAR', 'PER', 'CUM', 'CMT', 'PAZ'];
 
   @override
   Widget build(BuildContext context) {
     final dayLabel = _dayNames[day.weekday - 1];
+    final rotation = index % 2 == 0 ? -1.5 : 1.5;
 
     return GestureDetector(
       onTap: () {
@@ -85,47 +96,50 @@ class _DayCell extends StatelessWidget {
         context.read<CompletionProvider>().loadForDate(dateStr);
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-          width: isSelected ? 52 : 44,
-          height: isSelected ? 80 : 72,
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.35),
-                      blurRadius: 12,
-                      offset: const Offset(0, 6),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                dayLabel.toUpperCase(),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: isSelected
-                      ? Colors.white.withValues(alpha: 0.85)
-                      : AppColors.onSurfaceVariant.withValues(alpha: 0.7),
-                  letterSpacing: 0.8,
-                  fontWeight: FontWeight.w700,
+        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+        child: Transform.rotate(
+          angle: rotation * 3.1415926535 / 180,
+          child: Container(
+            width: 64,
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppColors.primaryContainer
+                  : AppColors.brutalistWhite,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.brutalistBlack, width: 4.0),
+              boxShadow: isSelected
+                  ? const [
+                      BoxShadow(
+                        color: AppColors.brutalistBlack,
+                        offset: Offset(4, 4),
+                        blurRadius: 0,
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  dayLabel,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: isSelected ? Colors.white70 : Colors.black54,
+                    letterSpacing: 0.5,
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                '${day.day}',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: isSelected ? Colors.white : AppColors.onSurface,
-                  fontWeight: FontWeight.w700,
+                const SizedBox(height: 2),
+                Text(
+                  '${day.day}',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: isSelected ? Colors.white : Colors.black,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

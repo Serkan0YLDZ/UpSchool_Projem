@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/widgets/brutalist_container.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/record_model.dart';
 import '../../../providers/completion_provider.dart';
 import '../../../providers/record_provider.dart';
@@ -173,242 +173,176 @@ class _CardBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = _priorityColor(record.priority);
+    // Generate a pseudo-random rotation based on the id's length for stable asymetery
+    final rotation = (record.id.length % 2 == 0) ? 1.0 : -1.0;
 
-    return Opacity(
-      opacity: isDone ? 0.55 : 1.0,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(20),
-          border: Border(left: BorderSide(color: borderColor, width: 4)),
-          boxShadow: const [
-            BoxShadow(
-              color: AppColors.ambientShadow,
-              blurRadius: 12,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(20),
-            onLongPress: onLongPress,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      _IconBubble(icon: record.icon),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: _TitleArea(record: record, isDone: isDone),
+    // Choose icon and color arbitrarily or map from properties later
+    const iconData = Icons.water_drop_rounded;
+    final iconColor = const Color(0xFFC4EDF8); // light blue
+
+    final currentTarget = record.targetProgress > 0
+        ? record.targetProgress
+        : 100;
+    final progressPercent = (progress / currentTarget).clamp(0.0, 1.0);
+
+    return BrutalistContainer(
+      rotatedOffset: rotation,
+      onTap: () {
+        // Toggle done logic can be here, simple complete/uncomplete
+        onProgressChanged(isDone ? 0 : currentTarget.toDouble());
+      },
+      child: GestureDetector(
+        onLongPress: onLongPress,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: iconColor,
+                    border: Border.all(
+                      color: AppColors.brutalistBlack,
+                      width: 3,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    iconData,
+                    color: AppColors.brutalistBlack,
+                    size: 24,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.brutalistWhite,
+                    border: Border.all(
+                      color: AppColors.brutalistBlack,
+                      width: 3,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: AppColors.brutalistBlack,
+                        offset: Offset(3, 3),
+                        blurRadius: 0,
                       ),
-                      InkWell(
-                        onTap: () {
-                          _showProgressSheet(context, progress);
-                        },
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isDone
-                                ? Colors.green.withAlpha(30)
-                                : AppColors.surfaceContainerLow,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '%$progress',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: isDone
-                                      ? Colors.green
-                                      : AppColors.primary,
-                                ),
-                          ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.local_fire_department,
+                        color: Colors.deepOrange,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '12',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showProgressSheet(BuildContext context, int currentProgress) {
-    int tempProgress = currentProgress;
-    showModalBottomSheet(
-      context: context,
-      useRootNavigator: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setState) {
-            return SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.cardPadding),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  record.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'İlerlemeyi Güncelle',
-                      style: Theme.of(ctx).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      '%$tempProgress',
-                      style: Theme.of(ctx).textTheme.displaySmall?.copyWith(
-                        color: AppColors.primary,
+                      '$progress / $currentTarget',
+                      style: const TextStyle(
+                        fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Slider(
-                      value: tempProgress.toDouble(),
-                      min: 0,
-                      max: 100, // as was in the current card
-                      divisions: 10,
-                      activeColor: AppColors.primary,
-                      inactiveColor: AppColors.primary.withValues(alpha: 0.2),
-                      onChanged: (val) {
-                        setState(() => tempProgress = val.toInt());
-                        onProgressChanged(val);
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    isDone
+                        ? const Text(
+                            'Done!',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.purple,
+                            ),
+                          )
+                        : Text(
+                            '${(progressPercent * 100).toInt()}%',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                        },
-                        child: const Text('Tamam'),
-                      ),
-                    ),
                   ],
                 ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Color _priorityColor(Priority? priority) {
-    switch (priority) {
-      case Priority.high:
-        return AppColors.primary;
-      case Priority.medium:
-        return AppColors.tertiary;
-      case Priority.low:
-      case null:
-        return AppColors.outlineVariant;
-    }
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _IconBubble extends StatelessWidget {
-  const _IconBubble({required this.icon});
-
-  final String? icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceContainer,
-        shape: BoxShape.circle,
+                const SizedBox(height: 4),
+                Container(
+                  height: 16,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: isDone
+                        ? Colors.purple.withValues(alpha: 0.3)
+                        : AppColors.brutalistWhite,
+                    border: Border.all(
+                      color: AppColors.brutalistBlack,
+                      width: 3,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: progressPercent,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDone
+                            ? Colors.purple
+                            : AppColors.primaryContainer,
+                        border: Border(
+                          right: BorderSide(
+                            color: AppColors.brutalistBlack,
+                            width: 3,
+                          ),
+                        ),
+                        borderRadius: BorderRadius.horizontal(
+                          left: Radius.circular(16),
+                          right: progressPercent == 1.0
+                              ? Radius.circular(16)
+                              : Radius.zero,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-      alignment: Alignment.center,
-      child: Text(icon ?? '✨', style: const TextStyle(fontSize: 20)),
     );
   }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _TitleArea extends StatelessWidget {
-  const _TitleArea({required this.record, required this.isDone});
-
-  final RecordModel record;
-  final bool isDone;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          record.title,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: AppColors.onSurface,
-            decoration: isDone ? TextDecoration.lineThrough : null,
-            decorationColor: AppColors.onSurface.withValues(alpha: 0.4),
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        // Streak rozeti — Sprint 4'te gerçek veri entegre edilecek.
-        const SizedBox(height: 2),
-        const _StreakBadge(days: 0),
-      ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// 🔥 streak rozeti. Sprint 4'te StreakService'ten gerçek veri alacak.
-class _StreakBadge extends StatelessWidget {
-  const _StreakBadge({required this.days});
-
-  final int days;
-
-  @override
-  Widget build(BuildContext context) {
-    if (days == 0) return const SizedBox.shrink();
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Text('🔥', style: TextStyle(fontSize: 12)),
-        const SizedBox(width: 2),
-        Text(
-          '$days Gün',
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: AppColors.streakFire,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
-  }
-}
+} // End of file

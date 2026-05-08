@@ -9,6 +9,7 @@ import '../../../data/models/record_model.dart';
 import '../../../providers/completion_provider.dart';
 import '../../../providers/record_provider.dart';
 import '../../../modals/edit_record_sheet.dart';
+import '../../../core/widgets/brutalist_container.dart';
 
 class TodoCard extends StatelessWidget {
   const TodoCard({super.key, required this.record, required this.selectedDate});
@@ -166,133 +167,130 @@ class _TodoCardBody extends StatelessWidget {
   Color _getPriorityColor() {
     switch (record.priority) {
       case Priority.high:
-        return AppColors.error;
+        return Color(0xFFFF6B6B); // Lighter Red for Urgent
       case Priority.medium:
-        return AppColors.streakFire;
+        return Color(0xFFFDE074); // Billing Yellow
       case Priority.low:
-        return AppColors.primaryContainer;
       case null:
-        return Colors.transparent;
+        return AppColors.primaryContainer; // Travel Blue
+    }
+  }
+
+  String _getPriorityLabel() {
+    switch (record.priority) {
+      case Priority.high:
+        return 'YÜKSEK';
+      case Priority.medium:
+        return 'ORTA';
+      case Priority.low:
+        return 'DÜŞÜK';
+      case null:
+        return 'GÖREV';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final priorityColor = _getPriorityColor();
-    final hasPriority = record.priority != null;
+    // Generate pseudo-random rotation between -1 and 1
+    final isEven = record.id.length % 2 == 0;
+    final rotation = isEven ? 1.0 : -1.0;
 
-    return Opacity(
-      opacity: isDone ? 0.55 : 1.0,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          boxShadow: const [
-            BoxShadow(
-              color: AppColors.ambientShadow,
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onToggle,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        BrutalistContainer(
+          rotatedOffset: -rotation,
+          onTap: onToggle,
+          margin: const EdgeInsets.only(top: 12), // Give space for badge
+          padding: const EdgeInsets.all(16),
+          child: GestureDetector(
             onLongPress: onLongPress,
-            child: Stack(
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (hasPriority)
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    child: Container(width: 6, color: priorityColor),
+                // Brutalist Checkbox
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: isDone
+                        ? AppColors.brutalistBlack
+                        : AppColors.brutalistWhite,
+                    border: Border.all(
+                      color: AppColors.brutalistBlack,
+                      width: 4,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                Padding(
-                  padding: EdgeInsets.only(
-                    left: hasPriority ? AppSpacing.md + 6 : AppSpacing.md,
-                    right: AppSpacing.md,
-                    top: AppSpacing.md,
-                    bottom: AppSpacing.md,
-                  ),
-                  child: Row(
+                  child: isDone
+                      ? const Icon(
+                          Icons.check,
+                          color: AppColors.brutalistWhite,
+                          size: 20,
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: 2,
-                        ), // Align visually with first text line
-                        child: _TodoCheckbox(isDone: isDone),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              record.title,
-                              style: Theme.of(context).textTheme.bodyLarge
-                                  ?.copyWith(
-                                    color: AppColors.onSurface,
-                                    fontWeight: FontWeight.w600,
-                                    decoration: isDone
-                                        ? TextDecoration.lineThrough
-                                        : null,
-                                    decorationColor: AppColors.onSurface
-                                        .withValues(alpha: 0.5),
-                                  ),
-                            ),
-                            if (record.description != null &&
-                                record.description!.isNotEmpty) ...[
-                              const SizedBox(height: AppSpacing.xs),
-                              Text(
-                                record.description!,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: AppColors.onSurfaceVariant,
-                                      decoration: isDone
-                                          ? TextDecoration.lineThrough
-                                          : null,
-                                      decorationColor: AppColors
-                                          .onSurfaceVariant
-                                          .withValues(alpha: 0.5),
-                                    ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                            if (record.dueDate != null) ...[
-                              const SizedBox(height: AppSpacing.sm),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.event_outlined,
-                                    size: 16,
-                                    color: AppColors.onSurfaceVariant,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    DateFormat(
-                                      'd MMM yyyy, HH:mm',
-                                      'tr_TR',
-                                    ).format(record.dueDate!),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall
-                                        ?.copyWith(
-                                          color: AppColors.onSurfaceVariant,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ],
+                      Text(
+                        record.title,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isDone
+                              ? AppColors.outline
+                              : AppColors.brutalistBlack,
+                          decoration: isDone
+                              ? TextDecoration.lineThrough
+                              : null,
                         ),
                       ),
+                      if (record.dueDate != null) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.brutalistWhite,
+                            border: Border.all(
+                              color: AppColors.brutalistBlack,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: AppColors.brutalistBlack,
+                                offset: Offset(2, 2),
+                                blurRadius: 0,
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.access_time, size: 14),
+                              const SizedBox(width: 4),
+                              Text(
+                                DateFormat(
+                                  'd MMM, HH:mm',
+                                  'tr_TR',
+                                ).format(record.dueDate!),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -300,32 +298,41 @@ class _TodoCardBody extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _TodoCheckbox extends StatelessWidget {
-  const _TodoCheckbox({required this.isDone});
-
-  final bool isDone;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        color: isDone ? AppColors.primary : Colors.transparent,
-        border: isDone
-            ? null
-            : Border.all(color: AppColors.outlineVariant, width: 2),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      alignment: Alignment.center,
-      child: isDone
-          ? const Icon(Icons.check, size: 16, color: Colors.white)
-          : null,
+        // Badge
+        Positioned(
+          top: 0,
+          left: 16,
+          child: Transform.rotate(
+            angle: rotation * 2 * 3.1415 / 180,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: _getPriorityColor(),
+                border: Border.all(color: AppColors.brutalistBlack, width: 3),
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: const [
+                  BoxShadow(
+                    color: AppColors.brutalistBlack,
+                    offset: Offset(3, 3),
+                    blurRadius: 0,
+                  ),
+                ],
+              ),
+              child: Text(
+                _getPriorityLabel(),
+                style: TextStyle(
+                  color: record.priority == Priority.medium
+                      ? AppColors.brutalistBlack
+                      : AppColors.brutalistWhite,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

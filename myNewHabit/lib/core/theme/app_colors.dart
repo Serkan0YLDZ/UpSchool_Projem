@@ -66,4 +66,14 @@ abstract final class AppColors {
 
   /// Ambient shadow (rgba(0, 119, 182, 0.08))
   static const Color ambientShadow = Color(0x140077B6);
+
+  // ── Brutalist Elements (Neo-Brutalism) ───────────────────────────────────
+  /// Structural black for bold borders and hard shadows.
+  static const Color brutalistBlack = Color(0xFF000000);
+
+  /// Standard white for card backgrounds in brutalism
+  static const Color brutalistWhite = Color(0xFFFFFFFF);
+
+  /// Tertiary fixed background (e.g. today calendar, progress bars)
+  static const Color tertiaryFixed = Color(0xFF9FEFFE);
 }

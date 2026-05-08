@@ -166,46 +166,80 @@ class _CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Tasarımdaki w-3/5 (genişliğin %60'ı) max-w-xs (320px) özelliğini sağlıyoruz
-    final screenWidth = MediaQuery.of(context).size.width;
-    final width = (screenWidth * 0.6).clamp(0.0, 320.0);
-
-    return Container(
-      width: width,
-      height: AppSpacing.xxl,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-        boxShadow: [
-          BoxShadow(
-            // %15 opaklık: tasarımdaki pill shadow'un ana renkten türetilmesi
-            color: AppColors.primaryContainer.withAlpha(38),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
+    return Transform.rotate(
+      angle: 0.0174533, // ~1 degree rotation
+      child: Container(
+        height: 64,
+        margin: EdgeInsets.zero,
+        width: MediaQuery.of(context).size.width + 8,
+        decoration: const BoxDecoration(
+          color: AppColors.surfaceContainerLowest,
+          border: Border(
+            top: BorderSide(color: AppColors.brutalistBlack, width: 4.0),
           ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _NavItem(
-            icon: Icons.home_rounded,
-            isSelected: selectedIndex == 0,
-            onTap: () => onDestinationSelected(0),
-          ),
-          _NavItem(
-            icon: Icons.add_rounded,
-            isSelected: selectedIndex == 1,
-            iconSize: 28, // HTML'de "text-[28px]" kullanılmıştı
-            onTap: () => onDestinationSelected(1),
-          ),
-          _NavItem(
-            icon: Icons.person_rounded,
-            isSelected: selectedIndex == 2,
-            onTap: () => onDestinationSelected(2),
-          ),
-        ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _NavItem(
+              icon: Icons.home_rounded,
+              isSelected: selectedIndex == 0,
+              onTap: () => onDestinationSelected(0),
+            ),
+            _NavItem(
+              icon: Icons.palette_rounded, // or any other unselected icon
+              isSelected: selectedIndex == 1,
+              onTap: () {}, // Add your action here if needed or change logic
+            ),
+            // Central FAB
+            Transform.translate(
+              offset: const Offset(0, -24),
+              child: Transform.rotate(
+                angle: -0.0349066, // ~ -2 degrees
+                child: GestureDetector(
+                  onTap: () => onDestinationSelected(
+                    1,
+                  ), // Using index 1 as ADD action from previous logic
+                  child: Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryContainer,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: AppColors.brutalistBlack,
+                        width: 4.0,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: AppColors.brutalistBlack,
+                          offset: Offset(6, 6),
+                          blurRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.add_rounded,
+                      color: AppColors.brutalistWhite,
+                      size: 32,
+                      weight: 700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            _NavItem(
+              icon: Icons.calendar_today_rounded,
+              isSelected: selectedIndex == 3,
+              onTap: () {},
+            ),
+            _NavItem(
+              icon: Icons.person_rounded,
+              isSelected: selectedIndex == 2,
+              onTap: () => onDestinationSelected(2),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -216,34 +250,30 @@ class _NavItem extends StatelessWidget {
     required this.icon,
     required this.isSelected,
     required this.onTap,
-    this.iconSize = 24,
   });
 
   final IconData icon;
   final bool isSelected;
   final VoidCallback onTap;
-  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          color: isSelected ? AppColors.onPrimary : AppColors.onSurfaceVariant,
-          size: iconSize,
+      child: Transform.rotate(
+        angle: -0.0174533, // Rotate back slightly
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          child: Icon(
+            icon,
+            size: 24,
+            color: isSelected
+                ? AppColors.primaryContainer
+                : AppColors.onSurface,
+          ),
         ),
       ),
     );
   }
-}
+} // End of file

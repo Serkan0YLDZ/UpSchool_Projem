@@ -10,6 +10,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../providers/completion_provider.dart';
 import '../../providers/record_provider.dart';
+import '../../core/widgets/brutalist_badge.dart';
 import 'widgets/calendar_bar_widget.dart';
 import 'widgets/event_card.dart';
 import 'widgets/habit_card.dart';
@@ -53,9 +54,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              // ── Başlık ──────────────────────────────────────────────────
-              const _HomeHeader(),
-
               // ── Takvim barı ─────────────────────────────────────────────
               const CalendarBarWidget(),
               const SizedBox(height: AppSpacing.md),
@@ -70,44 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _HomeHeader extends StatelessWidget {
-  const _HomeHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    final today = DateFormat('d MMMM, EEEE', 'tr_TR').format(DateTime.now());
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.md,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Merhaba 👋',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.onSurfaceVariant),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            today,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: AppColors.onSurface,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -174,22 +134,71 @@ class _ContentArea extends StatelessWidget {
         children: [
           // ── Saatli Planlar ──────────────────────────────────────────────
           if (provider.scheduledTasks.isNotEmpty) ...[
-            _SectionTitle(title: 'Takvim', emoji: '⏰'),
-            const SizedBox(height: AppSpacing.sm),
-            ...provider.scheduledTasks.map(
-              (r) => EventCard(record: r, selectedDate: provider.selectedDate),
+            const BrutalistBadge(
+              text: 'Takvim',
+              backgroundColor: AppColors.primaryContainer,
+              textStyle: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              rotatedOffset: -1.0,
+            ),
+            const SizedBox(height: 24),
+            // We use Stack to manage custom Timeline
+            Stack(
+              children: [
+                Positioned(
+                  left: 56, // About the visual alignment from the design
+                  top: 8,
+                  bottom: 24,
+                  child: Container(width: 4, color: AppColors.brutalistBlack),
+                ),
+                Column(
+                  children: provider.scheduledTasks
+                      .map(
+                        (r) => EventCard(
+                          record: r,
+                          selectedDate: provider.selectedDate,
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
             ),
             const SizedBox(height: AppSpacing.lg),
           ],
 
           // ── Rutinlerim ──────────────────────────────────────────────────
           if (provider.habits.isNotEmpty) ...[
-            _SectionTitle(title: 'Yeni Alışkanlıklarım', emoji: '🌿'),
-            const SizedBox(height: AppSpacing.sm),
-            ...provider.habits.map(
-              (r) => HabitCard(record: r, selectedDate: provider.selectedDate),
+            const BrutalistBadge(
+              text: 'Yeni Alışkanlıklar',
+              backgroundColor: Color(0xFFE5B000), // Darker Yellow
+              textStyle: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              rotatedOffset: -1.0,
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: 24),
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 20,
+              crossAxisSpacing: 20,
+              childAspectRatio: 0.85,
+              children: provider.habits
+                  .map(
+                    (r) => HabitCard(
+                      record: r,
+                      selectedDate: provider.selectedDate,
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: AppSpacing.xl),
           ],
 
           // ── Yapılacaklar ────────────────────────────────────────────────
@@ -197,8 +206,17 @@ class _ContentArea extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _SectionTitle(title: 'Yapılacaklar', emoji: '☑️'),
-                _TodoFilterButton(),
+                const BrutalistBadge(
+                  text: 'Yapılacaklar',
+                  backgroundColor: Color(0xFFAA44E0), // Darker Purple
+                  textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  rotatedOffset: -1.0,
+                ),
+                const _TodoFilterButton(),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -239,31 +257,6 @@ class _ContentArea extends StatelessWidget {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title, required this.emoji});
-  final String title;
-  final String emoji;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(emoji, style: const TextStyle(fontSize: 18)),
-        const SizedBox(width: AppSpacing.xs),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: AppColors.onSurface,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _TodoFilterButton extends StatelessWidget {
   const _TodoFilterButton();
 
@@ -271,13 +264,31 @@ class _TodoFilterButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<RecordProvider>(
       builder: (context, provider, _) {
-        return IconButton(
-          icon: const Icon(Icons.filter_list_rounded, size: 24),
-          onPressed: () => _showFilterSheet(context, provider),
-          style: IconButton.styleFrom(
-            backgroundColor: AppColors.surfaceContainerLow,
-            foregroundColor: AppColors.primary,
-            padding: const EdgeInsets.all(AppSpacing.sm),
+        return GestureDetector(
+          onTap: () => _showFilterSheet(context, provider),
+          child: Transform.rotate(
+            angle: -2.0 * 3.1415 / 180,
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.brutalistWhite,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.brutalistBlack, width: 4.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: AppColors.brutalistBlack,
+                    offset: Offset(4, 4),
+                    blurRadius: 0,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.filter_list_rounded,
+                size: 24,
+                color: AppColors.brutalistBlack,
+              ),
+            ),
           ),
         );
       },
@@ -316,7 +327,9 @@ class _TodoFilterButton extends StatelessWidget {
                   _FilterOption(
                     label: 'Yapılanlar',
                     icon: '✅',
-                    isSelected: provider.activeFilters.contains(FilterType.todoDone),
+                    isSelected: provider.activeFilters.contains(
+                      FilterType.todoDone,
+                    ),
                     onTap: () {
                       provider.toggleFilter(FilterType.todoDone);
                     },
@@ -324,7 +337,9 @@ class _TodoFilterButton extends StatelessWidget {
                   _FilterOption(
                     label: 'Yapılacaklar',
                     icon: '🔄',
-                    isSelected: provider.activeFilters.contains(FilterType.todoTodo),
+                    isSelected: provider.activeFilters.contains(
+                      FilterType.todoTodo,
+                    ),
                     onTap: () {
                       provider.toggleFilter(FilterType.todoTodo);
                     },
@@ -340,7 +355,9 @@ class _TodoFilterButton extends StatelessWidget {
                   _FilterOption(
                     label: 'En Önemli',
                     icon: '⭐',
-                    isSelected: provider.activeFilters.contains(FilterType.mostImportant),
+                    isSelected: provider.activeFilters.contains(
+                      FilterType.mostImportant,
+                    ),
                     onTap: () {
                       provider.toggleFilter(FilterType.mostImportant);
                     },
@@ -348,7 +365,9 @@ class _TodoFilterButton extends StatelessWidget {
                   _FilterOption(
                     label: 'En Yakın Bitiş Tarihi',
                     icon: '⏰',
-                    isSelected: provider.activeFilters.contains(FilterType.earliest),
+                    isSelected: provider.activeFilters.contains(
+                      FilterType.earliest,
+                    ),
                     onTap: () {
                       provider.toggleFilter(FilterType.earliest);
                     },
@@ -364,7 +383,9 @@ class _TodoFilterButton extends StatelessWidget {
                   _FilterOption(
                     label: 'Bu Hafta',
                     icon: '📅',
-                    isSelected: provider.activeFilters.contains(FilterType.thisWeek),
+                    isSelected: provider.activeFilters.contains(
+                      FilterType.thisWeek,
+                    ),
                     onTap: () {
                       provider.toggleFilter(FilterType.thisWeek);
                     },
@@ -372,7 +393,9 @@ class _TodoFilterButton extends StatelessWidget {
                   _FilterOption(
                     label: 'Bu Ay',
                     icon: '🗓',
-                    isSelected: provider.activeFilters.contains(FilterType.thisMonth),
+                    isSelected: provider.activeFilters.contains(
+                      FilterType.thisMonth,
+                    ),
                     onTap: () {
                       provider.toggleFilter(FilterType.thisMonth);
                     },
