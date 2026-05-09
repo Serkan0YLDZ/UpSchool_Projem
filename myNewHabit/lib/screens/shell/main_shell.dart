@@ -162,9 +162,9 @@ class MainShell extends StatelessWidget {
         break;
 
       case RecordType.todo:
-        // TODO: Sprint 5'te Todo form sheet eklenecek. Şimdilik düz createdAt ile ekliyoruz.
         final todoDetails = await showTodoDetailsSheet(context);
         if (todoDetails == null || !context.mounted) return null;
+        if (todoDetails.goBack) return false;
 
         await provider.createRecord(
           RecordModel(

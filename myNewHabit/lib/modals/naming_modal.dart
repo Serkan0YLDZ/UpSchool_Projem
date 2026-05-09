@@ -182,7 +182,7 @@ class _NamingSheetState extends State<_NamingSheet> {
                   child: Text(
                     widget.type == RecordType.habit ? 'ALIŞKANLIĞINA BİR\nİSİM VER!' 
                     : widget.type == RecordType.event ? 'ETKİNLİĞİNE BİR\nİSİM VER!' 
-                    : 'GÖREVİNE BİR\nİSİM VER!',
+                    : 'YAPILACAK ŞEYE\nBİR İSİM VER!',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w900,
@@ -403,7 +403,7 @@ class _NamingSheetState extends State<_NamingSheet> {
   String get _hintText => switch (widget.type) {
     RecordType.habit => 'Alışkanlık adı...',
     RecordType.event => 'Etkinlik adı...',
-    RecordType.todo => 'Görev adı...',
+    RecordType.todo => 'Yapılacak şeyin adı...',
   };
 
   void _onContinue() {
