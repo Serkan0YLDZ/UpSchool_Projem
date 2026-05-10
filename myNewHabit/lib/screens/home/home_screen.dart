@@ -2,7 +2,7 @@
 // CustomScrollView+SliverList → ListView+Column (semantics crash fix)
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -300,11 +300,19 @@ class _TodoFilterButton extends StatelessWidget {
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (ctx) => Consumer<RecordProvider>(
-        builder: (consumerCtx, provider, _) => SafeArea(
+        builder: (consumerCtx, provider, _) => Container(
+          decoration: const BoxDecoration(
+            color: AppColors.brutalistWhite,
+            border: Border(
+              top: BorderSide(color: AppColors.brutalistBlack, width: 4),
+              left: BorderSide(color: AppColors.brutalistBlack, width: 4),
+              right: BorderSide(color: AppColors.brutalistBlack, width: 4),
+            ),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
             child: SingleChildScrollView(
@@ -313,97 +321,88 @@ class _TodoFilterButton extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Yapılacakları Filtrele',
-                    style: Theme.of(consumerCtx).textTheme.headlineSmall,
+                    'YAPILACAKLARI FİLTRELE',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.brutalistBlack,
+                      letterSpacing: -0.5,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'Durum',
-                    style: Theme.of(consumerCtx).textTheme.labelLarge?.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                  const Text(
+                    'DURUM',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.brutalistBlack,
+                      letterSpacing: 1.0,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   _FilterOption(
                     label: 'Yapılanlar',
-                    icon: '✅',
-                    isSelected: provider.activeFilters.contains(
-                      FilterType.todoDone,
-                    ),
-                    onTap: () {
-                      provider.toggleFilter(FilterType.todoDone);
-                    },
+                    icon: Icons.check_circle_outline,
+                    isSelected: provider.activeFilters.contains(FilterType.todoDone),
+                    onTap: () => provider.toggleFilter(FilterType.todoDone),
                   ),
                   _FilterOption(
                     label: 'Yapılacaklar',
-                    icon: '🔄',
-                    isSelected: provider.activeFilters.contains(
-                      FilterType.todoTodo,
-                    ),
-                    onTap: () {
-                      provider.toggleFilter(FilterType.todoTodo);
-                    },
+                    icon: Icons.pending_actions,
+                    isSelected: provider.activeFilters.contains(FilterType.todoTodo),
+                    onTap: () => provider.toggleFilter(FilterType.todoTodo),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'Sıralama',
-                    style: Theme.of(consumerCtx).textTheme.labelLarge?.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                  const Text(
+                    'SIRALAMA',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.brutalistBlack,
+                      letterSpacing: 1.0,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   _FilterOption(
                     label: 'En Önemli',
-                    icon: '⭐',
-                    isSelected: provider.activeFilters.contains(
-                      FilterType.mostImportant,
-                    ),
-                    onTap: () {
-                      provider.toggleFilter(FilterType.mostImportant);
-                    },
+                    icon: Icons.star_border_rounded,
+                    isSelected: provider.activeFilters.contains(FilterType.mostImportant),
+                    onTap: () => provider.toggleFilter(FilterType.mostImportant),
                   ),
                   _FilterOption(
                     label: 'En Yakın Bitiş Tarihi',
-                    icon: '⏰',
-                    isSelected: provider.activeFilters.contains(
-                      FilterType.earliest,
-                    ),
-                    onTap: () {
-                      provider.toggleFilter(FilterType.earliest);
-                    },
+                    icon: Icons.access_time_rounded,
+                    isSelected: provider.activeFilters.contains(FilterType.earliest),
+                    onTap: () => provider.toggleFilter(FilterType.earliest),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'Zaman Aralığı',
-                    style: Theme.of(consumerCtx).textTheme.labelLarge?.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                  const Text(
+                    'ZAMAN ARALIĞI',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.brutalistBlack,
+                      letterSpacing: 1.0,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   _FilterOption(
                     label: 'Bu Hafta',
-                    icon: '📅',
-                    isSelected: provider.activeFilters.contains(
-                      FilterType.thisWeek,
-                    ),
-                    onTap: () {
-                      provider.toggleFilter(FilterType.thisWeek);
-                    },
+                    icon: Icons.calendar_view_week_rounded,
+                    isSelected: provider.activeFilters.contains(FilterType.thisWeek),
+                    onTap: () => provider.toggleFilter(FilterType.thisWeek),
                   ),
                   _FilterOption(
                     label: 'Bu Ay',
-                    icon: '🗓',
-                    isSelected: provider.activeFilters.contains(
-                      FilterType.thisMonth,
-                    ),
-                    onTap: () {
-                      provider.toggleFilter(FilterType.thisMonth);
-                    },
+                    icon: Icons.calendar_month_rounded,
+                    isSelected: provider.activeFilters.contains(FilterType.thisMonth),
+                    onTap: () => provider.toggleFilter(FilterType.thisMonth),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                 ],
               ),
             ),
+          ),
           ),
         ),
       ),
@@ -422,40 +421,43 @@ class _FilterOption extends StatelessWidget {
   });
 
   final String label;
-  final String icon;
+  final IconData icon;
   final bool isSelected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: isSelected
-          ? AppColors.primary.withValues(alpha: 0.1)
-          : Colors.transparent,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
+    return GestureDetector(
+      onTap: onTap,
+      child: Transform.translate(
+        offset: isSelected ? const Offset(2, 2) : Offset.zero,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFAA44E0) : AppColors.brutalistWhite, // Purple matches Todo theme
+            border: Border.all(color: AppColors.brutalistBlack, width: 3),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isSelected
+                ? const []
+                : const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(4, 4))],
           ),
           child: Row(
             children: [
-              Text(icon, style: const TextStyle(fontSize: 20)),
-              const SizedBox(width: AppSpacing.md),
+              Icon(icon, size: 24, color: isSelected ? Colors.white : AppColors.brutalistBlack),
+              const SizedBox(width: 16),
               Expanded(
                 child: Text(
                   label,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: isSelected ? AppColors.primary : AppColors.onSurface,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: isSelected ? Colors.white : AppColors.brutalistBlack,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
               if (isSelected)
-                const Icon(Icons.check_rounded, color: AppColors.primary),
+                const Icon(Icons.check_rounded, color: Colors.white, size: 24),
             ],
           ),
         ),

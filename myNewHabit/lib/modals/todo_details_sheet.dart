@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../core/theme/app_colors.dart';
-import '../core/theme/app_spacing.dart';
+import '../core/utils/neo_picker.dart';
+
 import '../data/models/record_model.dart';
 
 /// Görev ekleme akışının son adımı: bitiş tarihi/saati ve önem derecesi.
@@ -38,6 +39,7 @@ class _TodoDetailsSheetState extends State<_TodoDetailsSheet> {
   DateTime? _dueDate;
   TimeOfDay? _dueTime;
   late Priority _priority;
+  bool _showDueDate = false;
 
   @override
   void initState() {
@@ -45,6 +47,7 @@ class _TodoDetailsSheetState extends State<_TodoDetailsSheet> {
     _dueDate = widget.initialDueDate;
     if (_dueDate != null) {
       _dueTime = TimeOfDay.fromDateTime(_dueDate!);
+      _showDueDate = true;
     }
     _priority = widget.initialPriority;
   }
@@ -181,10 +184,10 @@ class _TodoDetailsSheetState extends State<_TodoDetailsSheet> {
                         children: [
                           Expanded(
                             child: _PriorityButton(
-                              label: '🟢 Düşük',
+                              label: '🔵 Düşük',
                               isSelected: _priority == Priority.low,
                               onTap: () => setState(() => _priority = Priority.low),
-                              activeColor: const Color(0xFFBBF7D0), // green-200
+                              activeColor: const Color(0xFF93C5FD), // blue-300
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -226,21 +229,72 @@ class _TodoDetailsSheetState extends State<_TodoDetailsSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Zaman',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.brutalistBlack,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Bitiş Tarihi',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.brutalistBlack,
+                                ),
+                              ),
+                              Text(
+                                '(İsteğe Bağlı)',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _showDueDate = !_showDueDate;
+                                if (!_showDueDate) {
+                                  _dueDate = null;
+                                  _dueTime = null;
+                                }
+                              });
+                            },
+                            child: Container(
+                              width: 56,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: AppColors.brutalistWhite,
+                                border: Border.all(color: AppColors.brutalistBlack, width: 2),
+                              ),
+                              padding: const EdgeInsets.all(4),
+                              child: Align(
+                                alignment: _showDueDate ? Alignment.centerRight : Alignment.centerLeft,
+                                child: Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: _showDueDate ? blueBtnBg : Colors.grey,
+                                    border: Border.all(color: AppColors.brutalistBlack, width: 2),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_showDueDate) ...[
+                        const SizedBox(height: 16),
+                        _DateTimeSelector(
+                          date: _dueDate,
+                          time: _dueTime,
+                          onDateTap: _pickDueDate,
+                          onTimeTap: _pickDueTime,
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      _DateTimeSelector(
-                        date: _dueDate,
-                        time: _dueTime,
-                        onDateTap: _pickDueDate,
-                        onTimeTap: _pickDueTime,
-                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -287,7 +341,7 @@ class _TodoDetailsSheetState extends State<_TodoDetailsSheet> {
   }
 
   Future<void> _pickDueDate() async {
-    final picked = await showDatePicker(
+    final picked = await showNeoDatePicker(
       context: context,
       initialDate: _dueDate ?? DateTime.now(),
       firstDate: DateTime.now().subtract(const Duration(days: 1)),
@@ -296,31 +350,27 @@ class _TodoDetailsSheetState extends State<_TodoDetailsSheet> {
     if (picked != null) {
       setState(() {
         _dueDate = picked;
-        if (_dueTime == null) {
-          _dueTime = TimeOfDay.now();
-        }
+        _dueTime ??= TimeOfDay.now();
       });
     }
   }
 
   Future<void> _pickDueTime() async {
-    final picked = await showTimePicker(
+    final picked = await showNeoTimePicker(
       context: context,
       initialTime: _dueTime ?? TimeOfDay.now(),
     );
     if (picked != null) {
       setState(() {
         _dueTime = picked;
-        if (_dueDate == null) {
-          _dueDate = DateTime.now();
-        }
+        _dueDate ??= DateTime.now();
       });
     }
   }
 
   void _onSave() {
     DateTime? finalDueDate;
-    if (_dueDate != null) {
+    if (_showDueDate && _dueDate != null) {
       finalDueDate = DateTime(
         _dueDate!.year,
         _dueDate!.month,

@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/theme/app_colors.dart';
-import '../core/theme/app_spacing.dart';
+
 import '../data/models/record_model.dart';
 
 /// Ekleme akışının 2. adımı: isim girişi ve hızlı öneri chip'leri.

@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../core/theme/app_colors.dart';
-import '../core/theme/app_spacing.dart';
+import '../core/utils/neo_picker.dart';
+
 
 /// Görev ekleme akışının son adımı: başlangıç tarihi/saati ve bitiş tarihi/saati.
 Future<({DateTime startDate, String startTime, DateTime? endDate, bool goBack})?>
@@ -365,10 +366,10 @@ class _TaskTimingSheetState extends State<_TaskTimingSheet> {
   }
 
   Future<void> _pickStartDate() async {
-    final picked = await showDatePicker(
+    final picked = await showNeoDatePicker(
       context: context,
       initialDate: _startDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 1)),
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
     );
     if (picked != null) {
@@ -384,11 +385,11 @@ class _TaskTimingSheetState extends State<_TaskTimingSheet> {
   }
 
   Future<void> _pickStartTime() async {
-    final picked = await showTimePicker(
+    final picked = await showNeoTimePicker(
       context: context,
       initialTime: _startTime,
     );
-    if (picked != null) setState(() => _startTime = picked);
+    if (picked != null) {setState(() => _startTime = picked);}
   }
 
   void _toggleEndDate(bool value) {
@@ -405,17 +406,17 @@ class _TaskTimingSheetState extends State<_TaskTimingSheet> {
   }
 
   Future<void> _pickEndDate() async {
-    final picked = await showDatePicker(
+    final picked = await showNeoDatePicker(
       context: context,
       initialDate: _endDate ?? _startDate,
       firstDate: _startDate,
       lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
     );
-    if (picked != null) setState(() => _endDate = picked);
+    if (picked != null) {setState(() => _endDate = picked);}
   }
 
   Future<void> _pickEndTime() async {
-    final picked = await showTimePicker(
+    final picked = await showNeoTimePicker(
       context: context,
       initialTime: _endTime ?? const TimeOfDay(hour: 23, minute: 59),
     );
@@ -440,22 +441,6 @@ class _TaskTimingSheetState extends State<_TaskTimingSheet> {
     Navigator.of(
       context,
     ).pop((startDate: _startDate, startTime: startT, endDate: finalEndDate, goBack: false));
-  }
-}
-
-class _DragHandle extends StatelessWidget {
-  const _DragHandle();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 4,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-      ),
-    );
   }
 }
 

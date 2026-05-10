@@ -188,62 +188,45 @@ class _HabitDetailsSheetState extends State<_HabitDetailsSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      RichText(
-                        text: const TextSpan(
-                          text: 'Tekrar Sıklığı ',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.brutalistBlack),
-                          children: [
-                            TextSpan(
-                              text: '(İsteğe Bağlı)',
-                              style: TextStyle(fontWeight: FontWeight.normal, color: Colors.grey),
-                            ),
-                          ],
+                      const Text(
+                        'VEYA X GÜNDE BİR:',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.brutalistBlack,
+                          letterSpacing: 1.0,
                         ),
                       ),
                       const SizedBox(height: 16),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: List.generate(7, (index) {
-                            final val = index + 1;
-                            final isSelected = _intervalDays == val;
-                            final rotation = (index % 2 == 0) ? -0.03 : 0.03;
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  if (_intervalDays == val) {
-                                    _intervalDays = null; // deselect
-                                  } else {
-                                    _intervalDays = val;
-                                    _selectedDays.clear();
-                                  }
-                                });
-                              },
-                              child: Transform.rotate(
-                                angle: rotation,
-                                child: Container(
-                                  margin: const EdgeInsets.only(right: 12, bottom: 4),
-                                  width: 48,
-                                  height: 48,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: isSelected ? brandBlue : AppColors.brutalistWhite,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: AppColors.brutalistBlack, width: 2),
-                                    boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(2, 2))],
-                                  ),
-                                  child: Text(
-                                    '$val',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w900,
-                                      color: isSelected ? AppColors.brutalistWhite : AppColors.brutalistBlack,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.brutalistWhite,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.brutalistBlack, width: 3),
+                          boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(3, 3))],
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<int?>(
+                            value: _intervalDays,
+                            isExpanded: true,
+                            icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.brutalistBlack),
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.brutalistBlack, fontSize: 16),
+                            hint: const Text('Seçilmedi', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.brutalistBlack)),
+                            items: [
+                              const DropdownMenuItem<int?>(value: null, child: Text('Seçilmedi')),
+                              ...List.generate(30, (i) => DropdownMenuItem<int?>(
+                                value: i + 1,
+                                child: Text('${i + 1} günde bir tekrarla'),
+                              )),
+                            ],
+                            onChanged: (val) {
+                              setState(() {
+                                _intervalDays = val;
+                                if (val != null) _selectedDays.clear();
+                              });
+                            },
+                          ),
                         ),
                       ),
                     ],

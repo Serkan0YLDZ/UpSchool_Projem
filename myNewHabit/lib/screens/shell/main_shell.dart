@@ -32,11 +32,19 @@ class MainShell extends StatelessWidget {
 
     return Scaffold(
       extendBody: true, // Body'nin navigation bar arkasına uzaması için
-      body: child,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: _CustomBottomNavBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: (index) => _onNavTap(context, index),
+      body: Stack(
+        children: [
+          child,
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _CustomBottomNavBar(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (index) => _onNavTap(context, index),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -68,11 +76,12 @@ class MainShell extends StatelessWidget {
         target = null;
         targetUnit = null;
         
+        if (!context.mounted) return;
         await showAddRecordModal(
           context,
           onTypeSelected: (type) {
             selectedType = type;
-            Navigator.of(context).pop();
+            if (context.mounted) Navigator.of(context).pop();
           },
         );
         if (selectedType == null) {
@@ -81,6 +90,7 @@ class MainShell extends StatelessWidget {
           currentStep = 2;
         }
       } else if (currentStep == 2) {
+        if (!context.mounted) return;
         final result = await showNamingModal(
           context,
           type: selectedType!,
@@ -99,6 +109,7 @@ class MainShell extends StatelessWidget {
           currentStep = 3;
         }
       } else if (currentStep == 3) {
+        if (!context.mounted) return;
         final success = await _openDetailSheet(context, selectedType!, title!, target, targetUnit);
         if (success == false) {
           currentStep = 2;

@@ -30,36 +30,100 @@ class EventCard extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit, color: AppColors.primary),
-              title: const Text('Düzenle'),
-              onTap: () async {
-                Navigator.pop(ctx);
-                final updated = await showEditRecordSheet(context, record);
-                if (updated != null && context.mounted) {
-                  context.read<RecordProvider>().updateRecord(updated);
-                }
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: AppColors.relapseDanger),
-              title: const Text(
-                'Sil',
-                style: TextStyle(color: AppColors.relapseDanger),
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.brutalistBlack, width: 3),
+          boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(4, 4))],
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.brutalistBlack,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showDeleteDialog(context);
-              },
-            ),
-          ],
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          Navigator.pop(ctx);
+                          final updated = await showEditRecordSheet(context, record);
+                          if (updated != null && context.mounted) {
+                            context.read<RecordProvider>().updateRecord(updated);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFE599),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.brutalistBlack, width: 3),
+                            boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(4, 4))],
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.edit, color: AppColors.brutalistBlack),
+                              SizedBox(width: 8),
+                              Text('DÜZENLE', style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.brutalistBlack, fontSize: 16, letterSpacing: 1.0)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          _showDeleteDialog(context);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          decoration: BoxDecoration(
+                            color: AppColors.relapseDanger,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.brutalistBlack, width: 3),
+                            boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(4, 4))],
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.delete, color: AppColors.brutalistWhite),
+                              SizedBox(width: 8),
+                              Text('SİL', style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.brutalistWhite, fontSize: 16, letterSpacing: 1.0)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );
@@ -71,51 +135,88 @@ class EventCard extends StatelessWidget {
       barrierDismissible: true,
       builder: (ctx) {
         return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 40,
-          ),
-          child: Padding(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+          child: Container(
             padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.brutalistBlack, width: 3),
+              boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(6, 6))],
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(
-                  Icons.delete_forever,
+                  Icons.warning_amber_rounded,
                   color: AppColors.relapseDanger,
-                  size: 40,
+                  size: 48,
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'Bu takvim kaydını silmek istediğine emin misin?',
-                  style: Theme.of(context).textTheme.titleMedium,
+                const Text(
+                  'SİLMEK İSTEDİĞİNE\nEMİN MİSİN?',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.brutalistBlack,
+                    height: 1.2,
+                  ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 8),
+                Text(
+                  'Bu takvim kaydını silmek istediğine emin misin?',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.brutalistBlack.withValues(alpha: 0.7),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(ctx).pop(),
-                        child: const Text('Vazgeç'),
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(ctx).pop(),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: AppColors.brutalistWhite,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppColors.brutalistBlack, width: 2),
+                            boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(2, 2))],
+                          ),
+                          alignment: Alignment.center,
+                          child: const Text(
+                            'VAZGEÇ',
+                            style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.brutalistBlack),
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 16),
                     Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.relapseDanger,
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: () async {
+                      child: GestureDetector(
+                        onTap: () async {
                           Navigator.of(ctx).pop();
                           final provider = context.read<RecordProvider>();
                           await provider.deleteRecord(record.id);
                         },
-                        child: const Text('Sil'),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: AppColors.relapseDanger,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppColors.brutalistBlack, width: 2),
+                            boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(2, 2))],
+                          ),
+                          alignment: Alignment.center,
+                          child: const Text(
+                            'SİL',
+                            style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.brutalistWhite),
+                          ),
+                        ),
                       ),
                     ),
                   ],

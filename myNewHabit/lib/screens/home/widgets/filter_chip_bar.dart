@@ -41,13 +41,13 @@ class _ChipRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
       child: Row(
         children: _filters.map((entry) {
           final (type, label) = entry;
           final isActive = activeFilters.contains(type);
           return Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            padding: const EdgeInsets.only(right: 12.0),
             child: _FilterItem(type: type, label: label, isActive: isActive),
           );
         }).toList(),
@@ -71,26 +71,30 @@ class _FilterItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(label),
-      selected: isActive,
-      onSelected: (_) => context.read<RecordProvider>().toggleFilter(type),
-      selectedColor: AppColors.primary,
-      checkmarkColor: Colors.white,
-      labelStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
-        color: isActive ? Colors.white : AppColors.onSurfaceVariant,
-        fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-      ),
-      backgroundColor: AppColors.surfaceContainerLow,
-      side: BorderSide(
-        color: isActive ? AppColors.primary : AppColors.outlineVariant,
-        width: 1,
-      ),
-      shape: const StadiumBorder(),
-      showCheckmark: false,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
+    return GestureDetector(
+      onTap: () => context.read<RecordProvider>().toggleFilter(type),
+      child: Transform.translate(
+        offset: isActive ? const Offset(2, 2) : Offset.zero,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: isActive ? AppColors.primaryContainer : AppColors.brutalistWhite,
+            border: Border.all(color: AppColors.brutalistBlack, width: 3),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isActive
+                ? const []
+                : const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(4, 4))],
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+              color: isActive ? AppColors.brutalistWhite : AppColors.brutalistBlack,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
       ),
     );
   }
