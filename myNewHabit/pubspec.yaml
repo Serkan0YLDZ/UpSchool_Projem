@@ -18,7 +18,7 @@ dependencies:
   provider: ^6.1.2
 
   # Navigation
-  go_router: ^17.2.2
+  go_router: ^17.2.3
 
   # Local database — offline-only MVP
   sqflite: ^2.3.3+1
@@ -28,7 +28,7 @@ dependencies:
   flutter_local_notifications: ^21.0.0
 
   # Typography
-  google_fonts: ^8.0.2
+  google_fonts: ^8.1.0
 
   # Date/time formatting
   intl: ^0.20.2
