@@ -99,22 +99,22 @@ Bu nedenle plan, **Sprint 4'ten itibaren** tamamen yeni PRD'nin "V1 — MVP" kur
 | ID | Hikaye | Öncelik |
 |----|--------|---------|
 | US-601 | Kullanıcı olarak, bir alışkanlığı %100 tamamladığımda serim (🔥) artmalı ve kartın üstünde rozet olarak görünmelidir. | 🔴 Kritik |
-| US-602 | Kullanıcı olarak, bir alışkanlığı tamamlamadığımda ve yeni güne geçildiğinde serimin sıfırlandığını görmeliyim. | 🔴 Kritik |
+| US-602 | Kullanıcı olarak, planlı bir günü hedefe ulaşmadan geçirdiğimde serimin ya kurtarma günü / Es Geç ile korunabildiğini ya da kurtarma kaçırılırsa sıfırlandığını ve ileri tarihlerde kartın gizlendiğini görmeliyim. | 🔴 Kritik |
 | US-603 | Kullanıcı olarak, alışkanlıklarımı haftada 1 kez seri bozulmadan "Es Geç"ebilmeliyim. | 🟠 Yüksek |
 | US-604 | Kullanıcı olarak, streak rozetinin üzerine dokunduğumda "En uzun serin: X gün" bilgisini okuyabilmeliyim. | 🟡 Orta |
 
 ### Teknik Görevler
 
-- [ ] `StreakService` oluşturulması veya mevcut altyapının yeni `%100 completion` mantığına göre uyarlanması.
-- [ ] Gün atlandığında (gece yarısı kontrolü veya uygulama açılış kontrolü) serinin sıfırlanması mantığının kodlanması.
-- [ ] `HabitCard` üzerinde haftada 1 kullanılabilecek "Es Geç" butonunun aktif edilmesi. `streaks` tablosundaki `skip_used_this_week` durumunun güncellenmesi.
-- [ ] Streak rozetine dokunulduğunda "En uzun serin: X gün" bilgisinin `Tooltip` veya küçük `Dialog` ile gösterilmesi.
+- [x] `StreakService` + planlı gün (`HabitSchedule`) + tamamlama geçmişi ile seri, kurtarma ve sert kapanışın hesaplanması.
+- [x] Uygulama açılışı / tarih değişimi / tamamlama sonrası `reconcile` ile `streaks` satırının güncellenmesi; `series_closed_after` ankoru.
+- [x] `HabitCard` üzerinde haftada 1 "Es Geç", kurtarma günü için "Seriyi geri getir" ve rozet dokunuşu ile istatistik diyaloğu.
+- [x] `streaks` tablosu: `skip_used_this_week`, ISO hafta anahtarı, `open_miss_date`, `recovery_scheduled_date`, `recovery_applied`, `series_closed_after`.
 
 ### Kabul Kriterleri
 
-- [ ] %100 olan alışkanlıkların serisi veritabanında artar ve UI'a yansır.
-- [ ] Es Geç (Skip) kullanıldığında seri aynı kalır, buton o hafta için pasifleşir.
-- [ ] Gece yarısını geçen tamamlanmamış alışkanlıkların serisi 0'a iner.
+- [x] Hedef yüzdeye ulaşan tamamlamalar seriyi artırır ve seçili güne göre rozet UI'a yansır.
+- [x] Es Geç kullanıldığında seri korunur; buton aynı ISO haftasında pasifleşir.
+- [x] Kaçırma + Es Geç yok + kurtarma günü geçmeden toparlanmazsa seri sıfırlanır ve ankor tarihinden sonraki günlerde alışkanlık listelenmez; geçmiş günlerde görünür.
 
 ---
 

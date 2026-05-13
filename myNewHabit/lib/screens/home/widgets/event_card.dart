@@ -69,7 +69,7 @@ class EventCard extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFE599),
+                            color: AppColors.cardHeaderYellow,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppColors.brutalistBlack, width: 3),
                             boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(4, 4))],

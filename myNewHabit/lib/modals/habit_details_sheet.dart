@@ -34,13 +34,28 @@ class _HabitDetailsSheet extends StatefulWidget {
 }
 
 class _HabitDetailsSheetState extends State<_HabitDetailsSheet> {
+  /// Yeni alışkanlıkta boş başlangıç → PRD’deki “her gün” ile aynı: tüm günler seçili.
+  static const _allWeekdayCodes = [
+    'MON',
+    'TUE',
+    'WED',
+    'THU',
+    'FRI',
+    'SAT',
+    'SUN',
+  ];
+
   late Set<String> _selectedDays;
   int? _intervalDays;
 
   @override
   void initState() {
     super.initState();
-    _selectedDays = widget.initialRepeatDays.toSet();
+    if (widget.initialRepeatDays.isEmpty && widget.initialIntervalDays == null) {
+      _selectedDays = {..._allWeekdayCodes};
+    } else {
+      _selectedDays = widget.initialRepeatDays.toSet();
+    }
     _intervalDays = widget.initialIntervalDays;
   }
 

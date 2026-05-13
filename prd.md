@@ -83,9 +83,11 @@ Seçili güne göre kullanıcının **o güne atanmış tekrar eden alışkanlı
 - Tamamlama eşiği: `%100` işaretlendiğinde kart "tamamlandı" görünümüne geçer.
 
 **Seri (Streak) Sistemi:**
-- Bir alışkanlık `%100` tamamlandığında o günün serisi devam eder.
-- Kart üzerinde 🔥 + gün sayısı rozeti gösterilir (Örn: `🔥 14`).
-- **Es Geçme Hakkı:** Her alışkanlık için haftada 1 kez "Bugün Es Geç" seçeneği; seri korunur.
+- Bir alışkanlık hedef yüzdesine (`target_progress`, varsayılan %100) ulaştığında o planlı gün seriye sayılır.
+- Kart üzerinde 🔥 + gün sayısı rozeti gösterilir; seçili takvim gününe kadar olan planlı günler üzerinden hesaplanır (ör. 1. gün 1, 2. gün 2).
+- **Es Geçme Hakkı:** Her alışkanlık için haftada 1 kez (ISO haftası, Pazartesi başlangıç) "Bugün Es Geç"; o planlı gün `skipped` sayılır ve seri kırılmaz.
+- **Kurtarma günü:** Planlı bir gün ne hedefe ulaşıldı ne de Es Geç kullanıldıysa, seri hemen sıfırlanmaz; bir sonraki planlı gün "kurtarma günü"dür: kullanıcı o gün `%100` tamamlayabilir veya "Seriyi geri getir" ile köprü kurar; ardından seri sayacı bir üst değeri gösterir (ör. 3. gün kaçırıldıysa kurtarma gününde 🔥 3).
+- **Sert kapanış:** Kaçırılan günde Es Geç yoksa ve kurtarma günü da geçmeden seri toparlanmadıysa seri sıfırlanır; `series_closed_after` ankorundan **sonraki** takvim günlerinde bu alışkanlık ana sayfa listesinde gösterilmez; ankor günü ve geçmiş günlerde geçmiş görünüm korunur. Yeniden başlatmak için kart menüsünden "Seriyi yeniden başlat" kullanılır (veya düzenleme akışı üzerinden aynı işlem).
 
 **Filtreleme:** Bölüm başlığının sağında mini filtre: `Tümü | Tamamlanan | Bekleyen`
 

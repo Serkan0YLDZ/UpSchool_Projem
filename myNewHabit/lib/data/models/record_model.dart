@@ -85,6 +85,9 @@ class RecordModel {
   final DateTime createdAt;
   final bool isActive;
 
+  /// LWW senkron için yerel değişiklik zaman damgası (ms).
+  final int updatedAtMs;
+
   const RecordModel({
     required this.id,
     required this.type,
@@ -103,6 +106,7 @@ class RecordModel {
     this.dueDate,
     required this.createdAt,
     this.isActive = true,
+    this.updatedAtMs = 0,
   });
 
   /// sqflite Map'inden model oluşturur.
@@ -132,6 +136,7 @@ class RecordModel {
       createdAt: DateTime.parse(map['created_at'] as String),
       // sqflite BOOLEAN'ı INTEGER olarak saklar (1/0)
       isActive: (map['is_active'] as int) == 1,
+      updatedAtMs: map['updated_at_ms'] as int? ?? 0,
     );
   }
 
@@ -155,6 +160,7 @@ class RecordModel {
       'due_date': dueDate?.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
       'is_active': isActive ? 1 : 0,
+      'updated_at_ms': updatedAtMs,
     };
   }
 
@@ -176,6 +182,7 @@ class RecordModel {
     DateTime? dueDate,
     DateTime? createdAt,
     bool? isActive,
+    int? updatedAtMs,
   }) {
     return RecordModel(
       id: id ?? this.id,
@@ -195,6 +202,7 @@ class RecordModel {
       dueDate: dueDate ?? this.dueDate,
       createdAt: createdAt ?? this.createdAt,
       isActive: isActive ?? this.isActive,
+      updatedAtMs: updatedAtMs ?? this.updatedAtMs,
     );
   }
 }

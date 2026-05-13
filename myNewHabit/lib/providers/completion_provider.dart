@@ -2,10 +2,10 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'package:uuid/uuid.dart';
-
+import '../core/utils/calendar_date.dart';
 import '../data/models/completion_model.dart';
 import '../data/repositories/completion_repository.dart';
+import '../data/utils/completion_row_id.dart';
 
 /// Günlük tamamlama state'ini yönetir.
 ///
@@ -13,9 +13,12 @@ import '../data/repositories/completion_repository.dart';
 /// RecordProvider → hangi kayıtlar var
 /// CompletionProvider → o kayıtlar bugün tamamlandı mı?
 class CompletionProvider extends ChangeNotifier {
-  final CompletionRepository _repository;
+  CompletionProvider(this._repository, {this.onMutated});
 
-  CompletionProvider(this._repository);
+  final CompletionRepository _repository;
+  final Future<void> Function(String recordId)? onMutated;
+
+  static String _calendarTodayYmd() => CalendarDate.todayYmd();
 
   /// Seçili güne ait completion'lar: recordId → CompletionModel
   final Map<String, CompletionModel> _completions = {};
@@ -45,7 +48,8 @@ class CompletionProvider extends ChangeNotifier {
         ..clear()
         ..addEntries(list.map((c) => MapEntry(c.recordId, c)));
       _errorMessage = null;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('CompletionProvider.loadForDate failed: $e\n$stackTrace');
       _errorMessage = 'Tamamlama kayıtları yüklenemedi.';
     } finally {
       _setLoading(false);
@@ -53,23 +57,53 @@ class CompletionProvider extends ChangeNotifier {
   }
 
   /// Alışkanlığı veya görevi tamamlandı olarak işaretler.
+  ///
+  /// [requireToday]: true ise [date] takvim olarak bugün olmalı (alışkanlık kartı).
   Future<void> markDone(
     String recordId,
     String date, {
     int progress = 100,
+    bool requireToday = false,
   }) async {
-    await _mark(recordId, date, CompletionStatus.done, progress: progress);
+    await _mark(
+      recordId,
+      date,
+      CompletionStatus.done,
+      progress: progress,
+      requireToday: requireToday,
+    );
   }
 
   /// Alışkanlığı es geçer.
-  Future<void> markSkipped(String recordId, String date) async {
-    await _mark(recordId, date, CompletionStatus.skipped, progress: 0);
+  Future<void> markSkipped(
+    String recordId,
+    String date, {
+    bool requireToday = false,
+  }) async {
+    await _mark(
+      recordId,
+      date,
+      CompletionStatus.skipped,
+      progress: 0,
+      requireToday: requireToday,
+    );
   }
 
   /// Alışkanlığı kısmi ilerletir. Hedef değere ulaşıp ulaşmadığı
   /// UI katmanından hesaplanıp `markDone` çağrılabilir veya doğrudan burada kullanılabilir.
-  Future<void> markPartial(String recordId, String date, int progress) async {
-    await _mark(recordId, date, CompletionStatus.partial, progress: progress);
+  Future<void> markPartial(
+    String recordId,
+    String date,
+    int progress, {
+    bool requireToday = false,
+  }) async {
+    await _mark(
+      recordId,
+      date,
+      CompletionStatus.partial,
+      progress: progress,
+      requireToday: requireToday,
+    );
   }
 
   /// İlerleme değerini günceller (targetProgress kontrolü).
@@ -77,12 +111,13 @@ class CompletionProvider extends ChangeNotifier {
     String recordId,
     String date,
     int progress,
-    int targetProgress,
-  ) async {
+    int targetProgress, {
+    bool requireToday = false,
+  }) async {
     if (progress >= targetProgress) {
-      await markDone(recordId, date, progress: progress);
+      await markDone(recordId, date, progress: progress, requireToday: requireToday);
     } else {
-      await markPartial(recordId, date, progress);
+      await markPartial(recordId, date, progress, requireToday: requireToday);
     }
   }
 
@@ -95,7 +130,9 @@ class CompletionProvider extends ChangeNotifier {
       await _repository.delete(existing.id);
       _completions.remove(recordId);
       _errorMessage = null;
-    } catch (e) {
+      await onMutated?.call(recordId);
+    } catch (e, stackTrace) {
+      debugPrint('CompletionProvider.undoCompletion failed: $e\n$stackTrace');
       _errorMessage = 'İşlem geri alınamadı.';
     } finally {
       _setLoading(false);
@@ -107,10 +144,15 @@ class CompletionProvider extends ChangeNotifier {
     String date,
     CompletionStatus status, {
     int progress = 0,
+    bool requireToday = false,
   }) async {
+    if (requireToday && date != _calendarTodayYmd()) {
+      return;
+    }
+
     _setLoading(true);
     try {
-      final id = const Uuid().v4();
+      final id = CompletionRowId.forRecordAndDate(recordId, date);
       switch (status) {
         case CompletionStatus.done:
           await _repository.markDone(id, recordId, date, progress: progress);
@@ -128,7 +170,9 @@ class CompletionProvider extends ChangeNotifier {
         progress: progress,
       );
       _errorMessage = null;
-    } catch (e) {
+      await onMutated?.call(recordId);
+    } catch (e, stackTrace) {
+      debugPrint('CompletionProvider._mark failed: $e\n$stackTrace');
       _errorMessage = 'İşlem kaydedilemedi.';
     } finally {
       _setLoading(false);

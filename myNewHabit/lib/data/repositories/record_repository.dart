@@ -4,11 +4,15 @@ import 'package:sqflite/sqflite.dart';
 
 import '../database/database_helper.dart';
 import '../models/record_model.dart';
+import '../models/streak_model.dart';
 
 /// Kayıt CRUD işlemleri için sözleşme (OCP: impl swap edilebilir).
 abstract class RecordRepository {
   /// Tüm aktif kayıtları getirir.
   Future<List<RecordModel>> getAll();
+
+  /// Bulut senkron: aktif/pasif tüm kayıtlar.
+  Future<List<RecordModel>> getAllForSync();
 
   /// Belirli bir tarihe ait kayıtları getirir.
   ///
@@ -28,6 +32,9 @@ abstract class RecordRepository {
 
   /// Tek bir kaydı ID ile getirir; bulunamazsa null döner.
   Future<RecordModel?> getById(String id);
+
+  /// Bulut senkronu: yereli yazar; `markSyncDirty` tetiklenmez.
+  Future<void> applyRemoteRecord(RecordModel record);
 }
 
 /// sqflite tabanlı [RecordRepository] implementasyonu.
@@ -45,6 +52,13 @@ class SqfliteRecordRepository implements RecordRepository {
       whereArgs: [1],
       orderBy: 'created_at ASC',
     );
+    return maps.map(RecordModel.fromMap).toList();
+  }
+
+  @override
+  Future<List<RecordModel>> getAllForSync() async {
+    final db = await _dbHelper.database;
+    final maps = await db.query('records', orderBy: 'created_at ASC');
     return maps.map(RecordModel.fromMap).toList();
   }
 
@@ -99,22 +113,38 @@ class SqfliteRecordRepository implements RecordRepository {
   @override
   Future<void> create(RecordModel record) async {
     final db = await _dbHelper.database;
-    await db.insert(
-      'records',
-      record.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final r = record.copyWith(updatedAtMs: now);
+    await db.transaction((txn) async {
+      await txn.insert(
+        'records',
+        r.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      if (record.type == RecordType.habit) {
+        await txn.insert(
+          'streaks',
+          StreakModel(recordId: record.id).toMap(),
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        );
+      }
+    });
+    await _dbHelper.markSyncDirty();
   }
 
   @override
   Future<void> update(RecordModel record) async {
     final db = await _dbHelper.database;
+    final merged = record.copyWith(
+      updatedAtMs: DateTime.now().millisecondsSinceEpoch,
+    );
     await db.update(
       'records',
-      record.toMap(),
+      merged.toMap(),
       where: 'id = ?',
       whereArgs: [record.id],
     );
+    await _dbHelper.markSyncDirty();
   }
 
   @override
@@ -122,6 +152,7 @@ class SqfliteRecordRepository implements RecordRepository {
     final db = await _dbHelper.database;
     // FK CASCADE açık olduğu için completions ve streaks otomatik silinir.
     await db.delete('records', where: 'id = ?', whereArgs: [id]);
+    await _dbHelper.markSyncDirty();
   }
 
   @override
@@ -135,6 +166,23 @@ class SqfliteRecordRepository implements RecordRepository {
     );
     if (maps.isEmpty) return null;
     return RecordModel.fromMap(maps.first);
+  }
+
+  @override
+  Future<void> applyRemoteRecord(RecordModel record) async {
+    final db = await _dbHelper.database;
+    await db.insert(
+      'records',
+      record.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    if (record.type == RecordType.habit) {
+      await db.insert(
+        'streaks',
+        StreakModel(recordId: record.id).toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
+    }
   }
 
   /// 'yyyy-MM-dd' tarihinden haftanın kısaltmasını üretir.

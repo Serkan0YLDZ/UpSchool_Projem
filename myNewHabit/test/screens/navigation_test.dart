@@ -11,16 +11,32 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_new_habit/core/router/app_router.dart';
 import 'package:my_new_habit/core/theme/app_theme.dart';
+import 'package:my_new_habit/data/auth/mock_auth_backend.dart';
+import 'package:my_new_habit/data/database/database_helper.dart';
+import 'package:my_new_habit/data/services/cloud_sync_service.dart';
+import 'package:my_new_habit/providers/auth_session_provider.dart';
 import 'package:my_new_habit/providers/completion_provider.dart';
 import 'package:my_new_habit/providers/record_provider.dart';
+import 'package:my_new_habit/providers/streak_provider.dart';
+import 'package:my_new_habit/providers/sync_status_provider.dart';
+import 'package:my_new_habit/screens/focus/focus_section.dart';
+import 'package:my_new_habit/screens/focus/focus_section_screen.dart';
 import 'package:my_new_habit/screens/home/home_screen.dart';
 import 'package:my_new_habit/screens/profile/profile_screen.dart';
 import 'package:my_new_habit/screens/shell/main_shell.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../data/repositories/completion_repository_stub.dart';
 import '../data/repositories/record_repository_stub.dart';
+import '../data/repositories/streak_repository_stub.dart';
+
+/// Son oluşturulan [GoRouter] — odak ekranı yönlendirme testinde kullanılır.
+GoRouter? _navigationTestRouter;
+
+DatabaseHelper? _navTestDb;
 
 Widget _buildApp() {
+  final db = _navTestDb!;
   final router = GoRouter(
     initialLocation: AppRoutes.home,
     routes: [
@@ -37,18 +53,87 @@ Widget _buildApp() {
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: ProfileScreen()),
           ),
+          GoRoute(
+            path: AppRoutes.focusParent,
+            redirect: (context, state) {
+              if (state.uri.path == AppRoutes.focusParent) {
+                return AppRoutes.focusCalendar;
+              }
+              return null;
+            },
+            routes: [
+              GoRoute(
+                path: AppRoutes.focusCalendarSegment,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: FocusSectionScreen(section: FocusSection.calendar),
+                ),
+              ),
+              GoRoute(
+                path: AppRoutes.focusHabitsSegment,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: FocusSectionScreen(section: FocusSection.habits),
+                ),
+              ),
+              GoRoute(
+                path: AppRoutes.focusTodosSegment,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: FocusSectionScreen(section: FocusSection.todos),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     ],
   );
 
+  _navigationTestRouter = router;
+
+  final recStub = StubRecordRepository();
+  final compStub = StubCompletionRepository();
+  final streakStub = StubStreakRepository();
+
   return MultiProvider(
     providers: [
+      ChangeNotifierProvider<AuthSessionProvider>(
+        create: (_) => AuthSessionProvider(
+          backend: MockAuthBackend(),
+          dbHelper: db,
+        ),
+      ),
+      ChangeNotifierProvider<SyncStatusProvider>(
+        create: (_) {
+          final p = SyncStatusProvider(
+            dbHelper: db,
+            cloudSync: CloudSyncService(
+              recordRepository: recStub,
+              completionRepository: compStub,
+              streakRepository: streakStub,
+            ),
+          );
+          // Senkron meta ilk okuma
+          // ignore: discarded_futures
+          p.refresh();
+          return p;
+        },
+      ),
       ChangeNotifierProvider<RecordProvider>(
-        create: (_) => RecordProvider(StubRecordRepository()),
+        create: (_) => RecordProvider(recStub),
+      ),
+      ChangeNotifierProvider<StreakProvider>(
+        create: (_) => StreakProvider(
+          completionRepository: compStub,
+          streakRepository: streakStub,
+          recordRepository: recStub,
+        ),
       ),
       ChangeNotifierProvider<CompletionProvider>(
-        create: (_) => CompletionProvider(StubCompletionRepository()),
+        create: (ctx) => CompletionProvider(
+          compStub,
+          onMutated: (rid) async {
+            await ctx.read<StreakProvider>().reconcileForRecord(rid);
+          },
+        ),
       ),
     ],
     child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
@@ -59,8 +144,20 @@ Widget _buildApp() {
 
 void main() {
   setUpAll(() async {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
     GoogleFonts.config.allowRuntimeFetching = false;
     await initializeDateFormatting('tr_TR', null);
+  });
+
+  setUp(() async {
+    _navTestDb = DatabaseHelper.forTesting();
+    await _navTestDb!.database;
+  });
+
+  tearDown(() async {
+    await _navTestDb?.close();
+    _navTestDb = null;
   });
 
   group('Navigation — Sprint 1 kabul kriterleri', () {
@@ -98,6 +195,19 @@ void main() {
       // Assert — Ev (home) ikonu aktif; LoadingIndicator veya EmptyState görünür.
       // HomeScreen yüklendi = Scaffold hazır.
       expect(find.byIcon(Icons.home_rounded), findsOneWidget);
+    });
+
+    testWidgets('focus calendar route shows Takvim title', (tester) async {
+      await tester.pumpWidget(_buildApp());
+      await tester.pumpAndSettle();
+
+      _navigationTestRouter!.go(AppRoutes.focusCalendar);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey<String>('focus_section_title_calendar')),
+        findsOneWidget,
+      );
     });
   });
 

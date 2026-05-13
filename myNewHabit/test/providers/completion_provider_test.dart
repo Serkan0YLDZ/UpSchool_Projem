@@ -95,4 +95,14 @@ void main() {
     // Assert
     expect(provider.completionFor(recordId)?.status, CompletionStatus.skipped);
   });
+
+  test('markDone with requireToday does not persist when date is not calendar today', () async {
+    await provider.loadForDate('2099-12-31');
+    expect(provider.completionFor(recordId), isNull);
+
+    await provider.markDone(recordId, '2099-12-31', requireToday: true);
+
+    await provider.loadForDate('2099-12-31');
+    expect(provider.completionFor(recordId), isNull);
+  });
 }

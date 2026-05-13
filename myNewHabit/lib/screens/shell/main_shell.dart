@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:my_new_habit/core/utils/agent_arch_debug_log.dart';
+import 'package:my_new_habit/core/utils/calendar_date.dart';
 import 'package:my_new_habit/core/router/app_router.dart';
 import 'package:my_new_habit/core/theme/app_colors.dart';
 import 'package:my_new_habit/core/theme/app_spacing.dart';
@@ -13,6 +15,8 @@ import 'package:my_new_habit/modals/add_record_modal.dart';
 import 'package:my_new_habit/modals/habit_details_sheet.dart';
 import 'package:my_new_habit/modals/naming_modal.dart';
 import 'package:my_new_habit/modals/task_timing_sheet.dart';
+import 'package:my_new_habit/modals/focus_mode_picker_sheet.dart';
+import 'package:my_new_habit/screens/focus/focus_section.dart';
 import 'package:my_new_habit/modals/todo_details_sheet.dart';
 import 'package:my_new_habit/providers/record_provider.dart';
 
@@ -27,8 +31,28 @@ class MainShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final location = GoRouterState.of(context).uri.toString();
-    final selectedIndex = _locationToIndex(location);
+    // #region agent log
+    try {
+      context.read<RecordProvider>();
+      agentArchDebugLog(
+        hypothesisId: 'H5',
+        location: 'main_shell.dart:MainShell.build',
+        message: 'shell_provider_scope_ok',
+        data: {'hasRecordProvider': true},
+      );
+    } catch (e) {
+      agentArchDebugLog(
+        hypothesisId: 'H5',
+        location: 'main_shell.dart:MainShell.build',
+        message: 'shell_provider_scope_fail',
+        data: {'error': e.toString()},
+      );
+    }
+    // #endregion
+    final state = GoRouterState.of(context);
+    final navPath = state.uri.path;
+    final selectedIndex = _locationToIndex(navPath);
+    final focusClusterIcon = _focusClusterIcon(navPath);
 
     return Scaffold(
       extendBody: true, // Body'nin navigation bar arkasına uzaması için
@@ -41,7 +65,16 @@ class MainShell extends StatelessWidget {
             bottom: 0,
             child: _CustomBottomNavBar(
               selectedIndex: selectedIndex,
+              focusClusterIcon: focusClusterIcon,
               onDestinationSelected: (index) => _onNavTap(context, index),
+              onCalendarTap: () {
+                final path = GoRouterState.of(context).uri.path;
+                if (path.startsWith(AppRoutes.focusParent)) {
+                  return;
+                }
+                context.go(AppRoutes.focusCalendar);
+              },
+              onCalendarLongPress: () => _openFocusModePicker(context),
             ),
           ),
         ],
@@ -58,6 +91,17 @@ class MainShell extends StatelessWidget {
       case 2:
         context.go(AppRoutes.profile);
     }
+  }
+
+  Future<void> _openFocusModePicker(BuildContext context) async {
+    final section = await showFocusModePickerSheet(context);
+    if (!context.mounted || section == null) return;
+    final target = switch (section) {
+      FocusSection.calendar => AppRoutes.focusCalendar,
+      FocusSection.habits => AppRoutes.focusHabits,
+      FocusSection.todos => AppRoutes.focusTodos,
+    };
+    context.go(target);
   }
 
   /// Sprint 5 ekleme akışı:
@@ -160,9 +204,9 @@ class MainShell extends StatelessWidget {
             type: RecordType.event,
             title: title,
             scheduledTime: timing.startTime,
-            scheduledDate: DateFormat('yyyy-MM-dd').format(timing.startDate),
+            scheduledDate: CalendarDate.ymd(timing.startDate),
             endDate: timing.endDate != null
-                ? DateFormat('yyyy-MM-dd').format(timing.endDate!)
+                ? CalendarDate.ymd(timing.endDate!)
                 : null,
             endTime: timing.endDate != null
                 ? DateFormat('HH:mm').format(timing.endDate!)
@@ -202,10 +246,21 @@ class MainShell extends StatelessWidget {
     return true;
   }
 
-  int _locationToIndex(String location) {
-    if (location.startsWith(AppRoutes.profile)) return 2;
+  int _locationToIndex(String navPath) {
+    if (navPath.startsWith(AppRoutes.focusParent)) return 3;
+    if (navPath.startsWith(AppRoutes.profile)) return 2;
     return 0;
   }
+}
+
+IconData _focusClusterIcon(String navPath) {
+  if (navPath.startsWith(AppRoutes.focusHabits)) {
+    return Icons.repeat_rounded;
+  }
+  if (navPath.startsWith(AppRoutes.focusTodos)) {
+    return Icons.checklist_rounded;
+  }
+  return Icons.calendar_today_rounded;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -213,18 +268,24 @@ class MainShell extends StatelessWidget {
 class _CustomBottomNavBar extends StatelessWidget {
   const _CustomBottomNavBar({
     required this.selectedIndex,
+    required this.focusClusterIcon,
     required this.onDestinationSelected,
+    required this.onCalendarTap,
+    required this.onCalendarLongPress,
   });
 
   final int selectedIndex;
+  final IconData focusClusterIcon;
   final ValueChanged<int> onDestinationSelected;
+  final VoidCallback onCalendarTap;
+  final VoidCallback onCalendarLongPress;
 
   @override
   Widget build(BuildContext context) {
     return Transform.rotate(
       angle: 0.0174533, // ~1 degree rotation
       child: Container(
-        height: 64,
+        height: AppSpacing.mainShellBottomNavHeight,
         margin: EdgeInsets.zero,
         width: MediaQuery.of(context).size.width + 8,
         decoration: const BoxDecoration(
@@ -284,9 +345,10 @@ class _CustomBottomNavBar extends StatelessWidget {
               ),
             ),
             _NavItem(
-              icon: Icons.calendar_today_rounded,
+              icon: focusClusterIcon,
               isSelected: selectedIndex == 3,
-              onTap: () {},
+              onTap: onCalendarTap,
+              onLongPress: onCalendarLongPress,
             ),
             _NavItem(
               icon: Icons.person_rounded,
@@ -305,16 +367,19 @@ class _NavItem extends StatelessWidget {
     required this.icon,
     required this.isSelected,
     required this.onTap,
+    this.onLongPress,
   });
 
   final IconData icon;
   final bool isSelected;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       behavior: HitTestBehavior.opaque,
       child: Transform.rotate(
         angle: -0.0174533, // Rotate back slightly

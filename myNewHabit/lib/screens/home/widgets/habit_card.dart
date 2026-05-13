@@ -1,14 +1,28 @@
 // Sprint 3: Ana Sayfa & Takvim — HabitCard (US-303, US-304, US-306)
+// Sprint 6: Seri rozeti, Es Geç, kurtarma, istatistik diyaloğu
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/widgets/brutalist_container.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/record_model.dart';
+import '../../../data/services/streak_service.dart';
+import '../../../modals/edit_record_sheet.dart';
+import '../../../modals/streak_stats_dialog.dart';
 import '../../../providers/completion_provider.dart';
 import '../../../providers/record_provider.dart';
-import '../../../modals/edit_record_sheet.dart';
+import '../../../providers/streak_provider.dart';
+
+void _showHabitCompletionDayLockedSnack(BuildContext context) {
+  if (!context.mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Bu alışkanlığı yalnızca bugünün tarihinde tamamlayabilirsin.'),
+    ),
+  );
+}
 
 /// Rutin alışkanlık kartı.
 ///
@@ -20,12 +34,16 @@ class HabitCard extends StatelessWidget {
     super.key,
     required this.record,
     required this.selectedDate,
+    required this.todayYmd,
   });
 
   final RecordModel record;
   final String selectedDate;
+  final String todayYmd;
 
   void _showContextMenu(BuildContext context) {
+    final canRestart =
+        context.read<StreakProvider>().rowFor(record.id)?.seriesClosedAfter != null;
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
@@ -68,7 +86,7 @@ class HabitCard extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFE599),
+                            color: AppColors.cardHeaderYellow,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppColors.brutalistBlack, width: 3),
                             boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(4, 4))],
@@ -88,6 +106,48 @@ class HabitCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
+              if (canRestart)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: GestureDetector(
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      await context.read<StreakProvider>().restartSeries(record.id);
+                      if (context.mounted) {
+                        await context.read<RecordProvider>().loadRecords();
+                      }
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.brutalistBlack, width: 3),
+                        boxShadow: const [
+                          BoxShadow(color: AppColors.brutalistBlack, offset: Offset(4, 4)),
+                        ],
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.refresh_rounded, color: AppColors.brutalistBlack),
+                          SizedBox(width: 8),
+                          Text(
+                            'SERİYİ YENİDEN BAŞLAT',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.brutalistBlack,
+                              fontSize: 14,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              if (canRestart) const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -130,26 +190,54 @@ class HabitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CompletionProvider>(
-      builder: (context, completionProvider, _) {
-        final isDone = completionProvider.isDone(record.id);
-        final currentProgress =
-            completionProvider.completionFor(record.id)?.progress ?? 0;
-        return _CardBody(
-          record: record,
-          isDone: isDone,
-          progress: currentProgress,
-          onProgressChanged: (val) {
-            completionProvider.updateProgress(
-              record.id,
-              selectedDate,
-              val.toInt(),
-              record.targetProgress,
-            );
-          },
-          onLongPress: () => _showContextMenu(context),
+    final completionProvider = context.watch<CompletionProvider>();
+    final streakProvider = context.watch<StreakProvider>();
+    final isDone = completionProvider.isDone(record.id);
+    final currentProgress =
+        completionProvider.completionFor(record.id)?.progress ?? 0;
+    final streakView = streakProvider.viewFor(record, selectedDate, todayYmd);
+
+    return _CardBody(
+      record: record,
+      isDone: isDone,
+      progress: currentProgress,
+      streakView: streakView,
+      onProgressChanged: (val) async {
+        final v = val.toInt();
+        final target = record.targetProgress > 0 ? record.targetProgress : 100;
+        if (selectedDate != todayYmd) {
+          if (isDone && v == 0) {
+            await completionProvider.undoCompletion(record.id);
+            return;
+          }
+          if (v >= target || (v > 0 && v < target)) {
+            _showHabitCompletionDayLockedSnack(context);
+          }
+          return;
+        }
+        await completionProvider.updateProgress(
+          record.id,
+          selectedDate,
+          v,
+          record.targetProgress,
+          requireToday: true,
         );
       },
+      onLongPress: () => _showContextMenu(context),
+      onStreakTap: () => showStreakStatsDialog(
+        context,
+        longestStreak: streakView.longestStreak,
+      ),
+      onSkipTap: streakView.showSkipCta
+          ? () => completionProvider.markSkipped(
+                record.id,
+                selectedDate,
+                requireToday: true,
+              )
+          : null,
+      onRecoverTap: streakView.showRecoverCta
+          ? () => streakProvider.applyRecovery(record.id)
+          : null,
     );
   }
 
@@ -261,16 +349,24 @@ class _CardBody extends StatelessWidget {
     required this.record,
     required this.isDone,
     required this.progress,
+    required this.streakView,
     required this.onProgressChanged,
     required this.onLongPress,
+    required this.onStreakTap,
+    this.onSkipTap,
+    this.onRecoverTap,
   });
 
   final RecordModel record;
   final bool isDone;
   final int progress;
+  final StreakViewState streakView;
   final ValueChanged<double> onProgressChanged;
 
   final VoidCallback onLongPress;
+  final VoidCallback onStreakTap;
+  final VoidCallback? onSkipTap;
+  final VoidCallback? onRecoverTap;
 
   @override
   Widget build(BuildContext context) {
@@ -279,7 +375,7 @@ class _CardBody extends StatelessWidget {
 
     // Choose icon and color arbitrarily or map from properties later
     const iconData = Icons.water_drop_rounded;
-    final iconColor = const Color(0xFFC4EDF8); // light blue
+    final iconColor = AppColors.habitCardSoftBlue;
 
     final currentTarget = record.targetProgress > 0
         ? record.targetProgress
@@ -320,43 +416,10 @@ class _CardBody extends StatelessWidget {
                     size: 24,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.brutalistWhite,
-                    border: Border.all(
-                      color: AppColors.brutalistBlack,
-                      width: 3,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: AppColors.brutalistBlack,
-                        offset: Offset(3, 3),
-                        blurRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.local_fire_department,
-                        color: Colors.deepOrange,
-                        size: 14,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '12',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
+                _StreakBadge(
+                  count: streakView.displayStreak,
+                  flameTier: streakView.flameTier,
+                  onTap: onStreakTap,
                 ),
               ],
             ),
@@ -423,6 +486,13 @@ class _CardBody extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (onSkipTap != null || onRecoverTap != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  _StreakActionRow(
+                    onSkipTap: onSkipTap,
+                    onRecoverTap: onRecoverTap,
+                  ),
+                ],
               ],
             ),
           ],
@@ -430,4 +500,119 @@ class _CardBody extends StatelessWidget {
       ),
     );
   }
-} // End of file
+}
+
+class _StreakBadge extends StatelessWidget {
+  const _StreakBadge({
+    required this.count,
+    required this.flameTier,
+    required this.onTap,
+  });
+
+  final int count;
+  final int flameTier;
+  final VoidCallback onTap;
+
+  Color get _flameColor {
+    switch (flameTier) {
+      case 0:
+        return AppColors.streakMuted;
+      case 2:
+        return AppColors.streakRecovery;
+      case 3:
+        return AppColors.streakFire;
+      default:
+        return AppColors.streakFire;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: AppColors.brutalistWhite,
+            border: Border.all(color: AppColors.brutalistBlack, width: 3),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: const [
+              BoxShadow(
+                color: AppColors.brutalistBlack,
+                offset: Offset(3, 3),
+                blurRadius: 0,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.local_fire_department, color: _flameColor, size: 14),
+              const SizedBox(width: 4),
+              Text(
+                '$count',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StreakActionRow extends StatelessWidget {
+  const _StreakActionRow({
+    required this.onSkipTap,
+    required this.onRecoverTap,
+  });
+
+  final VoidCallback? onSkipTap;
+  final VoidCallback? onRecoverTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: [
+        if (onSkipTap != null)
+          TextButton(
+            onPressed: onSkipTap,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
+              'ES GEÇ',
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 10,
+                color: AppColors.primaryContainer,
+              ),
+            ),
+          ),
+        if (onRecoverTap != null)
+          TextButton(
+            onPressed: onRecoverTap,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
+              'SERİYİ GERİ GETİR',
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 10,
+                color: AppColors.streakRecovery,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}

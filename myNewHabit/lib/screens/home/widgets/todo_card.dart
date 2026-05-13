@@ -60,7 +60,7 @@ class TodoCard extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFE599),
+                            color: AppColors.cardHeaderYellow,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppColors.brutalistBlack, width: 3),
                             boxShadow: const [BoxShadow(color: AppColors.brutalistBlack, offset: Offset(4, 4))],
@@ -268,9 +268,9 @@ class _TodoCardBody extends StatelessWidget {
   Color _getPriorityColor() {
     switch (record.priority) {
       case Priority.high:
-        return Color(0xFFFF6B6B); // Lighter Red for Urgent
+        return AppColors.todoPriorityHigh;
       case Priority.medium:
-        return Color(0xFFFDE074); // Billing Yellow
+        return AppColors.todoPriorityLow;
       case Priority.low:
       case null:
         return AppColors.primaryContainer; // Travel Blue

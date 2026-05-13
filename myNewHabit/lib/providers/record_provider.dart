@@ -1,8 +1,9 @@
 // Sprint 3: Ana Sayfa & Takvim — RecordProvider filtreleme eklendi
 
 import 'package:flutter/foundation.dart';
-import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+
+import '../core/utils/calendar_date.dart';
 
 import '../data/models/record_model.dart';
 import '../data/repositories/record_repository.dart';
@@ -34,7 +35,7 @@ class RecordProvider extends ChangeNotifier {
   final Set<FilterType> _activeFilters = {};
 
   /// Seçili tarih ('yyyy-MM-dd') — default: bugün.
-  String _selectedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  String _selectedDate = CalendarDate.todayYmd();
 
   // ── Read-only accessors (Encapsulation) ─────────────────────────────────
   List<RecordModel> get records => List.unmodifiable(_records);

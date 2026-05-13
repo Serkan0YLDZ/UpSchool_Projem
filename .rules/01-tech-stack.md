@@ -1,6 +1,6 @@
 # Tech Stack & Project Structure
 
-You are a **Senior Flutter & Dart Developer** building the **myNewHabit** habit tracker app. This app runs fully **offline (local-only)** with no backend integration in the MVP. Always align your code with the approved Agile Plan.
+You are a **Senior Flutter & Dart Developer** building the **myNewHabit** habit tracker app. **MVP** hedefi tam **çevrimdışı (yerel öncelik)** çalışmadır; **V2** ile isteğe bağlı **Firebase Auth + Firestore** senkronu eklenebilir. Her zaman onaylı Agile Plan ile hizala.
 
 ---
 
@@ -17,10 +17,11 @@ You are a **Senior Flutter & Dart Developer** building the **myNewHabit** habit 
 | Fonts | **google_fonts** (Plus Jakarta Sans) |
 | Date/Time | **intl** |
 | Persistence | **shared_preferences** (onboarding flags only) |
+| Cloud / auth (V2 only) | **firebase_core**, **firebase_auth**, **cloud_firestore**, **google_sign_in**, **sign_in_with_apple** — `flutterfire configure` ve Firebase Console adımları zorunludur |
 | IDs | **uuid** |
 
-> **No backend, no Firebase, no Supabase, no Bloc, no Riverpod, no Freezed.**  
-> The app is local-only. Do not introduce any cloud dependency in the MVP.
+> **MVP:** Uygulama çevrimdışı çalışır; ana veri **SQLite** içindedir.  
+> **V2 / bulut modu (isteğe bağlı):** Firebase Authentication (Google, Apple, e-posta) ve Cloud Firestore ile manuel senkron; `lib/data/auth/`, `lib/data/services/cloud_sync_service.dart`, `firebase_options.dart` ve platform yapılandırma dosyaları bu kapsamdadır. V2 kodunda **Bloc, Riverpod, Freezed** kullanılmaz; durum yönetimi yine **Provider** kalır.
 
 ---
 
@@ -80,6 +81,16 @@ lib/
 │   └── todo_sheet.dart
 └── main.dart
 ```
+
+**V2 bulut modu ekleri (özet):** `data/auth/`, `data/services/cloud_sync_executor.dart`, `data/services/cloud_sync_service.dart`, `providers/auth_session_provider.dart`, `providers/sync_status_provider.dart`, `firebase_options.dart`, `android/app/google-services.json`, `ios/Runner/GoogleService-Info.plist`, `firebase/firestore.rules`.
+
+### Firebase Console kontrol listesi (canlı proje)
+
+1. Authentication: Google, Apple, E-posta/şifre açık.  
+2. Firestore: tek bölge, kurallar `users/{uid}/...` ile `request.auth.uid` eşlemesi.  
+3. Android: `google-services.json` + Play / debug **SHA-1**.  
+4. iOS: `GoogleService-Info.plist` + Sign in with Apple capability.  
+5. Depoda: `flutterfire configure` ile `firebase_options.dart` ve plist/json gerçek projeyle güncellenir (yer tutucular production’da kullanılmaz).
 
 ---
 

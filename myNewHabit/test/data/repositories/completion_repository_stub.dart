@@ -88,6 +88,16 @@ class StubCompletionRepository implements CompletionRepository {
   }
 
   @override
+  Future<List<CompletionModel>> getAll() async {
+    return _store.values.expand((list) => list).toList();
+  }
+
+  @override
+  Future<void> applyRemoteCompletion(CompletionModel model) async {
+    _upsert(model);
+  }
+
+  @override
   Future<void> delete(String id) async {
     for (final list in _store.values) {
       list.removeWhere((c) => c.id == id);

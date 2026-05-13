@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_spacing.dart';
+
+import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 import 'brutalist_container.dart';
 
 class BrutalistBadge extends StatelessWidget {
@@ -12,7 +13,7 @@ class BrutalistBadge extends StatelessWidget {
   const BrutalistBadge({
     super.key,
     required this.text,
-    this.backgroundColor = const Color(0xFFFFD166), // Default Yellow
+    this.backgroundColor = AppColors.neoBadgeDefaultYellow,
     this.rotatedOffset = 0.0,
     this.textStyle,
   });
@@ -21,7 +22,10 @@ class BrutalistBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return BrutalistContainer(
       backgroundColor: backgroundColor,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       borderRadius: AppSpacing.radiusSm,
       shadowOffset: 4.0,
       borderWidth: 3.0,
@@ -29,12 +33,11 @@ class BrutalistBadge extends StatelessWidget {
       child: Text(
         text,
         style: textStyle ??
-            const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: AppColors.brutalistBlack,
-              letterSpacing: -0.5,
-            ),
+            Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.brutalistBlack,
+                  letterSpacing: -0.5,
+                ),
       ),
     );
   }

@@ -1,13 +1,14 @@
 // Sprint 3: Ana Sayfa & Takvim — CalendarBarWidget (US-301, US-302)
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/calendar_date.dart';
 import '../../../providers/completion_provider.dart';
 import '../../../providers/record_provider.dart';
+import '../../../providers/streak_provider.dart';
 
 /// 7 günlük yatay kaydırılabilir takvim barı.
 ///
@@ -44,17 +45,17 @@ class _CalendarRow extends StatelessWidget {
     );
 
     return SizedBox(
-      height: 96,
+      height: AppSpacing.xxl + AppSpacing.lg,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
-          vertical: 8.0,
+          vertical: AppSpacing.sm,
         ),
         itemCount: days.length,
         itemBuilder: (context, index) {
           final day = days[index];
-          final dateStr = DateFormat('yyyy-MM-dd').format(day);
+          final dateStr = CalendarDate.ymd(day);
           final isSelected = dateStr == selectedDate;
           return _DayCell(
             day: day,
@@ -89,24 +90,34 @@ class _DayCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final dayLabel = _dayNames[day.weekday - 1];
     final rotation = index % 2 == 0 ? -1.5 : 1.5;
+    final textTheme = Theme.of(context).textTheme;
 
     return GestureDetector(
-      onTap: () {
-        context.read<RecordProvider>().selectDate(dateStr);
-        context.read<CompletionProvider>().loadForDate(dateStr);
+      onTap: () async {
+        final rp = context.read<RecordProvider>();
+        final cp = context.read<CompletionProvider>();
+        final sp = context.read<StreakProvider>();
+        await rp.selectDate(dateStr);
+        if (!context.mounted) return;
+        await cp.loadForDate(dateStr);
+        if (!context.mounted) return;
+        final todayYmd = CalendarDate.todayYmd();
+        await sp.loadForHabits(rp.habits, todayYmd);
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xs + AppSpacing.xs / 2,
+        ),
         child: Transform.rotate(
           angle: rotation * 3.1415926535 / 180,
           child: Container(
-            width: 64,
+            width: AppSpacing.xxl,
             decoration: BoxDecoration(
               color: isSelected
                   ? AppColors.primaryContainer
                   : AppColors.brutalistWhite,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.brutalistBlack, width: 4.0),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              border: Border.all(color: AppColors.brutalistBlack, width: AppSpacing.xs),
               boxShadow: isSelected
                   ? const [
                       BoxShadow(
@@ -122,20 +133,20 @@ class _DayCell extends StatelessWidget {
               children: [
                 Text(
                   dayLabel,
-                  style: TextStyle(
-                    fontSize: 12,
+                  style: textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: isSelected ? Colors.white70 : Colors.black54,
+                    color: isSelected
+                        ? AppColors.onPrimary.withValues(alpha: 0.78)
+                        : AppColors.onSurfaceVariant,
                     letterSpacing: 0.5,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${day.day}',
-                  style: TextStyle(
-                    fontSize: 20,
+                  style: textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: isSelected ? Colors.white : Colors.black,
+                    color: isSelected ? AppColors.onPrimary : AppColors.onSurface,
                   ),
                 ),
               ],

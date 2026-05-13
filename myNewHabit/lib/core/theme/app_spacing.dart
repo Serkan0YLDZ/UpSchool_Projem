@@ -57,4 +57,7 @@ abstract final class AppSpacing {
 
   /// Standart buton yüksekliği
   static const double buttonHeight = 56;
+
+  /// [MainShell] özel alt bar yüksekliği — modal sheet içeriği bunun üstünde bitmeli.
+  static const double mainShellBottomNavHeight = 64;
 }

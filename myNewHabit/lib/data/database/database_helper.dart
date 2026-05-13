@@ -1,7 +1,9 @@
 // Sprint 2: Veri Katmanı — sqflite singleton ve migration sistemi
 
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
+
+import '../models/sync_meta_row.dart';
 
 /// sqflite veritabanı bağlantısını yöneten singleton.
 ///
@@ -9,7 +11,7 @@ import 'package:path/path.dart';
 /// bu sayede ilerideki sprint'lerde yeni tablo/sütun eklemek güvendedir.
 class DatabaseHelper {
   static const String _dbName = 'my_new_habit.db';
-  static const int _dbVersion = 5;
+  static const int _dbVersion = 8;
 
   final String? _inMemoryPath;
 
@@ -68,8 +70,22 @@ class DatabaseHelper {
         await _migrateV4(db);
       } else if (v == 5) {
         await _migrateV5(db);
+      } else if (v == 6) {
+        await _migrateV6(db);
+      } else if (v == 7) {
+        await _migrateV7(db);
+      } else if (v == 8) {
+        await _migrateV8(db);
       }
     }
+  }
+
+  Future<bool> _columnExists(Database db, String table, String column) async {
+    final rows = await db.rawQuery('PRAGMA table_info($table)');
+    for (final r in rows) {
+      if (r['name'] == column) return true;
+    }
+    return false;
   }
 
   /// Versiyon 2: interval_days sütunu eklendi.
@@ -77,11 +93,8 @@ class DatabaseHelper {
   /// Sprint 2'de modele eklenen bu alan eski kurulumda yoktu;
   /// ALTER TABLE ile mevcut DB'ye ekliyoruz.
   Future<void> _migrateV2(Database db) async {
-    // Sütun zaten varsa hata vermemek için try/catch kullan.
-    try {
+    if (!await _columnExists(db, 'records', 'interval_days')) {
       await db.execute('ALTER TABLE records ADD COLUMN interval_days INTEGER');
-    } catch (_) {
-      // Sütun zaten mevcutsa görmezden gel.
     }
   }
 
@@ -102,18 +115,20 @@ class DatabaseHelper {
     ];
 
     for (final col in newRecordColumns) {
-      try {
+      final name = col.split(' ').first;
+      if (!await _columnExists(db, 'records', name)) {
         await db.execute('ALTER TABLE records ADD COLUMN $col');
-      } catch (_) {}
+      }
     }
 
     // completions tablosuna yeni sütunlar ekle
     final newCompletionColumns = ['progress INTEGER DEFAULT 0', 'note TEXT'];
 
     for (final col in newCompletionColumns) {
-      try {
+      final name = col.split(' ').first;
+      if (!await _columnExists(db, 'completions', name)) {
         await db.execute('ALTER TABLE completions ADD COLUMN $col');
-      } catch (_) {}
+      }
     }
 
     // Mevcut 'task' tiplerini 'event' yap (PRD'ye göre artık Takvime Ekle = event)
@@ -127,18 +142,95 @@ class DatabaseHelper {
   ///
   /// - records: end_date eklendi (çok günlü etkinlikler için).
   Future<void> _migrateV4(Database db) async {
-    try {
+    if (!await _columnExists(db, 'records', 'end_date')) {
       await db.execute('ALTER TABLE records ADD COLUMN end_date TEXT');
-    } catch (_) {}
+    }
   }
 
   /// Versiyon 5: Sprint 5 PRD revizyonu.
   ///
   /// - records: target_unit eklendi (örn: 'lt', 'km').
   Future<void> _migrateV5(Database db) async {
-    try {
+    if (!await _columnExists(db, 'records', 'target_unit')) {
       await db.execute('ALTER TABLE records ADD COLUMN target_unit TEXT');
-    } catch (_) {}
+    }
+  }
+
+  /// Versiyon 6: Sprint 6 — seri kurtarma ve sert kapanış.
+  Future<void> _migrateV6(Database db) async {
+    final cols = [
+      'skip_consumed_week_key TEXT',
+      'open_miss_date TEXT',
+      'recovery_scheduled_date TEXT',
+      'recovery_applied INTEGER NOT NULL DEFAULT 0',
+      'streak_frozen_before_miss INTEGER',
+      'series_closed_after TEXT',
+    ];
+    for (final col in cols) {
+      final name = col.split(' ').first;
+      if (!await _columnExists(db, 'streaks', name)) {
+        await db.execute('ALTER TABLE streaks ADD COLUMN $col');
+      }
+    }
+  }
+
+  /// Versiyon 8: bulut senkron meta + LWW için `updated_at_ms`.
+  Future<void> _migrateV8(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS sync_meta (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        pending_sync INTEGER NOT NULL DEFAULT 0,
+        last_local_mutation_ms INTEGER,
+        last_successful_cloud_sync_ms INTEGER
+      )
+    ''');
+    await db.rawInsert(
+      'INSERT OR IGNORE INTO sync_meta (id, pending_sync) VALUES (1, 0)',
+    );
+
+    if (!await _columnExists(db, 'records', 'updated_at_ms')) {
+      await db.execute(
+        'ALTER TABLE records ADD COLUMN updated_at_ms INTEGER NOT NULL DEFAULT 0',
+      );
+    }
+    if (!await _columnExists(db, 'completions', 'updated_at_ms')) {
+      await db.execute(
+        'ALTER TABLE completions ADD COLUMN updated_at_ms INTEGER NOT NULL DEFAULT 0',
+      );
+    }
+    if (!await _columnExists(db, 'streaks', 'updated_at_ms')) {
+      await db.execute(
+        'ALTER TABLE streaks ADD COLUMN updated_at_ms INTEGER NOT NULL DEFAULT 0',
+      );
+    }
+
+    await db.rawUpdate('''
+      UPDATE records
+      SET updated_at_ms = CAST(strftime('%s', datetime(substr(created_at, 1, 19))) AS INTEGER) * 1000
+      WHERE updated_at_ms = 0
+    ''');
+    await db.rawUpdate('''
+      UPDATE completions
+      SET updated_at_ms = CAST(strftime('%s', date || 'T12:00:00') AS INTEGER) * 1000
+      WHERE updated_at_ms = 0
+    ''');
+  }
+
+  /// Versiyon 7: completion başına (record_id, date) tek satır + tarih indeksi.
+  Future<void> _migrateV7(Database db) async {
+    await db.execute('''
+      DELETE FROM completions
+      WHERE rowid NOT IN (
+        SELECT MAX(rowid) FROM completions GROUP BY record_id, date
+      )
+    ''');
+    await db.execute(
+      'CREATE UNIQUE INDEX IF NOT EXISTS ux_completions_record_date '
+      'ON completions (record_id, date)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_completions_by_date ON completions (date)',
+    );
   }
 
   /// Versiyon 1 şeması: records, completions, streaks tabloları.
@@ -161,7 +253,8 @@ class DatabaseHelper {
         end_date        TEXT,
         due_date        TEXT,
         created_at      TEXT NOT NULL,
-        is_active       INTEGER NOT NULL DEFAULT 1
+        is_active       INTEGER NOT NULL DEFAULT 1,
+        updated_at_ms   INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
@@ -173,24 +266,98 @@ class DatabaseHelper {
         status     TEXT NOT NULL,
         progress   INTEGER DEFAULT 0,
         note       TEXT,
+        updated_at_ms INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY (record_id) REFERENCES records(id) ON DELETE CASCADE
       )
     ''');
 
     await db.execute('''
       CREATE TABLE streaks (
-        record_id           TEXT PRIMARY KEY,
-        current_streak      INTEGER NOT NULL DEFAULT 0,
-        longest_streak      INTEGER NOT NULL DEFAULT 0,
-        last_done_date      TEXT,
-        skip_used_this_week INTEGER NOT NULL DEFAULT 0,
+        record_id               TEXT PRIMARY KEY,
+        current_streak          INTEGER NOT NULL DEFAULT 0,
+        longest_streak          INTEGER NOT NULL DEFAULT 0,
+        last_done_date          TEXT,
+        skip_used_this_week     INTEGER NOT NULL DEFAULT 0,
+        skip_consumed_week_key  TEXT,
+        open_miss_date          TEXT,
+        recovery_scheduled_date TEXT,
+        recovery_applied        INTEGER NOT NULL DEFAULT 0,
+        streak_frozen_before_miss INTEGER,
+        series_closed_after     TEXT,
+        updated_at_ms           INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY (record_id) REFERENCES records(id) ON DELETE CASCADE
       )
     ''');
 
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS sync_meta (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        pending_sync INTEGER NOT NULL DEFAULT 0,
+        last_local_mutation_ms INTEGER,
+        last_successful_cloud_sync_ms INTEGER
+      )
+    ''');
+    await db.rawInsert(
+      'INSERT OR IGNORE INTO sync_meta (id, pending_sync) VALUES (1, 0)',
+    );
+
     // Tarih bazlı sorgular için index — getByDate performansını artırır.
     await db.execute(
       'CREATE INDEX idx_completions_date ON completions (record_id, date)',
+    );
+    await db.execute(
+      'CREATE UNIQUE INDEX ux_completions_record_date '
+      'ON completions (record_id, date)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_completions_by_date ON completions (date)',
+    );
+  }
+
+  /// Bulutla hizalanması gerektiğini işaretler (yerel veri değişti veya giriş sonrası).
+  Future<void> markSyncDirty() async {
+    final db = await database;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await db.rawUpdate(
+      'UPDATE sync_meta SET pending_sync = 1, last_local_mutation_ms = ? '
+      'WHERE id = 1',
+      [now],
+    );
+  }
+
+  /// Kayıt varsa senkron bekliyor olarak işaretler (misafir verisini hesaba taşıma).
+  Future<void> markSyncDirtyIfHasRecords() async {
+    final db = await database;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) AS c FROM records'),
+    );
+    if ((count ?? 0) > 0) {
+      await markSyncDirty();
+    }
+  }
+
+  /// Son başarılı tam senkron sonrası meta güncellemesi.
+  Future<void> markSyncComplete() async {
+    final db = await database;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await db.rawUpdate(
+      'UPDATE sync_meta SET pending_sync = 0, '
+      'last_successful_cloud_sync_ms = ? WHERE id = 1',
+      [now],
+    );
+  }
+
+  Future<SyncMetaRow> readSyncMeta() async {
+    final db = await database;
+    final rows = await db.query('sync_meta', where: 'id = ?', whereArgs: [1]);
+    if (rows.isEmpty) {
+      return const SyncMetaRow(pendingSync: false);
+    }
+    final m = rows.first;
+    return SyncMetaRow(
+      pendingSync: (m['pending_sync'] as int? ?? 0) == 1,
+      lastLocalMutationMs: m['last_local_mutation_ms'] as int?,
+      lastSuccessfulCloudSyncMs: m['last_successful_cloud_sync_ms'] as int?,
     );
   }
 

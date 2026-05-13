@@ -1,17 +1,34 @@
-# my_new_habit
+# myNewHabit — Flutter uygulaması
 
-A new Flutter project.
+Yerel öncelikli alışkanlık, takvim etkinliği ve yapılacak takibi. Tam ürün özeti, mimari, Firebase ve depo yapısı için üst dizindeki **[README.md](../README.md)** dosyasına bakın.
 
-## Getting Started
+## Hızlı komutlar
 
-This project is a starting point for a Flutter application.
+```bash
+flutter pub get
+flutter run
+```
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+dart analyze
+flutter test
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## iOS
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+cd ios && pod install && cd ..
+```
+
+## Paket adı ve sürüm
+
+- Dart paket adı: `my_new_habit` (`pubspec.yaml`)  
+- `environment.sdk`: depodaki `pubspec.yaml` ile aynı sürüm aralığını kullanın.
+
+## Firebase
+
+İsteğe bağlı bulut modu: `lib/firebase_options.dart`, Android `google-services.json`, iOS `GoogleService-Info.plist` ve Firebase Console ayarları. Ayrıntılı kontrol listesi: [../.rules/01-tech-stack.md](../.rules/01-tech-stack.md).
+
+## Kaynaklar
+
+- [Flutter dokümantasyonu](https://docs.flutter.dev/)

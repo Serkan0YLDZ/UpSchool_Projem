@@ -35,6 +35,12 @@ abstract class CompletionRepository {
     int progress,
   );
 
+  /// Tüm tamamlamalar (bulut senkron için).
+  Future<List<CompletionModel>> getAll();
+
+  /// Bulut senkronu: REPLACE; `markSyncDirty` tetiklenmez.
+  Future<void> applyRemoteCompletion(CompletionModel model);
+
   /// Bir completion kaydını siler (tamamlamayı geri al).
   Future<void> delete(String id);
 }
@@ -122,9 +128,27 @@ class SqfliteCompletionRepository implements CompletionRepository {
   }
 
   @override
+  Future<List<CompletionModel>> getAll() async {
+    final db = await _dbHelper.database;
+    final maps = await db.query('completions', orderBy: 'date ASC');
+    return maps.map(CompletionModel.fromMap).toList();
+  }
+
+  @override
+  Future<void> applyRemoteCompletion(CompletionModel model) async {
+    final db = await _dbHelper.database;
+    await db.insert(
+      'completions',
+      model.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  @override
   Future<void> delete(String id) async {
     final db = await _dbHelper.database;
     await db.delete('completions', where: 'id = ?', whereArgs: [id]);
+    await _dbHelper.markSyncDirty();
   }
 
   /// Aynı gün için tekrar kayıt oluşturmak yerine günceller (REPLACE).
@@ -136,17 +160,20 @@ class SqfliteCompletionRepository implements CompletionRepository {
     int progress = 0,
   }) async {
     final db = await _dbHelper.database;
+    final now = DateTime.now().millisecondsSinceEpoch;
     final model = CompletionModel(
       id: id,
       recordId: recordId,
       date: date,
       status: status,
       progress: progress,
+      updatedAtMs: now,
     );
     await db.insert(
       'completions',
       model.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    await _dbHelper.markSyncDirty();
   }
 }

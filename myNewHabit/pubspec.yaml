@@ -38,6 +38,12 @@ dependencies:
 
   # Unique identifiers
   uuid: ^4.4.2
+  firebase_core: ^4.8.0
+  firebase_auth: ^6.5.0
+  cloud_firestore: ^6.4.0
+  google_sign_in: ^7.2.0
+  sign_in_with_apple: ^8.0.0
+  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:

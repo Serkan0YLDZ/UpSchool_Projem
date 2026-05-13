@@ -64,6 +64,12 @@ abstract final class AppColors {
   /// Streak ateşi rengi
   static const Color streakFire = Color(0xFFFF6B35);
 
+  /// Kurtarma / düşük seri vurgusu (turuncu ton)
+  static const Color streakRecovery = Color(0xFFFF9500);
+
+  /// Seri düşük / nötr alev
+  static const Color streakMuted = Color(0xFFB0B8C2);
+
   /// Ambient shadow (rgba(0, 119, 182, 0.08))
   static const Color ambientShadow = Color(0x140077B6);
 
@@ -76,4 +82,28 @@ abstract final class AppColors {
 
   /// Tertiary fixed background (e.g. today calendar, progress bars)
   static const Color tertiaryFixed = Color(0xFF9FEFFE);
+
+  /// Neo-brutalist rozet varsayılanı
+  static const Color neoBadgeDefaultYellow = Color(0xFFFFD166);
+
+  /// Kart / modal üst şerit sarısı
+  static const Color cardHeaderYellow = Color(0xFFFFE599);
+
+  /// Bölüm başlığı / snackbar sarısı (koyu)
+  static const Color sectionBannerYellow = Color(0xFFE5B000);
+
+  /// Bölüm başlığı / odak vurgusu moru
+  static const Color sectionBannerPurple = Color(0xFFAA44E0);
+
+  /// Todo öncelik — yüksek
+  static const Color todoPriorityHigh = Color(0xFFFF6B6B);
+
+  /// Todo öncelik — düşük
+  static const Color todoPriorityLow = Color(0xFFFDE074);
+
+  /// Google marka mavisi (giriş satırı)
+  static const Color googleBrandBlue = Color(0xFF4285F4);
+
+  /// Alışkanlık kartı yumuşak mavi vurgu
+  static const Color habitCardSoftBlue = Color(0xFFC4EDF8);
 }

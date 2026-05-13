@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_new_habit/core/theme/app_colors.dart';
+import 'package:my_new_habit/core/utils/calendar_date.dart';
 import 'package:my_new_habit/core/utils/neo_picker.dart';
-
 import 'package:my_new_habit/data/models/record_model.dart';
 
 Future<RecordModel?> showEditRecordSheet(
@@ -442,7 +442,7 @@ class _EditRecordSheetState extends State<_EditRecordSheet> {
                     firstDate: DateTime.now().subtract(const Duration(days: 365)),
                     lastDate: DateTime.now().add(const Duration(days: 365*5)),
                   );
-                  if (date != null) setState(() => _scheduledDate = DateFormat('yyyy-MM-dd').format(date));
+                  if (date != null) setState(() => _scheduledDate = CalendarDate.ymd(date));
                 },
               ),
             ),
@@ -549,7 +549,7 @@ class _EditRecordSheetState extends State<_EditRecordSheet> {
                       lastDate: DateTime.now().add(const Duration(days: 365*5)),
                     );
                     if (date != null) {
-                      setState(() => _endDate = DateFormat('yyyy-MM-dd').format(date));
+                      setState(() => _endDate = CalendarDate.ymd(date));
                     }
                   },
                 ),

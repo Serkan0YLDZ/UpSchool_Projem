@@ -6,6 +6,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:my_new_habit/data/database/database_helper.dart';
 import 'package:my_new_habit/data/models/completion_model.dart';
 import 'package:my_new_habit/data/models/record_model.dart';
+import 'package:my_new_habit/data/utils/completion_row_id.dart';
 import 'package:my_new_habit/data/repositories/completion_repository.dart';
 import 'package:my_new_habit/data/repositories/record_repository.dart';
 
@@ -40,7 +41,11 @@ void main() {
       const date = '2024-01-15';
 
       // Act
-      await completionRepo.markDone('c1', 'r1', date);
+      await completionRepo.markDone(
+        CompletionRowId.forRecordAndDate('r1', date),
+        'r1',
+        date,
+      );
       final result = await completionRepo.getForRecordAndDate('r1', date);
 
       // Assert (US-202 kabul kriteri: tamamlama kaydedilebilir)
@@ -58,7 +63,11 @@ void main() {
       const date = '2024-01-16';
 
       // Act
-      await completionRepo.markSkipped('c2', 'r1', date);
+      await completionRepo.markSkipped(
+        CompletionRowId.forRecordAndDate('r1', date),
+        'r1',
+        date,
+      );
       final result = await completionRepo.getForRecordAndDate('r1', date);
 
       // Assert
@@ -73,10 +82,11 @@ void main() {
     () async {
       // Arrange — önce skipped, sonra done
       const date = '2024-01-18';
-      await completionRepo.markSkipped('c4', 'r1', date);
+      final rowId = CompletionRowId.forRecordAndDate('r1', date);
+      await completionRepo.markSkipped(rowId, 'r1', date);
 
       // Act
-      await completionRepo.markDone('c4', 'r1', date);
+      await completionRepo.markDone(rowId, 'r1', date);
       final result = await completionRepo.getForRecordAndDate('r1', date);
 
       // Assert — en son durum geçerlidir
@@ -88,8 +98,16 @@ void main() {
 
   test('getByDate should return only completions for given date', () async {
     // Arrange
-    await completionRepo.markDone('c5', 'r1', '2024-02-01');
-    await completionRepo.markDone('c6', 'r1', '2024-02-02');
+    await completionRepo.markDone(
+      CompletionRowId.forRecordAndDate('r1', '2024-02-01'),
+      'r1',
+      '2024-02-01',
+    );
+    await completionRepo.markDone(
+      CompletionRowId.forRecordAndDate('r1', '2024-02-02'),
+      'r1',
+      '2024-02-02',
+    );
 
     // Act
     final result = await completionRepo.getByDate('2024-02-01');
@@ -106,10 +124,11 @@ void main() {
     () async {
       // Arrange
       const date = '2024-03-01';
-      await completionRepo.markDone('c7', 'r1', date);
+      final rowId = CompletionRowId.forRecordAndDate('r1', date);
+      await completionRepo.markDone(rowId, 'r1', date);
 
       // Act
-      await completionRepo.delete('c7');
+      await completionRepo.delete(rowId);
       final result = await completionRepo.getForRecordAndDate('r1', date);
 
       // Assert

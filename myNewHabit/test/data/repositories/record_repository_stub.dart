@@ -21,6 +21,12 @@ class StubRecordRepository implements RecordRepository {
   }
 
   @override
+  Future<List<RecordModel>> getAllForSync() async {
+    if (shouldThrow) throw Exception('stub error');
+    return List.from(recordsToReturn);
+  }
+
+  @override
   Future<List<RecordModel>> getByDate(String date) async {
     lastQueriedDate = date;
     if (shouldThrow) throw Exception('stub error');
@@ -51,6 +57,16 @@ class StubRecordRepository implements RecordRepository {
       return recordsToReturn.firstWhere((r) => r.id == id);
     } catch (_) {
       return null;
+    }
+  }
+
+  @override
+  Future<void> applyRemoteRecord(RecordModel record) async {
+    final i = recordsToReturn.indexWhere((r) => r.id == record.id);
+    if (i >= 0) {
+      recordsToReturn[i] = record;
+    } else {
+      recordsToReturn.add(record);
     }
   }
 }

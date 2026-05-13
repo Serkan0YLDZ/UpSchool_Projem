@@ -31,7 +31,7 @@ Aşağıdaki dosyaları kod yazmadan önce oku ve her kararında bu dosyalara da
 
 ### 3. `/Users/serkan/Github/UpSchool_Projem/.rules/`
 **Ne yapar:** LLM için zorunlu kodlama kuralları klasörüdür. Her `.md` dosyası ayrı bir konu içerir:
-- `01-tech-stack.md` → Hangi paketi kullanacağını söyler (Provider, sqflite, go_router). Başka state management veya backend kesinlikle kullanma.
+- `01-tech-stack.md` → Paketler, klasör yapısı, MVP (yerel öncelik) ve **V2 bulut modu** (Firebase Auth + Firestore) istisnası. Bloc / Riverpod / Freezed yok.
 - `02-solid-oop.md` → SOLID prensiplerini ve OOP kurallarını tanımlar. SRP, encapsulation, dependency injection zorunludur.
 - `03-clean-code.md` → YAGNI, DRY, private widget class, dosya boyutu limitleri. V2 özelliklerini ekleme.
 - `04-commenting.md` → Yorum satırı kuralları. WHY yaz, WHAT yazma. `///` public API için.

@@ -40,6 +40,9 @@ class CompletionModel {
   /// Opsiyonel kullanıcı notu (Sprint 4)
   final String? note;
 
+  /// LWW senkron için yerel değişiklik zaman damgası (ms).
+  final int updatedAtMs;
+
   const CompletionModel({
     required this.id,
     required this.recordId,
@@ -47,6 +50,7 @@ class CompletionModel {
     required this.status,
     this.progress = 0,
     this.note,
+    this.updatedAtMs = 0,
   });
 
   factory CompletionModel.fromMap(Map<String, dynamic> map) {
@@ -57,6 +61,7 @@ class CompletionModel {
       status: CompletionStatus.fromValue(map['status'] as String),
       progress: map['progress'] as int? ?? 0,
       note: map['note'] as String?,
+      updatedAtMs: map['updated_at_ms'] as int? ?? 0,
     );
   }
 
@@ -68,6 +73,7 @@ class CompletionModel {
       'status': status.value,
       'progress': progress,
       'note': note,
+      'updated_at_ms': updatedAtMs,
     };
   }
 
@@ -78,6 +84,7 @@ class CompletionModel {
     CompletionStatus? status,
     int? progress,
     String? note,
+    int? updatedAtMs,
   }) {
     return CompletionModel(
       id: id ?? this.id,
@@ -86,6 +93,7 @@ class CompletionModel {
       status: status ?? this.status,
       progress: progress ?? this.progress,
       note: note ?? this.note,
+      updatedAtMs: updatedAtMs ?? this.updatedAtMs,
     );
   }
 }
