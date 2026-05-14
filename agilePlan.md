@@ -1,173 +1,244 @@
-# myNewHabit MVP için Yeni Agile Planı (PRD Revizyonu)
+# track_calendar_tasks_habits — Agile plan
 
-> **Platform:** Flutter (Dart) · **Hedef:** Local'de çalışan, tam işlevsel MVP  
-> **Renk Paleti:** Primary `#0077B6` · Secondary `#90E0EF` · Tertiary `#00B4D8` · Neutral `#F8FBFF`  
-> **Font:** Plus Jakarta Sans (Google Fonts)
+## 1. Vizyon ve ilkeler
 
----
-
-## 📍 Şu Anki Durum (Durum Özeti)
-
-Şu ana kadar projenin Sprint 1, Sprint 2 ve Sprint 3 aşamaları kodlanmış durumdadır. Uygulamanın temel veri katmanı (`sqflite`), takvim barı ve ana sayfa listeleri inşa edilmiştir.
-
-**ANCAK**, bu sprintler eski PRD'ye göre geliştirilmiş olduğu için:
-1. Uygulamada "Kötü Alışkanlık" (Quit) özelliği kodlanmış durumdadır. Yeni PRD ile bu yapı tamamen projeden çıkarılmıştır.
-2. Kayıt tipleri ve veri modelleri eski tasarıma göre (Örn: Alışkanlıkların 0-100% ilerlemesi yoktur, Todo listesinin filtreleri eksiktir) çalışmaktadır.
-
-Bu nedenle plan, **Sprint 4'ten itibaren** tamamen yeni PRD'nin "V1 — MVP" kurallarına göre yeniden yapılandırılmıştır.
+- **Platform:** Flutter (Dart), paket: `track_calendar_tasks_habits`.
+- Çalışma biçimi: **PRD = tek doğruluk kaynağı**; sprint kabul kriterleri PRD bölüm numaralarına referans verir.
+- **v0.1:** Tam yerel, SQLite (veya eşdeğeri), mock veri üretim dışı bırakılır.
+- **v0.2:** Firebase Auth, senkron, harici takvim, widget, rozet, sosyal.
 
 ---
 
-## 📋 Genel Bakış (Yeni MVP Yol Haritası)
+## 2. Epic özeti
 
-| # | Sprint | Süre | Odak |
-|---|--------|------|------|
-| 4 | PRD Revizyonu & Veri Modeli Adaptasyonu | 1 hafta | Quit modelinin silinmesi, Event/Habit/Todo geçişi, DB migration |
-| 5 | Ana Sayfa UI Revizyonu & İlerleme | 1 hafta | 0-100% progress, Todo filtreleri, Long Press etkileşimleri |
-| 6 | Seri (Streak) Sistemi & Es Geçme | 1 hafta | Streak motoru, haftalık skip hakkı |
-| 7 | Onboarding, Profil & MVP Çıkışı | 1 hafta | İlk açılış, bildirimler, QA testleri |
-
-**Kalan MVP Süresi: ~4 Hafta**
-
----
-
-## 🛠️ Sprint 4 — PRD Revizyonu & Veri Modeli Adaptasyonu
-
-**Hedef:** İptal edilen özelliklerin projeden tamamen temizlenmesi, veritabanının yeni `Event`, `Habit`, `Todo` tiplerine göre yapılandırılması ve Ekleme menüsünün (Bottom Sheet) güncellenmesi.
-
-### Kullanıcı Hikayeleri
-
-| ID | Hikaye | Öncelik |
-|----|--------|---------|
-| US-401 | Geliştirici olarak, gereksiz "Kötü Alışkanlık" (Quit) kodlarını temizleyerek projeyi sadeleştirmeliyim. | 🔴 Kritik |
-| US-402 | Kullanıcı olarak, "+" butonuna bastığımda "Takvime Ekle", "Yeni Alışkanlık" ve "Yapılacak Ekle" seçeneklerini görmeliyim. | 🔴 Kritik |
-| US-403 | Kullanıcı olarak, yeni alışkanlık eklerken %0-100 arasında bir hedef ilerleme (Örn: "Günde 2 litre su" için %100 hedefine ulaşana kadar arttırılabilir bir yapı) belirleyebilmeliyim. | 🔴 Kritik |
-| US-404 | Kullanıcı olarak, yapılacak (Todo) eklerken isteğe bağlı bir bitiş tarihi seçebilmeliyim. | 🟠 Yüksek |
-
-### Teknik Görevler
-
-- [x] `Quit` tipi, widget'ları (`QuitCard`), modelleri ve state logic'lerinin tamamen silinmesi.
-- [x] `RecordModel`'in güncellenmesi: `type` alanı -> `event`, `habit`, `todo` olarak değiştirilmeli.
-- [x] DB Şeması Güncellemesi: `target_progress`, `scheduled_date`, `end_time`, `due_date`, `description` vb. yeni kolonların `records` tablosuna eklenmesi. `completions` tablosuna `progress` kolonu eklenmesi.
-- [x] Bottom Sheet Revizyonu 1: "Ne Eklemek İstersin?" kısmında 3 yeni seçeneğin listelenmesi.
-- [x] Bottom Sheet Revizyonu 2: Seçilen tipe göre sadece ilgili alanların (Örn: Habit için `%` hedefi, Todo için bitiş tarihi) gösterildiği dinamik form yapısının oluşturulması.
-
-### Kabul Kriterleri
-
-- [x] Kötü alışkanlıklarla ilgili hiçbir kod parçası, model veya arayüz öğesi kalmamıştır.
-- [x] Yeni modellerle DB'ye sorunsuz bir şekilde Event, Habit, Todo eklenebilmektedir ve `flutter run` hatasız çalışır.
+| Epic | Sürüm | Süre (öneri) |
+|------|--------|----------------|
+| **E1 — Veri ve migrasyon** | v0.1 | 1 sprint |
+| **E2 — Shell ve üçgen navigasyon** | v0.1 | 1 sprint |
+| **E3 — Takvim / Alışkanlık / Todo ekranları** | v0.1 | 1–2 sprint |
+| **E4 — Seri motoru ve es geç** | v0.1 | 1 sprint |
+| **E5 — Polish: profil, filtre, boşluklar, splash, onboarding** | v0.1 | 1 sprint |
+| **E6 — Firebase Auth** | v0.2 | 1 sprint |
+| **E7 — Bulut senkron ve çakışma** | v0.2 | 1–2 sprint |
+| **E8 — Harici takvim** | v0.2 | 2+ sprint |
+| **E9 — Ana ekran widget’ları** | v0.2 | 1 sprint |
+| **E10 — Rozetler** | v0.2 | 1 sprint |
+| **E11 — Sosyal ve paylaşım** | v0.2 | 2+ sprint |
 
 ---
 
-## 🎨 Sprint 5 — Ana Sayfa UI Revizyonu & İlerleme Mekanizmaları
+## 3. Epic E1 — Veri modeli ve migrasyon (v0.1 · Sprint S1)
 
-**Hedef:** Ana sayfadaki 3 ana bölümü yeni PRD'ye göre yeniden inşa etmek; 0-100% ilerleme çubuklarını ve Yapılacaklar (Todo) listesinin filtreleme sistemini aktif etmek.
+**Hedef:** PRD §FR-04 tablolarının oluşturulması, `sqflite` (veya seçilen yerel DB) + migration zinciri.
 
-### Kullanıcı Hikayeleri
+### Kullanıcı hikayeleri
 
-| ID | Hikaye | Öncelik |
-|----|--------|---------|
-| US-501 | Kullanıcı olarak, "Alışkanlık Takibi" bölümündeki görevlerimi %0'dan %100'e kadar yüzdelik olarak (buton veya slider ile) ilerletebilmeliyim. | 🔴 Kritik |
-| US-502 | Kullanıcı olarak, alışkanlık %100 olduğunda kartın görsel olarak "tamamlandı" durumuna geçtiğini görmeliyim. | 🔴 Kritik |
-| US-503 | Kullanıcı olarak, "Yapılacaklar" bölümünü "En Önemli" veya "En Yakın Bitiş Tarihi"ne göre sıralayabilmeliyim. | 🟠 Yüksek |
-| US-504 | Kullanıcı olarak, "Yapılacaklar" bölümünde zaman aralığı (Bugün, Bu Hafta, Tümü) seçebilmeliyim. | 🟠 Yüksek |
-| US-505 | Kullanıcı olarak, ana sayfadaki herhangi bir kaydın üzerine **uzun bastığımda** onu düzenleyebilmeli veya silebilmeliyim. | 🔴 Kritik |
+| ID | Hikaye | PRD |
+|----|--------|-----|
+| US-1.1 | Geliştirici olarak, takvim etkinlikleri, alışkanlıklar ve yapılacaklar için ayrı tablolarla şema oluşturabilmeliyim. | FR-04 |
+| US-1.2 | Geliştirici olarak, `habit_day_logs` ile planlı gün başına durum tutabilmeliyim. | FR-04, FR-05 |
 
-### Teknik Görevler
+### Teknik görevler
 
-- [x] **Takvim Etkinlikleri Bölümü:** Saat/tarih etiketli, Event modeline uygun yeni kart tasarımı (Checkbox'lı).
-- [x] **Alışkanlık Takibi Bölümü:** Kart üzerinde `Slider` veya ilerleme butonlarıyla `%` değerinin güncellenebilmesi. Tamamlanma durumunun `%100` eşiğine bağlanması (Eski Checkbox'ın kaldırılması).
-- [x] **Yapılacaklar Listesi Bölümü:** Sadece `Todo`'ların gösterildiği yapı. Sağ üstte 2 boyutlu (Sıralama x Zaman Aralığı) filtrenin UI ve logic olarak eklenmesi.
-- [x] Tüm kartlarda **Uzun Basma (Long Press)** etkileşiminin eklenmesi:
-  - Uzun basınca "Düzenle" için dolu formun (Bottom Sheet) açılması.
-  - "Sil" tıklandığında uygulamanın en önünde açılan tam ekran onay modalının tasarlanması.
+- [ ] `sqflite` + `path` bağımlılıkları; `DatabaseHelper` (veya Drift) ve sürüm `onUpgrade`.
+- [ ] Tablolar: `calendar_events`, `habits`, `todos`, `habit_day_logs`, `streak_snapshots` (veya türetim stratejisi dokümante).
+- [ ] Repository katmanı: CRUD + soft delete + `local_revision`.
+- [ ] Mevcut mock akışından veri kaynağına geçiş planı (feature flag veya tek seferlik import).
 
-### Kabul Kriterleri
+### Definition of Done
 
-- [x] Alışkanlıklar %100 olmadan "Tamamlandı" statüsüne geçmez, %100 olunca yeşil/tamamlandı durumuna geçer.
-- [x] Todo filtreleri veri anında yenilenecek şekilde tıklandığında çalışır.
-- [x] Her kart uzun basılarak güvenli şekilde silinebilir/düzenlenebilir. UI kırılmaz.
+- [ ] Temiz kurulumda migration hatasız.
+- [ ] En az bir birim testi: habit insert + günlük log satırı.
 
 ---
 
-## 🔥 Sprint 6 — Seri (Streak) Sistemi & Es Geçme Hakkı
+## 4. Epic E2 — Shell ve üçgen sekme (v0.1 · Sprint S2)
 
-**Hedef:** Alışkanlıklar için streak motorunun kurulması, rozet gösterimi ve haftalık "Es Geç" (Skip) mekaniği.
+**Hedef:** PRD §FR-01: alt barda Ekle + üçgen köşe navigasyonu.
 
-### Kullanıcı Hikayeleri
+### Kullanıcı hikayeleri
 
-| ID | Hikaye | Öncelik |
-|----|--------|---------|
-| US-601 | Kullanıcı olarak, bir alışkanlığı %100 tamamladığımda serim (🔥) artmalı ve kartın üstünde rozet olarak görünmelidir. | 🔴 Kritik |
-| US-602 | Kullanıcı olarak, planlı bir günü hedefe ulaşmadan geçirdiğimde serimin ya kurtarma günü / Es Geç ile korunabildiğini ya da kurtarma kaçırılırsa sıfırlandığını ve ileri tarihlerde kartın gizlendiğini görmeliyim. | 🔴 Kritik |
-| US-603 | Kullanıcı olarak, alışkanlıklarımı haftada 1 kez seri bozulmadan "Es Geç"ebilmeliyim. | 🟠 Yüksek |
-| US-604 | Kullanıcı olarak, streak rozetinin üzerine dokunduğumda "En uzun serin: X gün" bilgisini okuyabilmeliyim. | 🟡 Orta |
+| ID | Hikaye | PRD |
+|----|--------|-----|
+| US-2.1 | Kullanıcı olarak, alt barda üçgen üzerinden Takvim / Alışkanlık / Yapılacaklar arasında geçiş yapabilmeliyim. | FR-01 |
+| US-2.2 | Kullanıcı olarak, ekran okuyucuda her mod için anlamlı etiket duyabilmeliyim. | FR-01 |
 
-### Teknik Görevler
+### Teknik görevler
 
-- [x] `StreakService` + planlı gün (`HabitSchedule`) + tamamlama geçmişi ile seri, kurtarma ve sert kapanışın hesaplanması.
-- [x] Uygulama açılışı / tarih değişimi / tamamlama sonrası `reconcile` ile `streaks` satırının güncellenmesi; `series_closed_after` ankoru.
-- [x] `HabitCard` üzerinde haftada 1 "Es Geç", kurtarma günü için "Seriyi geri getir" ve rozet dokunuşu ile istatistik diyaloğu.
-- [x] `streaks` tablosu: `skip_used_this_week`, ISO hafta anahtarı, `open_miss_date`, `recovery_scheduled_date`, `recovery_applied`, `series_closed_after`.
+- [ ] `CustomPainter` veya `Stack` + üçgen geometrisi; hit test.
+- [ ] `Semantics` etiketleri.
+- [ ] Renk token’ları: `homeSectionCalendarBlue`, `homeSectionHabitsCoral`, `homeSectionTodosOrange`.
 
-### Kabul Kriterleri
+### DoD
 
-- [x] Hedef yüzdeye ulaşan tamamlamalar seriyi artırır ve seçili güne göre rozet UI'a yansır.
-- [x] Es Geç kullanıldığında seri korunur; buton aynı ISO haftasında pasifleşir.
-- [x] Kaçırma + Es Geç yok + kurtarma günü geçmeden toparlanmazsa seri sıfırlanır ve ankor tarihinden sonraki günlerde alışkanlık listelenmez; geçmiş günlerde görünür.
+- [ ] PRD renkleri ve köşe eşlemesi doğrulandı.
+- [ ] Küçük ekranda (ör. 375 genişlik) taşma yok.
 
 ---
 
-## 🚀 Sprint 7 — Onboarding, Profil, Bildirimler & MVP Çıkışı
+## 5. Epic E3 — Üç mod ekranı ve formlar (v0.1 · Sprint S3)
 
-**Hedef:** İlk açılış deneyimi, profil istatistikleri, lokal bildirimler ve uygulamanın tüm cihazlarda hatasız çalıştığının test edilmesi.
+**Hedef:** Liste + ekleme/düzenleme; alışkanlıkta ikon + renk (FR-03).
 
-### Kullanıcı Hikayeleri
+### Kullanıcı hikayeleri
 
-| ID | Hikaye | Öncelik |
-|----|--------|---------|
-| US-701 | Kullanıcı olarak, uygulamayı ilk açtığımda popüler alışkanlıkları tek tıkla listeme ekleyebilmeliyim. | 🟠 Yüksek |
-| US-702 | Kullanıcı olarak, profil ekranımda toplam tamamlanan görev sayımı ve ilerlememi görebilmeliyim. | 🟠 Yüksek |
-| US-703 | Kullanıcı olarak, belirlediğim saatli etkinliklerden (Event) önce cihazımda bildirim almalıyım. | 🔴 Kritik |
-| US-704 | Kullanıcı olarak, her gün 21:00'de o gün tamamlamadığım alışkanlıklarımın sayısını içeren bir özet bildirim almalıyım. | 🟠 Yüksek |
+| ID | Hikaye | PRD |
+|----|--------|-----|
+| US-3.1 | Kullanıcı olarak, takvim etkinliği ekleyip seçili güne göre listeleyebilmeliyim. | FR-04 |
+| US-3.2 | Kullanıcı olarak, alışkanlık eklerken ikon ve ikon rengi seçebilmeliyim. | FR-03 |
+| US-3.3 | Kullanıcı olarak, haftalık veya N günde bir tekrar tanımlayabilmeliyim. | FR-04, FR-05 |
+| US-3.4 | Kullanıcı olarak, yapılacak ekleyip tamamlayabilmeliyim. | FR-04 |
 
-### Teknik Görevler
+### Teknik görevler
 
-- [ ] `OnboardingScreen` kodlanması ve default alışkanlıkların `SharedPreferences` ile entegrasyonu (Sadece ilk açılışta gösterilir).
-- [ ] `ProfileScreen`'in V1 için tamamlanması (Toplam aktif alışkanlık, en uzun seri, bugünkü tamamlama `%` barı).
-- [ ] `flutter_local_notifications` kurulumu ve `zonedSchedule` ile saatli Event bildirimlerinin ayarlanması.
-- [ ] Akşam 21:00 özet bildirimi için local background task yapılandırması (Eksik alışkanlık sayısı sorgusu).
-- [ ] iOS/Android küçük ekranlarda (Örn: iPhone SE 375px genişlik) UI testlerinin yapılması ve QA bug-fix.
-- [ ] `README.md` ve kurulum dokümanlarının güncellenmesi.
+- [ ] `Provider` (veya mevcut state) ile repository bağlantısı.
+- [ ] İkon seçici UI + `icon_key`, `icon_color_argb` persistans.
+- [ ] Takvim çubuğu ve güne göre filtre.
 
-### Kabul Kriterleri
+### DoD
 
-- [ ] Uygulama temiz kurulup ilk kez açıldığında boş sayfa göstermez, öneriler sunar.
-- [ ] Zamanı gelen Event bildirimi cihaz kilitliyken veya uygulama arkadayken de gösterilir.
-- [ ] Tüm akış (Ekle -> Listele -> İlerle -> Sil) çökmeksizin test edilir ve MVP "Definition of Done" statüsüne ulaşır.
+- [ ] Üç mod uçtan uca veri okur/yazar.
 
 ---
 
-## 📊 V1 - MVP Definition of Done
+## 6. Epic E4 — Seri ve es geç (v0.1 · Sprint S4)
 
-Aşağıdaki tüm koşullar sağlandığında uygulamanın Local Çalışan MVP sürümü tamamlanmış sayılır:
+**Hedef:** PRD §FR-05 kanonik örnek (10 / 12 / 14) ve haftada 1 es geç.
 
-| Kriter | Durum |
-|--------|-------|
-| `flutter run` ile local'de çalışır (iOS/Android) | ⬜ |
-| Event, Habit, Todo tipleri eklenebilir / düzenlenebilir / silinebilir | ⬜ |
-| Kötü alışkanlık kodları tamamen silinmiştir | ⬜ |
-| Alışkanlık takibi %0-100 progress sistemi ile çalışır | ⬜ |
-| Yapılacaklar (Todo) listesi çoklu filtrelemeyle hatasız çalışır | ⬜ |
-| Uzun basma ile "Düzenle/Sil" akışı çalışır | ⬜ |
-| Streak motoru ve Es geçme hakkı sistemi hatasız hesaplar | ⬜ |
-| İlk açılış onboarding ekranı ve default veriler görünür | ⬜ |
-| Saatli etkinlik bildirimi belirlenen saatte tetiklenir | ⬜ |
-| Veriler uygulama restart edildiğinde korunur (SQLite) | ⬜ |
-| iPhone SE (375px) boyutunda UI taşması yoktur | ⬜ |
+### Kullanıcı hikayeleri
+
+| ID | Hikaye | PRD |
+|----|--------|-----|
+| US-4.1 | Kullanıcı olarak, planlı günlerde hedefe ulaştığımda seri sayımının arttığını görmeliyim. | FR-05 |
+| US-4.2 | Kullanıcı olarak, haftada bir kez es geç ile seriyi koruyabilmeliyim. | FR-05 |
+| US-4.3 | Kullanıcı olarak, seri bittiğinde bunu arayüzde anlayabilmeliyim. | FR-05 |
+
+### Teknik görevler
+
+- [ ] Planlı gün üretici: `anchor_date` + `interval_days` / haftalık maske.
+- [ ] `StreakService` (veya domain servisi): `met` / `missed` / `skipped` / `series_lapsed` geçişleri.
+- [ ] ISO haftası bazlı `skip_used` sayacı (Pazartesi başlangıç).
+- [ ] **Birim testleri:** PRD’deki 10-12-14 senaryosu + es geç sınırı.
+
+### DoD
+
+- [ ] Tüm birim testleri yeşil.
+- [ ] `skip_source` alanı yazılıyor (`free_weekly`).
 
 ---
 
-## 🔮 V2+ — Gelecekte Eklenecek Özellikler
+## 7. Epic E5 — Polish (v0.1 · Sprint S5)
 
-> Firebase entegrasyonları, Google/Apple Takvim senkronizasyonları, Arkadaş listeleri ve Ortak alışkanlık takibi gibi özellikler MVP çıkışından sonra planlanacaktır. V2 yol haritası `prd.md` içinde detaylandırılmıştır.
+**Hedef:** FR-02, FR-06, FR-07, FR-08, FR-09, FR-10.
+
+### Kullanıcı hikayeleri
+
+| ID | Hikaye | PRD |
+|----|--------|-----|
+| US-5.1 | Kullanıcı olarak, profil ekranının geri kalan uygulama ile uyumlu görünmesini beklerim. | FR-02 |
+| US-5.2 | Kullanıcı olarak, boş listelerde emoji yerine ikon görmeliyim. | FR-06 |
+| US-5.3 | Kullanıcı olarak, önem seçiminde gereksiz ikon görmemeliyim. | FR-07 |
+| US-5.4 | Kullanıcı olarak, “Yapılacakları Filtrele” başlığını ve seçili chip’lerin koyu gri olduğunu görmeliyim. | FR-08 |
+| US-5.5 | Kullanıcı olarak, ilk açılışta kısa rehber görmeliyim. | FR-09 |
+| US-5.6 | Kullanıcı olarak, açılışta beyaz flaş yerine markalı/skeleton görünüm görmeliyim. | FR-10 |
+
+### Teknik görevler
+
+- [ ] Profil widget’ları tema token’larına bağlama.
+- [ ] `EmptyStateWidget` ikonlaştırma; öncelik satırlarından ikon kaldırma.
+- [ ] `todo_filter_button` metin + chip `neoStackFace`.
+- [ ] Onboarding sayfası + `SharedPreferences` anahtarı.
+- [ ] Native splash + ilk frame tema.
+
+### DoD (v0.1 çıkış)
+
+- [ ] PRD v0.1 FR maddeleri için manuel test checklist tamamlandı.
+- [ ] `flutter analyze` kritik uyarı yok (takım eşiği).
+
+---
+
+## 8. Epic E6 — Firebase Auth (v0.2 · Sprint S6)
+
+| ID | Hikaye | PRD |
+|----|--------|-----|
+| US-6.1 | Kullanıcı olarak, Firebase ile oturum açıp kapatabilmeliyim. | FR-11 |
+
+### Teknik görevler
+
+- [ ] `firebase_core`, `firebase_auth`; `flutterfire configure`.
+- [ ] Profil ekranında oturum durumu.
+
+### DoD
+
+- [ ] En az bir sağlayıcı (e-posta veya Google) uçtan uca.
+
+---
+
+## 9. Epic E7 — Senkron ve çakışma (v0.2 · Sprint S7)
+
+| ID | Hikaye | PRD |
+|----|--------|-----|
+| US-7.1 | Kullanıcı olarak, çevrimdışı yaptığım değişikliklerin bağlantı gelince buluta gitmesini beklerim. | FR-12 |
+| US-7.2 | Kullanıcı olarak, çakışmada yerel mi bulut mu seçeceğimi sorulduğunda anlayabilmeliyim. | FR-12 |
+
+### Teknik görevler
+
+- [ ] Firestore şema taslağı (koleksiyon başına `local_revision` veya vektör saat).
+- [ ] Çakışma çözüm bottom sheet’i.
+
+### DoD
+
+- [ ] İki cihaz senaryosu manuel test dokümantasyonu.
+
+---
+
+## 10. Epic E8 — Harici takvim (v0.2 · Sprint S8+)
+
+| ID | Hikaye | PRD |
+|----|--------|-----|
+| US-8.1 | Kullanıcı olarak, Google/Apple/Outlook’tan etkinlik içe aktarabilmeliyim (pilot en az bir kaynak). | FR-13 |
+
+### Teknik görevler
+
+- [ ] OAuth istemcileri; token güvenli saklama.
+- [ ] `calendar_events` ile harici `external_id` eşlemesi.
+
+---
+
+## 11. Epic E9 — Widget’lar (v0.2 · Sprint S9)
+
+**PRD:** FR-14 önerilerinden en az 1 widget MVP.
+
+### DoD
+
+- [ ] iOS veya Android’de en az bir widget türü mağaza öncesi test edilir.
+
+---
+
+## 12. Epic E10 — Rozetler (v0.2 · Sprint S10)
+
+**PRD:** FR-15.
+
+### DoD
+
+- [ ] `badges` / `user_badges` yazımı ve ilk 3 rozet tetiklenir.
+
+---
+
+## 13. Epic E11 — Sosyal (v0.2 · Sprint S11+)
+
+**PRD:** FR-16.
+
+### DoD
+
+- [ ] Arkadaşlık isteği + kabul.
+- [ ] Paylaşılan liste veya paylaşılan alışkanlık pilotu.
+- [ ] Security Rules gözden geçirmesi.
+
+---
+
+## 14. Riskler ve bağımlılıklar
+
+- **Harici takvim:** Apple EventKit kapalı ekosistem; Graph ve Google API kota/limitleri.
+- **Sosyal:** PII ve KVKK; telefon/e-posta araması için indeks ve hash stratejisi zorunlu.
+- **Widget:** Arka plan güncelleme sıklığı OS kısıtları.

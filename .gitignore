@@ -1,1 +1,15 @@
 .DS_Store
+
+# Ortam ve gizlilik
+.env
+.env.*
+!.env.example
+*.pem
+
+# IDE / editör
+.idea/
+*.swp
+*.swo
+
+# Cursor / ajan günlükleri (isteğe bağlı; büyük veya kişisel logları repodan uzak tut)
+.cursor/debug*.log

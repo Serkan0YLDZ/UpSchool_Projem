@@ -43,3 +43,17 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase / Google services (v0.2 — ekip politikası: repoda tutulmaz)
+**/google-services.json
+**/GoogleService-Info.plist
+
+# Android imzalama (yerel)
+**/android/key.properties
+*.jks
+*.keystore
+
+# Ortam ve gizli anahtarlar
+.env
+.env.*
+!.env.example

@@ -1,392 +1,326 @@
-# myNewHabit — Ürün Gereksinim Dokümanı (PRD)
-**Son Güncelleme:** Sprint 3 Sonrası Revizyon
+# track_calendar_tasks_habits — Ürün Gereksinim Dokümanı (PRD)
 
-> Bu PRD iki ana bölümden oluşur:
-> - **V1 — MVP (Local):** Flutter uygulaması, local SQLite, sunucu veya auth gerektirmez.
-> - **V2 — Production:** Firebase Auth, Firestore, takvim senkronizasyonu, sosyal özellikler.
+## 1. Özet ve vizyon
 
----
+Takvim etkinlikleri, tekrarlayan alışkanlıklar ve yapılacakları tek uygulamada birleştiren, **önce tam yerel (v0.1)**, ardından **Firebase ile bulut ve geniş özellikler (v0.2)** sunan bir günlük yönetim ürünü.
 
-## Ürün Vizyonu
+### 1.1. Sürüm stratejisi
 
-myNewHabit; takvim yönetimi, yapılacaklar listesi ve alışkanlık takibini tek çatı altında birleştiren, sadeliği ve estetiği ön planda tutan bir günlük yönetim aracıdır. Kullanıcılar; günlük planlarını organize eder, tekrar eden alışkanlıklarını takip eder ve yapılacaklar listelerini yönetir.
+| Sürüm | Odak | Bağımlılık |
+|--------|------|------------|
+| **v0.1** | Tüm akışların cihazda, **internetsiz** ve **mock’suz üretim kalitesinde** çalışması; SQLite (veya eşdeğeri) ile kalıcı veri | Yok |
+| **v0.2** | Firebase Auth, çok cihazlı senkron, harici takvim kaynakları, ana ekran widget’ları, rozetler, sosyal paylaşım | Firebase + platform izinleri |
 
-> **⛔ Kapsam Dışı (Tüm Versiyonlar):** "Kötü alışkanlık / bırakma takibi" özelliği projeden tamamen çıkarılmıştır.
+### 1.2. Tasarım ve tema referansı (v0.1)
 
----
-
----
-
-# 🟦 V1 — MVP (Local Çalışan Uygulama)
-
-**Hedef:** Sunucu, auth veya internet bağlantısı gerektirmeksizin cihaz üzerinde tam işlevsel çalışan uygulama.
+- Tema: [`track_calendar_tasks_habits/lib/core/theme/app_theme.dart`](track_calendar_tasks_habits/lib/core/theme/app_theme.dart), renkler: [`app_colors.dart`](track_calendar_tasks_habits/lib/core/theme/app_colors.dart).
+- Ana sayfa bölüm renkleri (üçlü metafor ile uyumlu): `homeSectionCalendarBlue`, `homeSectionHabitsCoral`, `homeSectionTodosOrange`.
+- Merkez **Ekle** FAB yüz rengi (koyu gri referans): `neoStackFace` (`#434D5E`) — yapılacaklar filtresinde **seçili** chip’ler bu tona hizalanır.
 
 ---
 
-## 1. Uygulama Genel Yapısı
+## 2. v0.1 — Tam yerel MVP
 
-### 1.1. Alt Navigasyon
-
-Uygulama üç ana sekmeye sahiptir:
-
-| Tab | İkon | Açıklama |
-|-----|------|----------|
-| 🏠 Ana Sayfa | home | Takvim, Alışkanlıklar ve Yapılacaklar |
-| ➕ Ekle | add_circle | Yeni kayıt ekleme bottom sheet |
-| 👤 Profil | person | Özet istatistikler |
+**Tanım:** Uygulama ilk kurulumdan itibaren giriş zorunluluğu olmadan; veri **yerelde** kalır; liste, ekleme, düzenleme, silme, seri ve es geç kuralları **çevrimdışı** test edilebilir.
 
 ---
 
-## 2. Ana Sayfa Düzeni
+### FR-01 — Alt navigasyon: üçgen köşe metaforu (Takvim · Alışkanlık · Yapılacaklar)
 
-Ana sayfa **dikey olarak üç bölümden** oluşur ve tek sayfa üzerinde yukarıdan aşağıya sıralanır.
+**Bağlam:** Alt barda merkezde **Ekle**; sağında tek sekme içinde üç mod arasında geçiş.
 
----
+**Gereksinim:**
 
-### 2.1. Takvim Barı (En Üst)
+- Sağ sekmede **tek bir ikon alanı**, içinde **eşkenar üçgen** çizimi; üç köşe sırasıyla:
+  - **Üst:** Takvim (renk: `homeSectionCalendarBlue`),
+  - **Sol alt:** Alışkanlık (`homeSectionHabitsCoral`),
+  - **Sağ alt:** Yapılacaklar (`homeSectionTodosOrange`).
+- Seçili mod: ilgili köşe **vurgulu** (dolgu veya kalın kontur + hafif ölçek); diğer köşeler ikincil opaklıkta.
+- **Semantics:** `Takvim görünümü`, `Alışkanlık görünümü`, `Yapılacaklar görünümü` ve seçili durum duyurusu.
+- Dokunma hedefi minimum 48×48 dp; köşelere yakın dokunuşlarda en yakın köşe / mod seçilir veya üçgen üzerinde konum bazlı hit-test.
 
-```
-◀  Paz  Pzt  Sal  ●Çar●  Per  Cum  Cmt  ▶       [📅]
-```
+**Kabul kriterleri:**
 
-- Yatay kaydırılabilir (`ScrollableCalendarBar`).
-- Varsayılan merkez: **Bugün**.
-- Kaydırma aralığı: **Bugünden 10 gün öncesi ↔ 10 gün sonrası** (toplam 21 gün görünür havuz, ekranda ~7 gün).
-- Sağ köşede **Takvim Görünümü ikonu** (📅) bulunur; ilerleyen versiyonlarda tam takvim ekranına açılır.
-- Seçili gün: `#0077B6` dolu daire, bugün ise ek "bugün" etiketi.
-- Gün değiştiğinde aşağıdaki tüm bölümler seçili güne göre yeniden render edilir.
-
----
-
-### 2.2. Takvim Etkinlikleri Bölümü
-
-Seçili günün **saatli planları** (Takvime Ekle tipi kayıtlar) kronolojik sıraya göre listelenir.
-
-**Kart anatomisi:**
-- Sol: saat etiketi (Örn: `14:30`) (Eğer varsa bitiş saati (veya başka günse bitişi o günün tarihi görünür) de gösterilir)
-- Orta: başlık + opsiyonel açıklama
-- Sağ: tamamlama checkbox'ı
-- Sol bordür rengi: tamamlandıysa yeşil, tamamlanmadıysa öncelik rengi
-
-**Boş durum:** "Bu gün için planlanmış etkinlik yok."
+- [ ] Üç mod arasında geçiş tek sekmeden yapılır; tema renkleri PRD’deki token’larla uyumludur.
+- [ ] Erişilebilirlik etiketleri VoiceOver / TalkBack ile doğrulanır.
 
 ---
 
-### 2.3. Alışkanlık Takibi Bölümü
+### FR-02 — Profil ekranı tema uyumu
 
-Seçili güne göre kullanıcının **o güne atanmış tekrar eden alışkanlıkları** listelenir.
+**Gereksinim:** Profil; `AppTheme` / `ColorScheme` / `AppTypography` ile kartlar, arka plan, butonlar ve ayırıcılar ana uygulama ile **görsel olarak tutarlı** (neo-brutalist / Material 3 karışımı mevcut dil korunur).
 
-**İlerleme Mekanizması:**
-- Her alışkanlığın 0–100 arası bir tamamlanma yüzdesi vardır.
-- Kullanıcı; kart üzerindeki yüzde düğmesine veya progress slider'a basarak değeri günceller.
-- Örnek: "Günde 2 litre su iç" → `%60`
-- Tamamlama eşiği: `%100` işaretlendiğinde kart "tamamlandı" görünümüne geçer.
+**Kabul kriterleri:**
 
-**Seri (Streak) Sistemi:**
-- Bir alışkanlık hedef yüzdesine (`target_progress`, varsayılan %100) ulaştığında o planlı gün seriye sayılır.
-- Kart üzerinde 🔥 + gün sayısı rozeti gösterilir; seçili takvim gününe kadar olan planlı günler üzerinden hesaplanır (ör. 1. gün 1, 2. gün 2).
-- **Es Geçme Hakkı:** Her alışkanlık için haftada 1 kez (ISO haftası, Pazartesi başlangıç) "Bugün Es Geç"; o planlı gün `skipped` sayılır ve seri kırılmaz.
-- **Kurtarma günü:** Planlı bir gün ne hedefe ulaşıldı ne de Es Geç kullanıldıysa, seri hemen sıfırlanmaz; bir sonraki planlı gün "kurtarma günü"dür: kullanıcı o gün `%100` tamamlayabilir veya "Seriyi geri getir" ile köprü kurar; ardından seri sayacı bir üst değeri gösterir (ör. 3. gün kaçırıldıysa kurtarma gününde 🔥 3).
-- **Sert kapanış:** Kaçırılan günde Es Geç yoksa ve kurtarma günü da geçmeden seri toparlanmadıysa seri sıfırlanır; `series_closed_after` ankorundan **sonraki** takvim günlerinde bu alışkanlık ana sayfa listesinde gösterilmez; ankor günü ve geçmiş günlerde geçmiş görünüm korunur. Yeniden başlatmak için kart menüsünden "Seriyi yeniden başlat" kullanılır (veya düzenleme akışı üzerinden aynı işlem).
-
-**Filtreleme:** Bölüm başlığının sağında mini filtre: `Tümü | Tamamlanan | Bekleyen`
-
-**Boş durum:** "Bu güne atanmış alışkanlık yok."
+- [ ] Profilde kullanılan yüzey renkleri `surface` ailesiyle uyumlu; metin kontrastı okunabilir.
+- [ ] Navigasyon ve üst çubuk ile çakışan renk tutarsızlığı yok.
 
 ---
 
-### 2.4. Yapılacaklar Listesi Bölümü
+### FR-03 — Yeni alışkanlık: ikon ve ikon rengi
 
-Seçili güne ait görevler **checkbox listesi** olarak gösterilir.
+**Gereksinim:** Alışkanlık oluştururken:
 
-**Kart anatomisi:**
-- Sol: öncelik renk şeridi (Kırmızı=Yüksek, Turuncu=Orta, Gri=Düşük)
-- Checkbox: tamamlandı mı?
-- Başlık + opsiyonel eğer bitiş tarihi varsa bitiş tarihi etiketi
-- Sağ: bitiş tarihi varsa küçük tarih badge'i
+- **İkon:** Önceden tanımlı bir setten seçim (ör. `IconData` code point veya `Icons.xxx` anahtarı string olarak saklanır: `icon_key`).
+- **İkon rengi:** Kullanıcı seçimi (ARGB hex veya tema indeksi); alan: `icon_color_argb`.
 
-**Filtreleme:**
-"Yapılacaklar Listesi" başlığının **sağında** filtre menüsü bulunur. İki boyutlu filtreleme:
+**Kabul kriterleri:**
 
-| Boyut | Seçenekler |
-|-------|-----------|
-| Sıralama | En Önemli · En Yakın Bitiş Tarihi |
-| Zaman Aralığı | Bugün · Bu Hafta · Bu Ay · Tümü |
-
-> Filtre uygulandığında sadece bitiş tarihi olan kayıtlar ilgili zaman filtresinde görünür. Bitiş tarihi olmayan kayıtlar "Tümü" filtresinde her zaman görünür.
-
-**Boş durum:** "Bu gün için yapılacak yok."
+- [ ] Kayıtlı alışkanlık kartında seçilen ikon ve renk görünür.
+- [ ] Veri modelinde ikon alanları dolu; varsayılan ikon + renk tanımlıdır.
 
 ---
 
-### 2.5. Uzun Basma (Long Press) ile Düzenleme / Silme
+### FR-04 — Veritabanı: takvim, alışkanlık, yapılacaklar ayrımı (buluta hazır)
 
-**En kritik etkileşim kuralı:** Kullanıcı, üç bölümdeki herhangi bir karta **uzun basarsa** context menü açılır.
+**İlkeler:**
 
-- **Düzenle:** İlgili kayıt tipinin dolu halde edit bottom sheet'i açılır.
-- **Sil:** Tam ekran onay modalı açılır (diğer UI elementlerinin önünde).
-  - Modal: "Bu kaydı silmek istediğine emin misin?" + **İptal** / **Sil** butonları.
-  - Silme işlemi ilgili completion ve streak kayıtlarını da temizler.
+- **Ayrı tablolar** (veya ayrı entity koleksiyonları); geniş tek `records` tablosundan kaçınılmalı (senkron ve şema evrimi için).
+- Ortak meta alanlar (her ana tabloda):  
+  `id` (UUID, metin), `created_at`, `updated_at`, `deleted_at` (NULL = aktif), `local_revision` (integer, monoton artan), isteğe bağlı `device_id` (v0.2 için yer ayrılır).
 
----
+#### 2.1. Tablo: `calendar_events`
 
-## 3. Kayıt Tipleri
+| Alan | Tip | Açıklama |
+|------|-----|----------|
+| id | TEXT PK | UUID |
+| title | TEXT | Başlık |
+| description | TEXT? | Açıklama |
+| starts_at | TEXT ISO8601 | Başlangıç (tarih+saat, yerel) |
+| ends_at | TEXT ISO8601? | Bitiş |
+| is_all_day | INTEGER 0/1 | |
+| created_at, updated_at, deleted_at | TEXT / INT | |
+| local_revision | INTEGER | |
 
-### 3.1. Takvime Ekle (Görev / Etkinlik)
+#### 2.2. Tablo: `habits`
 
-| Alan | Detay |
-|------|-------|
-| Başlık | Zorunlu |
-| Tarih & Saat | Zorunlu (tarih seçici + saat seçici) |
-| Bitiş Saati | Opsiyonel |
-| Açıklama | Opsiyonel |
+| Alan | Tip | Açıklama |
+|------|-----|----------|
+| id | TEXT PK | |
+| title | TEXT | |
+| description | TEXT? | |
+| schedule_kind | TEXT | `weekly` \| `interval` |
+| interval_days | INTEGER? | N günde bir; `schedule_kind=interval` iken zorunlu |
+| weekly_days_mask | INTEGER? | Bit mask Pzt…Paz veya 7 bool JSON; `weekly` iken |
+| anchor_date | TEXT ISO8601 date | İlk planlı gün (oluşturma veya kullanıcı seçimi) |
+| target_progress | INTEGER | 0–100, tamamlanma eşiği |
+| icon_key | TEXT | |
+| icon_color_argb | INTEGER veya TEXT | |
+| created_at, updated_at, deleted_at | | |
+| local_revision | INTEGER | |
 
-→ Ana sayfada **Takvim Etkinlikleri** bölümünde görünür.
+#### 2.3. Tablo: `todos`
 
----
+| Alan | Tip | Açıklama |
+|------|-----|----------|
+| id | TEXT PK | |
+| title | TEXT | |
+| description | TEXT? | |
+| due_date | TEXT ISO8601 date? | |
+| priority | TEXT veya INT | `high` / `medium` / `low` — **UI’da öncelik için ikon kullanılmaz** (FR-07) |
+| is_completed | INTEGER 0/1 | |
+| completed_at | TEXT? | |
+| created_at, updated_at, deleted_at | | |
+| local_revision | INTEGER | |
 
-### 3.2. Yeni Alışkanlık (Tekrar Eden Görev)
+#### 2.4. Tablo: `habit_day_logs` (planlı gün başına durum — senkron için granüler)
 
-| Alan | Detay |
-|------|-------|
-| Başlık | Zorunlu |
-| Önem Derecesi | Yüksek · Orta · Düşük |
-| Tekrar Günleri | Haftanın belirli günleri VEYA her X günde bir |
-| İlerleme Hedefi | 0–100 arası, kullanıcı tanımlı (Örn: "80% yeterli") — opsiyonel |
-| İkon / Emoji | Opsiyonel |
+| Alan | Tip | Açıklama |
+|------|-----|----------|
+| id | TEXT PK | |
+| habit_id | TEXT FK | |
+| calendar_date | TEXT ISO8601 date | Yerel takvim günü |
+| planned | INTEGER 0/1 | Bu gün planlı mı |
+| progress | INTEGER 0–100 | |
+| status | TEXT | `pending` \| `met` \| `missed` \| `skipped` \| `series_lapsed` |
+| skip_source | TEXT? | v0.1: `free_weekly`; v0.2+: `ad` placeholder |
+| created_at, updated_at, deleted_at | | |
+| local_revision | INTEGER | |
 
-→ Ana sayfada **Alışkanlık Takibi** bölümünde görünür.
+#### 2.5. Tablo: `streak_snapshots` (isteğe bağlı özet; türetilebilir)
 
----
+| habit_id | TEXT PK | |
+| current_streak | INTEGER | Seçili güne göre gösterim için cache |
+| longest_streak | INTEGER | |
+| series_state | TEXT | `active` \| `broken` \| `closed` |
+| series_closed_after | TEXT date? | Bu tarihten **sonraki** günlerde liste gizleme |
+| updated_at | TEXT | |
 
-### 3.3. Yapılacak (To-Do)
+**Kabul kriterleri:**
 
-| Alan | Detay |
-|------|-------|
-| Başlık | Zorunlu |
-| Önem Derecesi | Yüksek · Orta · Düşük |
-| Bitiş Tarihi | Opsiyonel (tarihe basılırsa tarih seçici açılır) |
-| Açıklama | Opsiyonel |
-| Tekrar | Yok (tek seferlik checkbox) |
-
-→ Ana sayfada **Yapılacaklar Listesi** bölümünde görünür.
-
----
-
-## 4. Kayıt Ekleme Akışı (Bottom Sheet)
-
-```
-Adım 1: "Ne Eklemek İstersin?"
- ┌──────────────────┐
- │ 📅 Takvime Ekle  │
- │ 🔁 Yeni Alışkanlık│
- │ ☑️ Yapılacak Ekle │
- └──────────────────┘
-
-Adım 2: İsimlendirme + Hızlı Öneri Chip'leri
-
-Adım 3: Tip'e özel detay ekranı (saat / gün seçici / öncelik)
-```
-
-- Ekranda gereksiz alan gösterilmez: "Saat Ekle" seçilirse saat seçici açılır, seçilmezse görünmez.
-- Hızlı öneri chip'leri: "💧 Su İç", "📖 Kitap Oku", "🏃 Spor Yap" vb.
-
----
-
-## 5. İlk Açılış (Onboarding)
-
-- Kullanıcı uygulamayı ilk açtığında boş ekran **görmez**.
-- Popüler alışkanlık önerileri sunulur (tek tıkla ekle).
-- "Boş Başla" seçeneği de mevcut.
-- `SharedPreferences` ile bir kez gösterilir.
-
----
-
-## 6. Profil Ekranı (Minimal MVP)
-
-- Toplam aktif alışkanlık sayısı
-- Bugünkü tamamlanma yüzdesi (`CircularProgressIndicator`)
-- En uzun seri rekoru
-- Toplam tamamlanan yapılacak sayısı
-- Bildirim yönetme ayarları
----
-
-## 7. Bildirimler
-
-| Bildirim | Zamanlama |
-|----------|-----------|
-| Saatli etkinlik hatırlatıcı | Etkinlikten X dakika önce |
-| Akşam motivasyon bildirimi | Her gün 21:00 — eksik alışkanlık sayısı ile dinamik mesaj |
+- [ ] CRUD işlemleri bu tablolar üzerinden yapılır; migration sürümü yönetilir.
+- [ ] Soft delete ve `local_revision` senkron taslağı (v0.2) ile uyumludur.
 
 ---
 
-## 8. V1 Veritabanı Şeması (SQLite — sqflite)
+### FR-05 — Planlama ve seri mantığı (N günde bir örnek; es geç haftada 1)
 
-```sql
--- Ana kayıt tablosu (3 tip birlikte)
-CREATE TABLE records (
-  id              TEXT PRIMARY KEY,
-  type            TEXT NOT NULL,       -- 'event' | 'habit' | 'todo'
-  title           TEXT NOT NULL,
-  description     TEXT,
-  icon            TEXT,
-  priority        TEXT,                -- 'low' | 'medium' | 'high'
-  -- Alışkanlık alanları
-  repeat_days     TEXT,                -- JSON: '["MON","WED","FRI"]'
-  interval_days   INTEGER,             -- Alternatif: her X günde bir
-  target_progress INTEGER DEFAULT 100, -- Tamamlanmış sayılan % eşiği
-  -- Takvim etkinliği alanları
-  scheduled_date  TEXT,                -- 'yyyy-MM-dd'
-  scheduled_time  TEXT,                -- 'HH:mm'
-  end_time        TEXT,                -- 'HH:mm' (opsiyonel)
-  -- To-do alanları
-  due_date        TEXT,                -- 'yyyy-MM-dd' (opsiyonel)
-  -- Ortak alanlar
-  created_at      TEXT NOT NULL,
-  is_active       INTEGER DEFAULT 1,
-  sort_order      INTEGER DEFAULT 0    -- Gelecekte sürükle-bırak için
-);
+#### 2.5.1. Planlı günlerin üretimi
 
--- Günlük tamamlama / ilerleme kayıtları
-CREATE TABLE completions (
-  id          TEXT PRIMARY KEY,
-  record_id   TEXT NOT NULL,
-  date        TEXT NOT NULL,           -- 'yyyy-MM-dd'
-  status      TEXT NOT NULL,           -- 'done' | 'skipped' | 'partial'
-  progress    INTEGER DEFAULT 0,       -- 0-100 (alışkanlıklar için)
-  note        TEXT,                    -- Opsiyonel kullanıcı notu
-  FOREIGN KEY (record_id) REFERENCES records(id) ON DELETE CASCADE
-);
+- `anchor_date` = \(D_0\) (tarih; saat yok).
+- `schedule_kind = interval` ve `interval_days = N` ise planlı günler:  
+  \(D_0, D_0 + N, D_0 + 2N, …\) (takvim günü olarak).
 
--- Seri (streak) bilgileri — sadece alışkanlıklar için
-CREATE TABLE streaks (
-  record_id              TEXT PRIMARY KEY,
-  current_streak         INTEGER DEFAULT 0,
-  longest_streak         INTEGER DEFAULT 0,
-  last_done_date         TEXT,
-  skip_used_this_week    INTEGER DEFAULT 0,
-  skip_week_start        TEXT,         -- Hangi haftanın skip'i kullanıldı
-  FOREIGN KEY (record_id) REFERENCES records(id) ON DELETE CASCADE
-);
-```
+**Görünürlük (ana liste, seçili gün = \(S\)):**
 
-> **Not:** `ON DELETE CASCADE` sayesinde bir kayıt silindiğinde ilgili completion ve streak kayıtları otomatik temizlenir.
+- Alışkanlık, \(S\) için listelenir **yalnızca** \(S\) bir planlı günse ve:
+  - \(S \ge D_0\) (anchor öncesi günlerde görünmez),
+  - `series_state != closed` **veya** \(S \le\) `series_closed_after` kuralı PRD’de: seri kapandıktan sonra **ileri** günlerde gizle; geçmiş / ankor gününde geçmiş görünüm korunabilir (ürün kararı: geçmiş günlerde kart “seri bitti” durumu ile görünür).
+
+**Örnek (kanonik kabul testi):**  
+Anchor \(D_0\) = ayın 10’u, \(N = 2\). Planlı günler: 10, 12, 14, …
+
+- 8 ve 9: anchor öncesi → **bu alışkanlık için planlı değil** (liste yok).
+- 11: planlı gün değil → o gün “bugün yapılacak alışkanlık” listesinde **bu seri için slot yok** (PRD’ye uygun).
+- 12: planlı → kullanıcı arayüzünde **tamamlanması beklenen** gün.
+
+#### 2.5.2. Seri sayımı
+
+- Seri, ardışık **planlı** günlerde hedefe (`target_progress`) ulaşma ile artar.
+- 10’da tamamlandı ve 12’de tamamlandı → gösterilen seri **2** (ör. alev sayısı 2).
+
+#### 2.5.3. Kaçırma ve serinin bitmesi
+
+- 10’da tamamlandı, **12’de tamamlanmadı** (ve o gün henüz kapanmadıysa beklenir; 12 bittikten sonra) bir sonraki planlı gün **14**:
+  - 14’e gelindiğinde, 12 planlı günü hedefe ulaşmadan kapatıldıysa → **seri biter**; UI’da “seri bitti” ve **`series_closed_after`** / `series_state = closed` güncellenir.
+  - **Es geç** bu senaryoda devreye girebilir (aşağıda).
+
+#### 2.5.4. Es geç (Skip)
+
+- **Haftada 1** kullanım: hafta tanımı **ISO haftası, Pazartesi 00:00 — Pazar 23:59:59** (yerel saat dilimi).
+- Es geç, **yalnızca planlı bir gün** için kullanılabilir; o gün `skipped` + `skip_source = free_weekly` olarak işlenir; **seri kırılmaz** (bir sonraki planlı güne köprü kurar).
+- Aynı ISO haftasında ikinci es geç **pasif**; hafta değişince sıfırlanır.
+- **v0.2 notu:** `skip_source` alanı ileride `ad` ile doldurularak reklam izlenmesi sonrası ek hak tanımına genişletilecek (v0.1’de sadece `free_weekly`).
+
+**Kabul kriterleri:**
+
+- [ ] Yukarıdaki 10 / 12 / 14 tarih senaryosu birim testi ile doğrulanır.
+- [ ] Haftalık es geç sayacı doğru sıfırlanır.
+- [ ] Seri bittiğinde ileri tarihlerde liste kuralları uygulanır; kullanıcıya “yeniden başlat” veya düzenleme akışı (minimal: seriyi sıfırlama) tanımlanır.
 
 ---
 
-## 9. V1 Definition of Done
+### FR-06 — Boş durumlar: emoji yok, ikon
 
-| Kriter | Durum |
-|--------|-------|
-| `flutter run` ile local'de çalışır (iOS/Android) | ⬜ |
-| 3 kayıt tipi eklenebilir / düzenlenebilir / silinebilir | ⬜ |
-| Kaydırılabilir takvim barı (±10 gün) çalışır | ⬜ |
-| Takvim etkinlikleri bölümü seçili güne göre gösterilir | ⬜ |
-| Alışkanlık takibi 0-100% progress ile çalışır | ⬜ |
-| Yapılacaklar listesi checkbox + filtreleme çalışır | ⬜ |
-| Uzun basma ile düzenleme / silme akışı çalışır | ⬜ |
-| Streak motoru doğru hesaplar | ⬜ |
-| Es geçme hakkı sistemi çalışır | ⬜ |
-| İlk açılış onboarding ekranı görünür | ⬜ |
-| Saatli etkinlik bildirimi tetiklenir | ⬜ |
-| Veriler uygulama restart'ta korunur (sqflite) | ⬜ |
-| iPhone SE (375px) boyutunda kırılma yok | ⬜ |
+**Gereksinim:** “Bu tarih için … yok” tipi metinlerde emoji kullanılmaz; `Icon` widget (Material veya uygulama ikon seti) ile görsel destek verilir.
+
+**Kabul kriterleri:**
+
+- [ ] Tüm boş durum bileşenleri ikon + metin kullanır.
 
 ---
 
----
+### FR-07 — Önem derecesi: ikon kaldırma
 
-# 🟩 V2 — Production (Backend + Sunucu)
+**Gereksinim:** Öncelik / önem seçimi veya gösteriminde **ayrı ikonlar kullanılmaz**; renk şeridi, metin etiketi veya segment yeterlidir.
 
-> V1 MVP tamamlanıp onaylandıktan sonra başlanacaktır. Bu bölüm mimari yönlendirme ve önceliklendirme amaçlıdır.
+**Kabul kriterleri:**
 
----
-
-## 1. Kimlik Doğrulama — Firebase Authentication
-
-**Firebase Authentication** kullanılacaktır.
-
-**V2'de desteklenecek giriş yöntemleri:**
-- Google ile Giriş
-- Apple ile Giriş
-- E-posta / Şifre
-- (Opsiyonel) Telefon numarası ile OTP
-
-**Mimari not:** Flutter tarafında `firebase_auth` paketi kullanılır. Kullanıcı giriş yapmamışsa veriler local SQLite'ta tutulmaya devam eder; giriş yapıldığında Firestore'a senkronize edilir.
+- [ ] Öncelik satırlarında ikon yok; yalnızca renk / yazı.
 
 ---
 
-## 2. Bulut Veritabanı — Firebase Firestore
+### FR-08 — Yapılacaklar filtresi metin ve chip rengi
 
-Google'ın önerilen bulut veritabanı çözümü **Cloud Firestore**'dur (gerçek zamanlı senkronizasyon, offline destek, ölçeklenebilir). Profil bölümünde verilerin senkronize edilip edilmediğin görüntülenebilir.
+**Gereksinim:**
 
-### Koleksiyon Yapısı
+- Başlık metni tam olarak: **Yapılacakları Filtrele** (sadece “F” harfi büyük, Türkçe başlık biçimi).
+- Seçili filtre chip’leri: arka plan / kontur, **merkez Ekle butonu yüzü** ile aynı koyu gri ton: `AppColors.neoStackFace` (`#434D5E`); üzerindeki metin okunaklı kontrast (ör. beyaz veya `neoStackOnFace`).
 
-```
-users/
-  {userId}/
-    profile/          → displayName, email, createdAt
-    records/          → kayıtlar (event | habit | todo)
-      {recordId}/
-        completions/  → günlük tamamlama kayıtları
-        streak/       → streak belgesi
-    settings/         → bildirim tercihleri, tema, dil
+**Kabul kriterleri:**
 
-groups/               → Sosyal özellik (V2.3+)
-  {groupId}/
-    members/
-    shared_records/
-    activity_feed/
-```
-
-**Neden Firestore?**
-- Offline-first çalışır (cihaz çevrimdışıyken yerel önbellekte günceller, çevrimiçi olunca senkronize eder).
-- Gerçek zamanlı stream desteği (arkadaş aktiviteleri anlık görünür).
-- `firebase_firestore` Flutter paketi ile kolay entegrasyon.
+- [ ] Metin birebir doğru.
+- [ ] Seçili chip görseli FAB koyu gri ile eşleşir.
 
 ---
 
-## 3. Takvim Senkronizasyonu
+### FR-09 — İlk kurulum onboarding
 
-| Sağlayıcı | API | Durum |
-|-----------|-----|-------|
-| Google Calendar | Google Calendar API v3 | V2.1 |
-| Apple Calendar | EventKit (iOS native) | V2.1 |
-| Microsoft Outlook | Microsoft Graph API | V2.2 |
+**Gereksinim:** Uygulama **ilk indirme / ilk açılış** sonrası bir kez: takvim çubuğu, üç mod, ekleme akışı, seri ve es geç kısa anlatılır (2–4 ekran veya tek kaydırmalı sayfa + “Başla”).
 
-**Senkronizasyon mantığı:** Çift yönlü (myNewHabit → Takvim ve Takvim → myNewHabit). Çakışma yönetimi: "Son güncellenen kazanır" politikası (V2.1 için).
+**Kabul kriterleri:**
+
+- [ ] `SharedPreferences` (veya eşdeğeri) ile “onboarding tamamlandı” bayrağı; tekrar gösterilmez (Ayarlar’dan sıfırlanabilir opsiyonel).
 
 ---
 
-## 4. Sosyal Özellikler (Arkadaşlarla Paylaşım)
+### FR-10 — Açılış deneyimi (beyaz ekran önleme)
 
-> Özellikle **to-do listesi** ve **alışkanlık takibi** arkadaşlarla paylaşılabilir olacak şekilde tasarlanacaktır.
+**Gereksinim:**
 
-### 4.1. Arkadaş Sistemi
-- Kullanıcı adı veya e-posta veya telefon numarası ile arkadaş ekleme
-- Arkadaşlık isteği / kabul akışı
+- **Native splash:** Android `launch_background`, iOS `LaunchScreen` — arka plan `neoChromePlate` veya `surface` ile uyumlu; kısa süre beyaz flaş minimize.
+- **İlk frame:** `MaterialApp` / `runApp` sonrası hemen tema dolgu + marka işareti veya skeleton; ağır init arka planda.
 
-### 4.2. Paylaşılan Alışkanlıklar
-- Bir alışkanlığı "Ortak Hedef" olarak işaretle
-- Gruba davet et (Örn: "30 Gün Spor" meydan okuması)
-- Grup içi ilerleme tablosu (kim ne kadar tamamladı)
+**Kabul kriterleri:**
 
-### 4.3. Paylaşılan Yapılacaklar Listesi
-- Bir listeyi arkadaşla paylaş
-- Ortak liste: her iki kullanıcı da görev ekleyebilir / tamamlayabilir
-- Gerçek zamanlı güncelleme (Firestore stream)
+- [ ] Soğuk başlatmada kullanıcı anlamlı bir görsel görür (düz beyaz ekran kabul edilmez).
 
 ---
 
-## 5. V2 Ek Özellikler
+## 3. v0.2 — Firebase ve genişleme
 
-| Özellik | Versiyon | Açıklama |
-|---------|----------|----------|
-| Ana Ekran Widget'ları | V2.1 | iOS/Android widget: alışkanlıkları uygulamayı açmadan tamamla |
-| Kategorizasyon & Etiketler | V2.1 | Renk kodlu etiketler (Sağlık, İş, Kişisel Gelişim) |
-| Sürükle & Bırak Sıralama | V2.1 | Aynı öncelik grubunda manuel sıralama |
-| Gelişmiş Analitik | V2.2 | Aylık/yıllık grafikler, `fl_chart` |
-| Gamification | V2.3 | Rozetler, seviye sistemi, haftalık challenge |
-| Dark Mode | V2.1 | Sistem temasına göre otomatik geçiş |
+### FR-11 — Firebase Authentication
+
+- E-posta/şifre ve istenirse Google ile giriş; oturum durumu profilde görünür.
+
+### FR-12 — Veri senkronizasyonu
+
+- **Yerel öncelik:** Çevrimdışı yapılan değişiklikler kuyruklanır; bağlantı gelince gönderilir.
+- Bulut kaydı daha eskiyse: **yerel → buluta** aktarım (son yazan kazanır veya `local_revision` ile birleştirme politikası dokümante).
+- **Çakışma:** Aynı `id` için iki taraf da güncellediyse kullanıcıya **seçim ekranı**: “Yereli tut”, “Bulutu tut”, mümkünse alan alan birleştir (ör. sadece `title` çakışması).
+
+### FR-13 — Harici takvimler
+
+- **Google Calendar**, **Apple Calendar** (EventKit), **Microsoft Outlook** (Microsoft Graph).
+- **MVP önerisi:** Salt okunur **içe aktarma** ve yerel `calendar_events` ile eşleme; iki yönlü yazma sonraki alt sürüme bırakılabilir.
+- OAuth / izin akışları platform gereksinimlerine uygun.
+
+### FR-14 — Ana ekran widget’ları (ürün önerileri)
+
+1. **Bugünün yapılacakları:** Tamamlanmamış ilk 5 madde; tik ile kapatma (iOS WidgetKit / Android App Widget).
+2. **Seri özeti:** En yüksek aktif seri + seçilen alışkanlık ikonu.
+3. **Hızlı tamamla:** Tek alışkanlık kısayolu; slider veya tek dokunuşla %100.
+4. **Mini takvim:** Haftalık nokta görünümü; bugün ve planlı günler vurgulu.
+
+### FR-15 — Rozet sistemi (ürün önerileri)
+
+| Rozet | Tetikleyici | Örnek depolama |
+|--------|-------------|----------------|
+| İlk adım | İlk alışkanlık oluşturma | `badges_earned` |
+| Ateş 3 | Üst üste 3 planlı gün tamamlama | |
+| Ateş 7 | 7 planlı gün | |
+| Su gibi | 7 gün içinde 10 yapılacak tamamlama | |
+| Zamanında | 5 etkinliği bitişten önce tamamlama | |
+| Haftalık plan | ISO haftasında tüm planlı alışkanlıklar | |
+| Es geç ustası | Es geç kullanmadan 30 gün | (negatif ödül değil; dikkatli kopya) |
+| Bulut | v0.2 ilk başarılı senkron | |
+
+Tablo taslağı: `badges` (tanım), `user_badges` (user_id + badge_id + earned_at) — v0.2.
+
+### FR-16 — Sosyal: arkadaşlık ve paylaşım
+
+**Arama / ekleme:** Kullanıcı adı, e-posta veya telefon ile arama; **arkadaşlık isteği** gönderimi; **kabul / red** bildirimi (push v0.2+).
+
+**Paylaşılan alışkanlık:** İki kullanıcı aynı şablonu paylaşır; ilerleme gizlilik seviyesine göre (sadece “tamamlandı” boolean veya yüzde).
+
+**Paylaşılan yapılacaklar listesi:** Ortak liste koleksiyonu; üyeler madde ekler.
+
+**Firestore taslağı (üst seviye):**
+
+- `users/{uid}` — profil, görünen ad, `username` (benzersiz indeks), `phone_hash` / e-posta (KVKK / GDPR uyumu için minimum PII).
+- `friend_requests/{id}` — from, to, status.
+- `friendships/{id}` — sorted uids.
+- `shared_habits/{id}` — üyeler, habit şablonu referansı, kurallar.
+- `shared_todo_lists/{id}` — üyeler, `todos` alt koleksiyonu veya ayrı `shared_todos`.
+
+**Kabul (v0.2):**
+
+- [ ] İstek/kabul akışı uçtan uca çalışır.
+- [ ] Paylaşılan içerikte yetkisiz okuma engellenir (Security Rules).
 
 ---
+
+## 4. Kalite ve tanım (DoD özeti)
+
+- v0.1: Kritik kullanıcı akışları çevrimdışı; seri örnek testi geçer; onboarding ve splash davranışı doğrulanır.
+- v0.2: Auth + en az bir senkron senaryosu + çakışma UI demo testi; harici takvim için en az bir platformda pilot.
