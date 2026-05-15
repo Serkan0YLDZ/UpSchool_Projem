@@ -60,19 +60,29 @@
 
 | ID | Hikaye | PRD |
 |----|--------|-----|
-| US-2.1 | Kullanıcı olarak, alt barda üçgen üzerinden Takvim / Alışkanlık / Yapılacaklar arasında geçiş yapabilmeliyim. | FR-01 |
-| US-2.2 | Kullanıcı olarak, ekran okuyucuda her mod için anlamlı etiket duyabilmeliyim. | FR-01 |
+| US-2.1 | Kullanıcı olarak, alt barda üç mod ikonunun üçgenin köşeleri gibi dizildiğini görmeliyim (üçgen çizilmez). | FR-01 |
+| US-2.2 | Kullanıcı olarak, çift dokunuşla Takvim → Alışkanlık → Yapılacaklar arasında döngüsel geçiş yapabilmeliyim. | FR-01 |
+| US-2.3 | Kullanıcı olarak, uzun basışla mod seçici (picker) açabilmeliyim. | FR-01 |
+| US-2.4 | Kullanıcı olarak, ekran okuyucuda her mod için anlamlı etiket duyabilmeliyim. | FR-01 |
 
 ### Teknik görevler
 
-- [ ] `CustomPainter` veya `Stack` + üçgen geometrisi; hit test.
-- [ ] `Semantics` etiketleri.
-- [ ] Renk token’ları: `homeSectionCalendarBlue`, `homeSectionHabitsCoral`, `homeSectionTodosOrange`.
+- [x] `_TriangleCornerNav` widget’ı: `Stack` + `Positioned` ile 3 ikon üçgen köşe pozisyonlarında — **üçgen çizilmez**.
+- [x] `_CornerIcon`: aktif ikon büyük + tam renk; pasif ikon küçük + düşük opasite; `AnimatedOpacity` geçişi.
+- [x] `GestureDetector.onDoubleTap` → `_nextFocusRoute()` döngüsel geçiş (Takvim→Alışkanlık→Yapılacaklar→Takvim).
+- [x] `GestureDetector.onLongPress` → `FocusModePickerSheet` (mevcut picker korunur).
+- [x] **Tek dokunuş bellek davranışı:** `MainShell`'de `static String _lastFocusRoute` tutulur; odak bölümündeyken her `build()`'de güncellenir. Tek tap → odak dışındaysa `_lastFocusRoute`'a gider, odak içindeyken hiçbir şey yapmaz.
+- [x] `Semantics` etiketleri: aktif mod adı + “seçili” duyurusu.
+- [x] Renk token’ları: `homeSectionCalendarBlue`, `homeSectionHabitsCoral`, `homeSectionTodosOrange`.
 
 ### DoD
 
-- [ ] PRD renkleri ve köşe eşlemesi doğrulandı.
-- [ ] Küçük ekranda (ör. 375 genişlik) taşma yok.
+- [x] Üçgen çizilmediği, yalnızca köşe konumlaması kullanıldığı doğrulandı.
+- [x] Tek dokunuş: odak dışındayken `_lastFocusRoute`’a gidildiği, odak içindeyken değişiklik olmadığı test edildi.
+- [x] Çift dokunuş döngüsü: Takvim→Alışkanlık→Yapılacaklar→Takvim manuel test edildi.
+- [x] Uzun basışta picker açılıyor; seçim sonrası doğru ekrana gidiliyor.
+- [x] PRD renkleri ve köşe eşlemesi doğrulandı.
+- [x] Küçük ekranda (ör. 375 genişlik) taşma yok.
 
 ---
 

@@ -31,18 +31,28 @@ Takvim etkinlikleri, tekrarlayan alışkanlıklar ve yapılacakları tek uygulam
 
 **Gereksinim:**
 
-- Sağ sekmede **tek bir ikon alanı**, içinde **eşkenar üçgen** çizimi; üç köşe sırasıyla:
-  - **Üst:** Takvim (renk: `homeSectionCalendarBlue`),
-  - **Sol alt:** Alışkanlık (`homeSectionHabitsCoral`),
-  - **Sağ alt:** Yapılacaklar (`homeSectionTodosOrange`).
-- Seçili mod: ilgili köşe **vurgulu** (dolgu veya kalın kontur + hafif ölçek); diğer köşeler ikincil opaklıkta.
+- Sağ sekmede **tek bir ikon alanı**; **üç mod ikonu** eşkenar üçgenin köşeleri gibi dizilir — **üçgen çizilmez**, yalnızca köşe konumlaması kullanılır:
+  - **Üst köşe:** Takvim ikonu (renk: `homeSectionCalendarBlue`),
+  - **Sol alt köşe:** Alışkanlık ikonu (`homeSectionHabitsCoral`),
+  - **Sağ alt köşe:** Yapılacaklar ikonu (`homeSectionTodosOrange`).
+- **Aktif mod ikonu:** Tam opasite + moda özgü renk + diğerlerine göre biraz daha büyük; pasif ikonlar küçük + düşük opasite.
+- **Dokunma davranışı:**
+  - **Tek dokunuş — odak dışındayken (Ana sayfa vb.):** Son ziyaret edilen odak bölümüne dönür (varsayılan: Takvim). Oturum süresince `static` değişkende tutulur.
+  - **Tek dokunuş — zaten odak bölümündeyken:** Değişiklik yok, mevcut modda kalınır.
+  - **Çift dokunuş (double tap):** Sıradaki moda geç — döngü: Takvim → Alışkanlık → Yapılacaklar → Takvim…
+  - **Uzun basış:** Mod seçici (picker) açılır; kullanıcı doğrudan istediği modu seçer.
 - **Semantics:** `Takvim görünümü`, `Alışkanlık görünümü`, `Yapılacaklar görünümü` ve seçili durum duyurusu.
-- Dokunma hedefi minimum 48×48 dp; köşelere yakın dokunuşlarda en yakın köşe / mod seçilir veya üçgen üzerinde konum bazlı hit-test.
+- Dokunma hedefi minimum 48×48 dp.
 
 **Kabul kriterleri:**
 
-- [ ] Üç mod arasında geçiş tek sekmeden yapılır; tema renkleri PRD’deki token’larla uyumludur.
-- [ ] Erişilebilirlik etiketleri VoiceOver / TalkBack ile doğrulanır.
+- [x] Üçgen çizilmez; yalnızca üç ikon köşe pozisyonlarında gösterilir.
+- [x] Tek dokunuş; odak dışındayken son ziyaret edilen bölüme döner, odak içindeyken değişiklik yapmaz.
+- [x] Çift dokunuşta döngüsel geçiş çalışır.
+- [x] Uzun basışta picker açılır ve seçim sonrası ilgili moda gidilir.
+- [x] Aktif mod ikonu pasiflerden belirgin biçimde büyüktür.
+- [x] Tema renkleri PRD token’larıyla uyumludur.
+- [x] Erişilebilirlik etiketleri VoiceOver / TalkBack ile doğrulanır.
 
 ---
 

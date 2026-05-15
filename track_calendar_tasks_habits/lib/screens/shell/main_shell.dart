@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/router/app_router.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/track_custom_colors.dart';
 import '../../core/utils/calendar_date.dart';
@@ -25,12 +26,19 @@ class MainShell extends StatelessWidget {
 
   final Widget child;
 
+  /// Son ziyaret edilen odak rotası (bellek). İlk açılışta Takvim varsayılan.
+  static String _lastFocusRoute = AppRoutes.focusCalendar;
+
   @override
   Widget build(BuildContext context) {
     final state = GoRouterState.of(context);
     final navPath = state.uri.path;
     final selectedIndex = _locationToIndex(navPath);
-    final focusClusterIcon = _focusClusterIcon(navPath);
+
+    // Odak bölümündeyken son rotayı güncelle (bellek).
+    if (navPath.startsWith(AppRoutes.focusParent)) {
+      _lastFocusRoute = navPath;
+    }
 
     return Scaffold(
       extendBody: true,
@@ -43,14 +51,17 @@ class MainShell extends StatelessWidget {
             bottom: 0,
             child: _CustomBottomNavBar(
               selectedIndex: selectedIndex,
-              focusClusterIcon: focusClusterIcon,
+              currentNavPath: navPath,
               onDestinationSelected: (index) => _onNavTap(context, index),
-              onCalendarTap: () {
-                final path = GoRouterState.of(context).uri.path;
-                if (path.startsWith(AppRoutes.focusParent)) return;
-                context.go(AppRoutes.focusCalendar);
+              onFocusTap: () {
+                // Odak dışındaysa son kaldığı bölüme git.
+                if (!navPath.startsWith(AppRoutes.focusParent)) {
+                  context.go(_lastFocusRoute);
+                }
               },
-              onCalendarLongPress: () => _openFocusModePicker(context),
+              onFocusDoubleTap: () =>
+                  context.go(_nextFocusRoute(navPath)),
+              onFocusLongPress: () => _openFocusModePicker(context),
             ),
           ),
         ],
@@ -222,28 +233,38 @@ class MainShell extends StatelessWidget {
     if (navPath.startsWith(AppRoutes.profile)) return 2;
     return 0;
   }
-}
 
-IconData _focusClusterIcon(String navPath) {
-  if (navPath.startsWith(AppRoutes.focusHabits)) return Icons.repeat_rounded;
-  if (navPath.startsWith(AppRoutes.focusTodos)) return Icons.checklist_rounded;
-  return Icons.calendar_today_rounded;
+  /// Sıradaki odak rotasını döndürür (çift dokunuş döngüsü).
+  static String _nextFocusRoute(String currentPath) {
+    if (currentPath.startsWith(AppRoutes.focusCalendar)) {
+      return AppRoutes.focusHabits;
+    }
+    if (currentPath.startsWith(AppRoutes.focusHabits)) {
+      return AppRoutes.focusTodos;
+    }
+    if (currentPath.startsWith(AppRoutes.focusTodos)) {
+      return AppRoutes.focusCalendar;
+    }
+    return AppRoutes.focusCalendar; // odak dışındayken → takvimden başla
+  }
 }
 
 class _CustomBottomNavBar extends StatelessWidget {
   const _CustomBottomNavBar({
     required this.selectedIndex,
-    required this.focusClusterIcon,
+    required this.currentNavPath,
     required this.onDestinationSelected,
-    required this.onCalendarTap,
-    required this.onCalendarLongPress,
+    required this.onFocusTap,
+    required this.onFocusDoubleTap,
+    required this.onFocusLongPress,
   });
 
   final int selectedIndex;
-  final IconData focusClusterIcon;
+  final String currentNavPath;
   final ValueChanged<int> onDestinationSelected;
-  final VoidCallback onCalendarTap;
-  final VoidCallback onCalendarLongPress;
+  final VoidCallback onFocusTap;
+  final VoidCallback onFocusDoubleTap;
+  final VoidCallback onFocusLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -303,11 +324,11 @@ class _CustomBottomNavBar extends StatelessWidget {
                 ),
               ),
             ),
-            _NavItem(
-              icon: focusClusterIcon,
-              isSelected: selectedIndex == 3,
-              onTap: onCalendarTap,
-              onLongPress: onCalendarLongPress,
+            _TriangleCornerNav(
+              currentPath: currentNavPath,
+              onTap: onFocusTap,
+              onDoubleTap: onFocusDoubleTap,
+              onLongPress: onFocusLongPress,
             ),
             _NavItem(
               icon: Icons.person_rounded,
@@ -326,12 +347,10 @@ class _NavItem extends StatelessWidget {
     required this.icon,
     required this.isSelected,
     required this.onTap,
-    this.onLongPress,
   });
   final IconData icon;
   final bool isSelected;
   final VoidCallback onTap;
-  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -342,7 +361,6 @@ class _NavItem extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      onLongPress: onLongPress,
       behavior: HitTestBehavior.opaque,
       child: Transform.rotate(
         angle: -0.0174533,
@@ -353,6 +371,129 @@ class _NavItem extends StatelessWidget {
             size: 24,
             color: iconColor,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Üç mod ikonunu üçgenin köşeleri gibi dizer.
+/// Üçgen çizilmez — sadece köşe konumlaması kullanılır.
+/// - Tek dokunuş : değişiklik yok.
+/// - Çift dokunuş: sıradaki moda geçiş (Takvim→Alışkanlık→Yapılacaklar→…).
+/// - Uzun basış  : mod seçici (picker) açılır.
+class _TriangleCornerNav extends StatelessWidget {
+  const _TriangleCornerNav({
+    required this.currentPath,
+    required this.onTap,
+    required this.onDoubleTap,
+    required this.onLongPress,
+  });
+
+  final String currentPath;
+  final VoidCallback onTap;
+  final VoidCallback onDoubleTap;
+  final VoidCallback onLongPress;
+
+  String _semanticLabel(bool cal, bool hab, bool tod) {
+    if (cal) return 'Takvim görünümü (seçili)';
+    if (hab) return 'Alışkanlık görünümü (seçili)';
+    if (tod) return 'Yapılacaklar görünümü (seçili)';
+    return 'Mod seçici: Takvim, Alışkanlık, Yapılacaklar';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isCalendar = currentPath.startsWith(AppRoutes.focusCalendar);
+    final isHabits = currentPath.startsWith(AppRoutes.focusHabits);
+    final isTodos = currentPath.startsWith(AppRoutes.focusTodos);
+
+    return Semantics(
+      label: _semanticLabel(isCalendar, isHabits, isTodos),
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        onDoubleTap: onDoubleTap,
+        onLongPress: onLongPress,
+        behavior: HitTestBehavior.opaque,
+        child: Transform.rotate(
+          angle: -0.0174533,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Üst köşe — Takvim
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: _CornerIcon(
+                        icon: Icons.calendar_today_rounded,
+                        color: AppColors.homeSectionCalendarBlue,
+                        isActive: isCalendar,
+                      ),
+                    ),
+                  ),
+                  // Sol alt köşe — Alışkanlık
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    child: _CornerIcon(
+                      icon: Icons.repeat_rounded,
+                      color: AppColors.homeSectionHabitsCoral,
+                      isActive: isHabits,
+                    ),
+                  ),
+                  // Sağ alt köşe — Yapılacaklar
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: _CornerIcon(
+                      icon: Icons.checklist_rounded,
+                      color: AppColors.homeSectionTodosOrange,
+                      isActive: isTodos,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tek bir köşe ikonu — aktif ise büyük + renkli, pasif ise küçük + soluk.
+class _CornerIcon extends StatelessWidget {
+  const _CornerIcon({
+    required this.icon,
+    required this.color,
+    required this.isActive,
+  });
+
+  final IconData icon;
+  final Color color;
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    final track = context.track;
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 200),
+      opacity: isActive ? 1.0 : 0.38,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        child: Icon(
+          icon,
+          size: isActive ? 20 : 14,
+          color: isActive ? color : track.neoStackShadow,
         ),
       ),
     );
