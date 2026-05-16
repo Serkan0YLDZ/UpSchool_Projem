@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Padding(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   child: EmptyStateWidget(
-                    emoji: '⚠️',
+                    icon: Icons.warning_amber_rounded,
                     message: provider.errorMessage ?? '',
                     ctaLabel: 'Tekrar Dene',
                   ),
@@ -122,7 +122,7 @@ class _ContentArea extends StatelessWidget {
 
     if (!hasAny) {
       return const EmptyStateWidget(
-        emoji: '🌟',
+        icon: Icons.auto_awesome,
         message: 'Bugün için kayıt yok.\nHaydi bir alışkanlık ekleyelim!',
         ctaLabel: 'Kayıt Ekle',
       );

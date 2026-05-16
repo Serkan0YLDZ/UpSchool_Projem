@@ -12,6 +12,8 @@ class BrutalistContainer extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final VoidCallback? onTap;
+  final double? width;
+  final double? height;
   final double rotatedOffset;
 
   const BrutalistContainer({
@@ -25,6 +27,8 @@ class BrutalistContainer extends StatelessWidget {
     this.margin,
     this.onTap,
     this.rotatedOffset = 0.0,
+    this.width,
+    this.height,
   });
 
   @override
@@ -34,6 +38,8 @@ class BrutalistContainer extends StatelessWidget {
     final ink = track.brutalistInk;
 
     Widget content = Container(
+      width: width,
+      height: height,
       margin: margin,
       decoration: BoxDecoration(
         color: bg,

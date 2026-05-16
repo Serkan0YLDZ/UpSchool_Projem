@@ -45,6 +45,7 @@ class RecordModel {
   final String title;
   final String? description;
   final String? icon;
+  final int? iconColor;
   final Priority? priority;
   final List<String> repeatDays;
   final int? intervalDays;
@@ -65,6 +66,7 @@ class RecordModel {
     required this.title,
     this.description,
     this.icon,
+    this.iconColor,
     this.priority,
     this.repeatDays = const [],
     this.intervalDays,
@@ -138,6 +140,8 @@ class RecordModel {
     String? title,
     String? description,
     String? icon,
+    int? iconColor,
+    bool clearIconColor = false,
     Priority? priority,
     List<String>? repeatDays,
     int? intervalDays,
@@ -158,6 +162,7 @@ class RecordModel {
       title: title ?? this.title,
       description: description ?? this.description,
       icon: icon ?? this.icon,
+      iconColor: clearIconColor ? null : (iconColor ?? this.iconColor),
       priority: priority ?? this.priority,
       repeatDays: repeatDays ?? this.repeatDays,
       intervalDays: intervalDays ?? this.intervalDays,

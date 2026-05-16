@@ -8,12 +8,14 @@ import 'package:uuid/uuid.dart';
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/theme/track_custom_colors.dart';
 import '../../core/utils/calendar_date.dart';
 import '../../data/models/record_model.dart';
 import '../../modals/add_record_modal.dart';
 import '../../modals/focus_mode_picker_sheet.dart';
 import '../../modals/habit_details_sheet.dart';
+import '../../modals/habit_icon_sheet.dart';
 import '../../modals/naming_modal.dart';
 import '../../modals/task_timing_sheet.dart';
 import '../../modals/todo_details_sheet.dart';
@@ -98,13 +100,21 @@ class MainShell extends StatelessWidget {
     String? title;
     int? target;
     String? targetUnit;
+    List<String> habitRepeatDays = [];
+    int? habitIntervalDays;
+    String? iconKey;
+    int? iconColor;
 
-    while (currentStep > 0 && currentStep <= 3 && context.mounted) {
+    while (currentStep > 0 && currentStep <= 4 && context.mounted) {
       if (currentStep == 1) {
         selectedType = null;
         title = null;
         target = null;
         targetUnit = null;
+        habitRepeatDays = [];
+        habitIntervalDays = null;
+        iconKey = null;
+        iconColor = null;
         if (!context.mounted) return;
         await showAddRecordModal(
           context,
@@ -136,16 +146,82 @@ class MainShell extends StatelessWidget {
         }
       } else if (currentStep == 3) {
         if (!context.mounted) return;
-        final success = await _openDetailSheet(
-          context,
-          selectedType!,
-          title!,
-          target,
-          targetUnit,
-        );
-        if (success == false) {
-          currentStep = 2;
+        if (selectedType == RecordType.habit) {
+          // Alışkanlık için 4 adımlı akış
+          final details = await showHabitDetailsSheet(
+            context,
+            initialRepeatDays: habitRepeatDays,
+            initialIntervalDays: habitIntervalDays,
+          );
+          if (details == null || !context.mounted) return;
+          if (details.goBack) {
+            currentStep = 2;
+          } else {
+            habitRepeatDays = details.repeatDays;
+            habitIntervalDays = details.intervalDays;
+            currentStep = 4;
+          }
         } else {
+          // Event / Todo için eski 3. adım
+          final success = await _openDetailSheet(context, selectedType!, title!, target, targetUnit);
+          if (success == false) {
+            currentStep = 2;
+          } else {
+            return;
+          }
+        }
+      } else if (currentStep == 4) {
+        // 4. adım: İkon & Renk seçimi (yalnızca habit)
+        if (!context.mounted) return;
+        final iconResult = await showHabitIconSheet(
+          context,
+          initialIconKey: iconKey,
+          initialIconColor: iconColor,
+        );
+        if (iconResult == null) return;
+        if (iconResult.goBack) {
+          currentStep = 3;
+        } else {
+          iconKey = iconResult.iconKey;
+          iconColor = iconResult.iconColor;
+          // Kayıt oluştur
+          if (!context.mounted) return;
+          final provider = context.read<RecordProvider>();
+          await provider.createRecord(
+            RecordModel(
+              id: const Uuid().v4(),
+              type: RecordType.habit,
+              title: title!,
+              icon: iconKey,
+              iconColor: iconColor,
+              repeatDays: habitRepeatDays,
+              intervalDays: habitIntervalDays,
+              targetProgress: target ?? 100,
+              targetUnit: targetUnit,
+              createdAt: DateTime.now(),
+            ),
+          );
+          if (context.mounted) {
+            final track = context.track;
+            HapticFeedback.mediumImpact();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(children: [
+                  const Icon(Icons.check_circle_rounded, color: Colors.white),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: Text('"$title" eklendi!',
+                    style: AppTypography.labelLg.copyWith(color: Colors.white))),
+                ]),
+                backgroundColor: track.brutalistInk,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  side: const BorderSide(color: Colors.white, width: 2),
+                ),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          }
           return;
         }
       }
@@ -217,10 +293,28 @@ class MainShell extends StatelessWidget {
     }
 
     if (context.mounted) {
-      HapticFeedback.lightImpact();
+      final track = context.track;
+      HapticFeedback.mediumImpact();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('"$title" eklendi 🎉'),
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_rounded, color: Colors.white),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  '"$title" eklendi!',
+                  style: AppTypography.labelLg.copyWith(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: track.brutalistInk,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            side: const BorderSide(color: Colors.white, width: 2),
+          ),
           duration: const Duration(seconds: 2),
         ),
       );

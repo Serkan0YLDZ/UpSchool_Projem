@@ -4,7 +4,7 @@ import '../core/theme/record_type_accent.dart';
 import '../core/theme/track_custom_colors.dart';
 import '../data/models/record_model.dart';
 
-Future<({String title, int target, String? targetUnit, bool goBack})?> showNamingModal(
+Future<({String title, int target, String? targetUnit, bool goBack})?>  showNamingModal(
   BuildContext context, {
   required RecordType type,
   String? initialTitle,
@@ -65,8 +65,9 @@ class _NamingSheetState extends State<_NamingSheet> {
 
   bool get _isTitleEmpty => _controller.text.trim().isEmpty;
 
+  // Alışkanlık önerileri: emoji kaldırıldı, "Erken Uyan" çıkarıldı
   List<String> get _suggestions => switch (widget.type) {
-    RecordType.habit => ['Su İç 💧', 'Kitap Oku 📚', 'Spor Yap 🏃', 'Meditasyon 🧘', 'Erken Uyan ⏰'],
+    RecordType.habit => ['Su İç 💧', 'Kitap Oku 📚', 'Spor Yap 🏃', 'Meditasyon 🧘'],
     RecordType.event => ['Toplantı 💼', 'Randevu 📅', 'Sinema 🍿', 'Kutlama 🎉'],
     RecordType.todo => ['Alışveriş 🛒', 'Fatura Öde 💳', 'Mail Gönder 📧', 'Evi Temizle 🧹'],
   };
@@ -76,6 +77,31 @@ class _NamingSheetState extends State<_NamingSheet> {
     RecordType.event => 'Etkinlik adı...',
     RecordType.todo => 'Yapılacak şeyin adı...',
   };
+
+  /// Öneri tıklandığında başlık + otomatik hedef/birim set eder.
+  void _applySuggestion(String raw) {
+    // Emojiyi temizle, sade metni al
+    final clean = raw.replaceAll(RegExp(r'[^\w\sğüşıöçĞÜŞİÖÇ]'), '').trim();
+    _controller.text = clean;
+
+    // Yalnızca habit için otomatik hedef
+    if (widget.type == RecordType.habit) {
+      final lower = clean.toLowerCase();
+      if (lower.contains('su iç') || lower.contains('su ic')) {
+        _targetController.text = '5';
+        _unitController.text = 'lt';
+      } else if (lower.contains('kitap')) {
+        _targetController.text = '50';
+        _unitController.text = 'sayfa';
+      } else if (lower.contains('spor')) {
+        _targetController.text = '30';
+        _unitController.text = 'dk';
+      } else if (lower.contains('meditasyon')) {
+        _targetController.text = '10';
+        _unitController.text = 'dk';
+      }
+    }
+  }
 
   void _onContinue() {
     final title = _controller.text.trim();
@@ -115,8 +141,14 @@ class _NamingSheetState extends State<_NamingSheet> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
-                    onTap: () => Navigator.pop(context,
-                        (title: '', target: 100, targetUnit: null, goBack: true)),
+                    onTap: () => Navigator.pop(context, (
+                        title: '',
+                        target: 100,
+                        targetUnit: null,
+                        iconKey: null,
+                        iconColor: null,
+                        goBack: true,
+                      )),
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -135,6 +167,10 @@ class _NamingSheetState extends State<_NamingSheet> {
                       _StepDot(active: true, color: accent, type: widget.type),
                       const SizedBox(width: 6),
                       _StepDot(active: false, type: widget.type),
+                      if (widget.type == RecordType.habit) ...[
+                        const SizedBox(width: 6),
+                        _StepDot(active: false, type: widget.type),
+                      ],
                     ],
                   ),
                 ],
@@ -213,10 +249,7 @@ class _NamingSheetState extends State<_NamingSheet> {
                 children: _suggestions.asMap().entries.map((e) {
                   final angle = e.key % 2 == 0 ? -0.03 : 0.03;
                   return GestureDetector(
-                    onTap: () {
-                      final clean = e.value.replaceAll(RegExp(r'[^\w\sğüşıöçĞÜŞİÖÇ]'), '').trim();
-                      _controller.text = clean;
-                    },
+                    onTap: () => _applySuggestion(e.value),
                     child: Transform.rotate(
                       angle: angle,
                       child: Container(

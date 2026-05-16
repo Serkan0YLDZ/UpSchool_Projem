@@ -5,11 +5,14 @@ import '../theme/app_colors.dart';
 import '../theme/track_custom_colors.dart';
 
 /// Neo-Brutalist tarih seçici.
+/// [accentColor] parametresi picker arka planını ve seçili günü renklendirir;
+/// geçilmezse varsayılan olarak [AppColors.homeSectionCalendarBlue] kullanılır.
 Future<DateTime?> showNeoDatePicker({
   required BuildContext context,
   required DateTime initialDate,
   required DateTime firstDate,
   required DateTime lastDate,
+  Color? accentColor,
 }) {
   return showGeneralDialog<DateTime>(
     context: context,
@@ -21,6 +24,7 @@ Future<DateTime?> showNeoDatePicker({
       initialDate: initialDate,
       firstDate: firstDate,
       lastDate: lastDate,
+      accentColor: accentColor ?? AppColors.homeSectionCalendarBlue,
     ),
     transitionBuilder: (context, anim1, anim2, child) => Transform.scale(
       scale: anim1.value,
@@ -30,9 +34,12 @@ Future<DateTime?> showNeoDatePicker({
 }
 
 /// Neo-Brutalist saat seçici.
+/// [accentColor] parametresi picker arka planını renklendirir;
+/// geçilmezse varsayılan olarak [AppColors.homeSectionCalendarBlue] kullanılır.
 Future<TimeOfDay?> showNeoTimePicker({
   required BuildContext context,
   required TimeOfDay initialTime,
+  Color? accentColor,
 }) {
   return showGeneralDialog<TimeOfDay>(
     context: context,
@@ -41,7 +48,10 @@ Future<TimeOfDay?> showNeoTimePicker({
     barrierColor: context.scheme.scrim.withValues(alpha: 0.45),
     transitionDuration: const Duration(milliseconds: 250),
     pageBuilder: (context, anim1, anim2) =>
-        _NeoTimePickerDialog(initialTime: initialTime),
+        _NeoTimePickerDialog(
+          initialTime: initialTime,
+          accentColor: accentColor ?? AppColors.homeSectionCalendarBlue,
+        ),
     transitionBuilder: (context, anim1, anim2, child) => Transform.scale(
       scale: anim1.value,
       child: Opacity(opacity: anim1.value, child: child),
@@ -55,11 +65,13 @@ class _NeoDatePickerDialog extends StatefulWidget {
   final DateTime initialDate;
   final DateTime firstDate;
   final DateTime lastDate;
+  final Color accentColor;
 
   const _NeoDatePickerDialog({
     required this.initialDate,
     required this.firstDate,
     required this.lastDate,
+    required this.accentColor,
   });
 
   @override
@@ -89,12 +101,8 @@ class _NeoDatePickerDialogState extends State<_NeoDatePickerDialog> {
   Widget build(BuildContext context) {
     final scheme = context.scheme;
     final track = context.track;
-    final panelBg = Color.lerp(
-      AppColors.homeSectionCalendarBlue,
-      Colors.white,
-      0.52,
-    )!;
-    final accent = AppColors.homeSectionCalendarBlue;
+    final accent = widget.accentColor;
+    final panelBg = Color.lerp(accent, Colors.white, 0.52)!;
     final daysInMonth =
         DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
     final firstDayOffset =
@@ -261,8 +269,12 @@ class _NeoDatePickerDialogState extends State<_NeoDatePickerDialog> {
 
 class _NeoTimePickerDialog extends StatefulWidget {
   final TimeOfDay initialTime;
+  final Color accentColor;
 
-  const _NeoTimePickerDialog({required this.initialTime});
+  const _NeoTimePickerDialog({
+    required this.initialTime,
+    required this.accentColor,
+  });
 
   @override
   State<_NeoTimePickerDialog> createState() => _NeoTimePickerDialogState();
@@ -283,12 +295,8 @@ class _NeoTimePickerDialogState extends State<_NeoTimePickerDialog> {
   Widget build(BuildContext context) {
     final scheme = context.scheme;
     final track = context.track;
-    final panelBg = Color.lerp(
-      AppColors.homeSectionCalendarBlue,
-      Colors.white,
-      0.48,
-    )!;
-    final accent = AppColors.homeSectionCalendarBlue;
+    final accent = widget.accentColor;
+    final panelBg = Color.lerp(accent, Colors.white, 0.48)!;
 
     return Dialog(
       backgroundColor: Colors.transparent,

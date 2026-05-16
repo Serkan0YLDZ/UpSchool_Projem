@@ -15,29 +15,33 @@ class ProfileBenefitsCard extends StatelessWidget {
     return BrutalistContainer(
       rotatedOffset: -0.8,
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      backgroundColor: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Giriş yapınca neler olur?',
-            style: AppTypography.headlineSm.copyWith(color: scheme.onSurface),
+            style: AppTypography.headlineSm.copyWith(
+              color: scheme.onSurface,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           const SizedBox(height: AppSpacing.smMd),
-          _Bullet(
+          const _Bullet(
             text: 'Alışkanlık ve görev verilerin bulutta güvenle saklanır.',
           ),
           const SizedBox(height: AppSpacing.sm),
-          _Bullet(
+          const _Bullet(
             text: 'Telefon veya tablette aynı hesapla otomatik senkron olur.',
           ),
           const SizedBox(height: AppSpacing.sm),
-          _Bullet(
+          const _Bullet(
             text:
                 'İlerlemen, seriler ve özet grafikler hesabına bağlandığında burada görünür.',
           ),
           const SizedBox(height: AppSpacing.smMd),
           Text(
-            'Giriş yapmadan da uygulamanın tamamını kullanmaya devam edebilirsin; veriler şimdilik yalnızca bu cihazda kalır.',
+            'Giriş yapmadan da uygulamayı kullanabilirsin; veriler yalnızca bu cihazda kalır.',
             style: AppTypography.bodySm.copyWith(
               color: scheme.onSurfaceVariant,
             ),
@@ -61,12 +65,10 @@ class _Bullet extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 4),
-          child: Text(
-            '•',
-            style: AppTypography.bodyMd.copyWith(
-              color: scheme.primaryContainer,
-              fontWeight: FontWeight.w800,
-            ),
+          child: Icon(
+            Icons.check_circle_outline_rounded,
+            size: 18,
+            color: scheme.primaryContainer,
           ),
         ),
         const SizedBox(width: AppSpacing.sm),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/track_custom_colors.dart';
+import '../../../core/utils/habit_icons.dart';
 import '../../../core/widgets/brutalist_container.dart';
 import '../../../data/models/record_model.dart';
 import '../../../data/services/streak_service.dart';
@@ -62,13 +63,6 @@ class HabitCard extends StatelessWidget {
         context,
         longestStreak: streakView.longestStreak,
       ),
-      onSkipTap: streakView.showSkipCta
-          ? () => completionProvider.markSkipped(
-                record.id,
-                selectedDate,
-                requireToday: true,
-              )
-          : null,
       onRecoverTap: streakView.showRecoverCta
           ? () => streakProvider.applyRecovery(record.id)
           : null,
@@ -353,7 +347,6 @@ class _CardBody extends StatelessWidget {
     required this.onProgressChanged,
     required this.onLongPress,
     required this.onStreakTap,
-    this.onSkipTap,
     this.onRecoverTap,
   });
 
@@ -364,7 +357,6 @@ class _CardBody extends StatelessWidget {
   final ValueChanged<double> onProgressChanged;
   final VoidCallback onLongPress;
   final VoidCallback onStreakTap;
-  final VoidCallback? onSkipTap;
   final VoidCallback? onRecoverTap;
 
   @override
@@ -376,7 +368,7 @@ class _CardBody extends StatelessWidget {
     final currentTarget = record.targetProgress > 0 ? record.targetProgress : 100;
     final progressPercent = (progress / currentTarget).clamp(0.0, 1.0);
     final tertiarySoft = scheme.tertiary.withValues(alpha: 0.3);
-    final tertiarySolid = scheme.tertiary;
+
 
     return BrutalistContainer(
       rotatedOffset: rotation,
@@ -392,20 +384,26 @@ class _CardBody extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: track.habitCardSoftBlue,
-                    border: Border.all(color: ink, width: 3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.water_drop_rounded,
-                    color: ink,
-                    size: 24,
-                  ),
-                ),
+                Builder(builder: (context) {
+                  final iconData = HabitIcons.resolve(record.icon);
+                  final iconBg = record.iconColor != null
+                      ? Color(record.iconColor!)
+                      : track.habitCardSoftBlue;
+                  return Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: iconBg,
+                      border: Border.all(color: ink, width: 3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      iconData,
+                      color: ink,
+                      size: 24,
+                    ),
+                  );
+                }),
                 _StreakBadge(
                   count: streakView.displayStreak,
                   flameTier: streakView.flameTier,
@@ -447,7 +445,9 @@ class _CardBody extends StatelessWidget {
                     widthFactor: progressPercent,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isDone ? tertiarySolid : scheme.primaryContainer,
+                        color: isDone
+                            ? const Color(0xFF4CAF50)
+                            : scheme.primaryContainer,
                         border: Border(
                           right: BorderSide(color: ink, width: 3),
                         ),
@@ -461,10 +461,9 @@ class _CardBody extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (onSkipTap != null || onRecoverTap != null) ...[
+                if (onRecoverTap != null) ...[
                   const SizedBox(height: AppSpacing.sm),
                   _StreakActionRow(
-                    onSkipTap: onSkipTap,
                     onRecoverTap: onRecoverTap,
                   ),
                 ],
@@ -527,36 +526,17 @@ class _StreakBadge extends StatelessWidget {
 }
 
 class _StreakActionRow extends StatelessWidget {
-  const _StreakActionRow({this.onSkipTap, this.onRecoverTap});
-  final VoidCallback? onSkipTap;
+  const _StreakActionRow({this.onRecoverTap});
   final VoidCallback? onRecoverTap;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = context.scheme;
     final track = context.track;
 
     return Wrap(
       spacing: 8,
       runSpacing: 4,
       children: [
-        if (onSkipTap != null)
-          TextButton(
-            onPressed: onSkipTap,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              'ES GEÇ',
-              style: TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 10,
-                color: scheme.primaryContainer,
-              ),
-            ),
-          ),
         if (onRecoverTap != null)
           TextButton(
             onPressed: onRecoverTap,

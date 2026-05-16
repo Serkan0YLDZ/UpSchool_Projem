@@ -36,12 +36,16 @@ class _ProfileCloudSyncCardState extends State<ProfileCloudSyncCard> {
     return BrutalistContainer(
       rotatedOffset: -0.35,
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      backgroundColor: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Bulut senkron',
-            style: AppTypography.headlineSm.copyWith(fontSize: 18),
+            style: AppTypography.headlineSm.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(
@@ -56,7 +60,7 @@ class _ProfileCloudSyncCardState extends State<ProfileCloudSyncCard> {
               Expanded(
                 child: Text(
                   synced
-                      ? 'Verilerin buluttaki veritabanı ile senkron.'
+                      ? 'Verilerin buluttaki veritabanı ile senkronize edildi.'
                       : (sync.meta.pendingSync
                           ? 'Yerel değişiklikler henüz buluta tam yansımadı.'
                           : 'Henüz tam senkron yapılmadı. Aşağıdaki düğmeyi kullan.'),
@@ -68,47 +72,59 @@ class _ProfileCloudSyncCardState extends State<ProfileCloudSyncCard> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            height: AppSpacing.buttonHeight,
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: busy
-                  ? null
-                  : () async {
-                      if (synced) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Verilerin zaten buluttaki veritabanı ile senkron.',
-                            ),
+          BrutalistContainer(
+            onTap: busy
+                ? null
+                : () async {
+                    if (synced) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text(
+                            'Verilerin zaten buluttaki veritabanı ile senkronize.',
                           ),
-                        );
-                        return;
-                      }
-                      try {
-                        await sync.syncNow();
-                        if (!context.mounted) return;
-                        await sync.refresh();
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              sync.isFullySynced
-                                  ? 'Senkron tamamlandı.'
-                                  : 'Senkron tamamlanamadı; bağlantını kontrol et.',
-                            ),
+                          backgroundColor: context.track.brutalistInk,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                      return;
+                    }
+                    try {
+                      await sync.syncNow();
+                      if (!context.mounted) return;
+                      await sync.refresh();
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            sync.isFullySynced
+                                ? 'Senkron tamamlandı.'
+                                : 'Senkron tamamlanamadı; bağlantını kontrol et.',
                           ),
-                        );
-                      } catch (e) {
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Senkron hatası: $e')),
-                        );
-                      }
-                    },
+                          backgroundColor: context.track.brutalistInk,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Senkron hatası: $e'),
+                          backgroundColor: context.track.brutalistInk,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+            backgroundColor: synced ? scheme.primaryContainer.withAlpha(200) : scheme.primaryContainer,
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            child: Center(
               child: Text(
-                synced ? 'Senkron (bilgi)' : 'Senkron et',
-                style: AppTypography.labelLg,
+                synced ? 'SENKRONİZE EDİLDİ' : 'ŞİMDİ SENKRON ET',
+                style: AppTypography.labelLg.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.1,
+                ),
               ),
             ),
           ),

@@ -8,31 +8,32 @@ class EmptyStateWidget extends StatelessWidget {
   const EmptyStateWidget({
     super.key,
     required this.message,
-    this.emoji = '📭',
+    required this.icon,
     this.ctaLabel,
     this.onCtaPressed,
   });
 
   final String message;
-  final String emoji;
+  final IconData icon;
   final String? ctaLabel;
   final VoidCallback? onCtaPressed;
 
   @override
   Widget build(BuildContext context) {
+    final scheme = context.scheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.cardPadding),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 48)),
+            Icon(icon, size: 48, color: scheme.primaryContainer),
             const SizedBox(height: AppSpacing.md),
             Text(
               message,
               textAlign: TextAlign.center,
               style: AppTypography.bodyMd.copyWith(
-                color: context.scheme.onSurfaceVariant,
+                color: scheme.onSurfaceVariant,
               ),
             ),
             if (ctaLabel != null && onCtaPressed != null) ...[

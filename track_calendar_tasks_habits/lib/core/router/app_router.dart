@@ -6,10 +6,33 @@ import '../../screens/home/home_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../screens/shell/main_shell.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../screens/onboarding/onboarding_screen.dart';
+
 final appRouter = GoRouter(
   initialLocation: AppRoutes.home,
   debugLogDiagnostics: false,
+  redirect: (context, state) async {
+    final prefs = await SharedPreferences.getInstance();
+    final completed = prefs.getBool('onboarding_completed') ?? false;
+    
+    final isGoingToOnboarding = state.uri.path == AppRoutes.onboarding;
+    
+    if (!completed && !isGoingToOnboarding) {
+      return AppRoutes.onboarding;
+    }
+    
+    if (completed && isGoingToOnboarding) {
+      return AppRoutes.home;
+    }
+    
+    return null;
+  },
   routes: [
+    GoRoute(
+      path: AppRoutes.onboarding,
+      builder: (context, state) => const OnboardingScreen(),
+    ),
     ShellRoute(
       builder: (context, state, child) => MainShell(child: child),
       routes: [
@@ -59,6 +82,7 @@ final appRouter = GoRouter(
 
 abstract final class AppRoutes {
   static const String home = '/';
+  static const String onboarding = '/onboarding';
   static const String profile = '/profile';
   static const String focusParent = '/focus';
   static const String focusCalendarSegment = 'calendar';

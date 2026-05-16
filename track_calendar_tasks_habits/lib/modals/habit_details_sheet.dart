@@ -4,7 +4,9 @@ import '../core/theme/record_type_accent.dart';
 import '../core/theme/track_custom_colors.dart';
 import '../data/models/record_model.dart';
 
-Future<({List<String> repeatDays, int? intervalDays, bool goBack})?> showHabitDetailsSheet(
+/// 3. adım: Gün & interval seçimi. İkon/renk 4. adımda.
+Future<({List<String> repeatDays, int? intervalDays, bool goBack})?>
+showHabitDetailsSheet(
   BuildContext context, {
   List<String> initialRepeatDays = const [],
   int? initialIntervalDays,
@@ -21,9 +23,13 @@ Future<({List<String> repeatDays, int? intervalDays, bool goBack})?> showHabitDe
 }
 
 class _HabitDetailsSheet extends StatefulWidget {
-  const _HabitDetailsSheet({required this.initialRepeatDays, this.initialIntervalDays});
+  const _HabitDetailsSheet({
+    required this.initialRepeatDays,
+    this.initialIntervalDays,
+  });
   final List<String> initialRepeatDays;
   final int? initialIntervalDays;
+
   @override
   State<_HabitDetailsSheet> createState() => _HabitDetailsSheetState();
 }
@@ -41,8 +47,11 @@ class _HabitDetailsSheetState extends State<_HabitDetailsSheet> {
 
   bool get _isValid => _selectedDays.isNotEmpty || _intervalDays != null;
 
-  void _onSave() => Navigator.of(context).pop(
-      (repeatDays: _selectedDays.toList(), intervalDays: _intervalDays, goBack: false));
+  void _onSave() => Navigator.of(context).pop((
+    repeatDays: _selectedDays.toList(),
+    intervalDays: _intervalDays,
+    goBack: false,
+  ));
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +73,11 @@ class _HabitDetailsSheetState extends State<_HabitDetailsSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 GestureDetector(
-                  onTap: () => Navigator.pop(context,
-                      (repeatDays: const <String>[], intervalDays: null, goBack: true)),
+                  onTap: () => Navigator.pop(context, (
+                    repeatDays: const <String>[],
+                    intervalDays: null,
+                    goBack: true,
+                  )),
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -77,10 +89,12 @@ class _HabitDetailsSheetState extends State<_HabitDetailsSheet> {
                     child: Icon(Icons.arrow_back, color: context.track.brutalistInk),
                   ),
                 ),
+                // 4 adım göstergesi — 3. aktif
                 Row(children: [
                   _stepDot(false), const SizedBox(width: 6),
                   _stepDot(false), const SizedBox(width: 6),
-                  _stepDot(true, accent),
+                  _stepDot(true, accent), const SizedBox(width: 6),
+                  _stepDot(false),
                 ]),
               ],
             ),
@@ -170,7 +184,7 @@ class _HabitDetailsSheetState extends State<_HabitDetailsSheet> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Oluştur', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.track.brutalistSurface)),
+                    Text('Devam Et', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.track.brutalistSurface)),
                     SizedBox(width: 8),
                     Icon(Icons.arrow_forward, color: context.track.brutalistSurface),
                   ],

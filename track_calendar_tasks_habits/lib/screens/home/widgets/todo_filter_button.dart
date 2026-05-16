@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/theme/app_colors.dart';
+
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/track_custom_colors.dart';
 import '../../../providers/record_provider.dart';
@@ -69,7 +69,7 @@ class TodoFilterButton extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'YAPILACAKLARI FİLTRELE',
+                        'Yapılacakları Filtrele',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w900,
@@ -183,7 +183,6 @@ class TodoFilterOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = context.scheme;
     final track = context.track;
 
     return GestureDetector(
@@ -194,7 +193,7 @@ class TodoFilterOption extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.homeSectionTodosOrange : track.brutalistSurface,
+            color: isSelected ? track.neoStackFace : track.brutalistSurface,
             border: Border.all(color: ink, width: 3),
             borderRadius: BorderRadius.circular(12),
             boxShadow: isSelected
@@ -206,7 +205,7 @@ class TodoFilterOption extends StatelessWidget {
               Icon(
                 icon,
                 size: 24,
-                color: isSelected ? scheme.onPrimary : ink,
+                color: isSelected ? track.neoStackOnFace : ink,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -214,13 +213,13 @@ class TodoFilterOption extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 16,
-                    color: isSelected ? scheme.onPrimary : ink,
+                    color: isSelected ? track.neoStackOnFace : ink,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
               if (isSelected)
-                Icon(Icons.check_rounded, color: scheme.onPrimary, size: 24),
+                Icon(Icons.check_rounded, color: track.neoStackOnFace, size: 24),
             ],
           ),
         ),

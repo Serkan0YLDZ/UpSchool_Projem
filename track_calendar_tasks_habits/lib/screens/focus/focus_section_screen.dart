@@ -50,11 +50,7 @@ class _FocusSectionScreenState extends State<FocusSectionScreen> {
     setState(() => _firstLoadDone = true);
   }
 
-  String get _title => switch (widget.section) {
-    FocusSection.calendar => 'Takvim',
-    FocusSection.habits => 'Alışkanlıklar',
-    FocusSection.todos => 'Yapılacaklar',
-  };
+
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +59,6 @@ class _FocusSectionScreenState extends State<FocusSectionScreen> {
     final todayYmd = CalendarDate.todayYmd();
     final visibleHabits = visibleHabitsForSelectedDate(rp, sp);
     final scheme = context.scheme;
-    final track = context.track;
 
     return Scaffold(
       backgroundColor: scheme.surface,
@@ -74,28 +69,6 @@ class _FocusSectionScreenState extends State<FocusSectionScreen> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.md,
-                  AppSpacing.sm,
-                  AppSpacing.md,
-                  0,
-                ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    _title,
-                    key: ValueKey('focus_section_title_${widget.section.name}'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: track.brutalistInk,
-                    ),
-                  ),
-                ),
-              ),
               const CalendarBarWidget(),
               const SizedBox(height: AppSpacing.md),
               if (!_firstLoadDone || rp.isLoading)
@@ -109,7 +82,7 @@ class _FocusSectionScreenState extends State<FocusSectionScreen> {
                 Padding(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   child: EmptyStateWidget(
-                    emoji: '⚠️',
+                    icon: Icons.warning_amber_rounded,
                     message: rp.errorMessage ?? '',
                   ),
                 )
@@ -149,7 +122,7 @@ class _SectionBody extends StatelessWidget {
       case FocusSection.calendar:
         if (provider.scheduledTasks.isEmpty) {
           return const EmptyStateWidget(
-            emoji: '📅',
+            icon: Icons.calendar_today_rounded,
             message: 'Bu tarih için takvim etkinliği yok.',
           );
         }
@@ -197,7 +170,7 @@ class _SectionBody extends StatelessWidget {
       case FocusSection.habits:
         if (visibleHabits.isEmpty) {
           return const EmptyStateWidget(
-            emoji: '🌟',
+            icon: Icons.auto_awesome,
             message: 'Bu tarih için listelenecek alışkanlık yok.',
           );
         }
@@ -205,7 +178,7 @@ class _SectionBody extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             BrutalistBadge(
-              text: 'Yeni Alışkanlıklar',
+              text: 'Alışkanlıklar',
               backgroundColor: AppColors.homeSectionHabitsCoral,
               borderRadius: AppSpacing.radiusLg,
               shadowOffset: 6,
@@ -242,7 +215,7 @@ class _SectionBody extends StatelessWidget {
       case FocusSection.todos:
         if (provider.todos.isEmpty) {
           return const EmptyStateWidget(
-            emoji: '✅',
+            icon: Icons.check_circle_outline_rounded,
             message: 'Yapılacak kayıt yok.',
           );
         }
@@ -284,7 +257,7 @@ class _SectionBody extends StatelessWidget {
                   return const Padding(
                     padding: EdgeInsets.only(top: AppSpacing.lg),
                     child: EmptyStateWidget(
-                      emoji: '🔍',
+                      icon: Icons.search_off_rounded,
                       message: 'Filtreye uygun yapılacak yok.',
                     ),
                   );

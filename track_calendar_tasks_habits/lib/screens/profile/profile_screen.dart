@@ -29,7 +29,12 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: scheme.surface,
-      appBar: AppBar(title: Text('Profil', style: AppTypography.headlineSm)),
+      appBar: AppBar(
+        title: Text(
+          'PROFİL',
+          style: AppTypography.headlineSm.copyWith(fontWeight: FontWeight.w900),
+        ),
+      ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -60,7 +65,11 @@ class _GuestBody extends StatelessWidget {
   final AuthSessionProvider auth;
 
   void _snack(BuildContext context, String message) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(message),
+        backgroundColor: context.track.brutalistInk,
+        behavior: SnackBarBehavior.floating,
+      ));
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +79,10 @@ class _GuestBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Merhaba!', style: AppTypography.headlineMd),
+        Text(
+          'Merhaba!',
+          style: AppTypography.headlineMd.copyWith(fontWeight: FontWeight.w900),
+        ),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'Hesabın yok veya giriş yapmadın. İstersen misafir olarak devam edebilirsin.',
@@ -79,7 +91,10 @@ class _GuestBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        Text('Giriş yap', style: AppTypography.headlineSm),
+        Text(
+          'Giriş yap',
+          style: AppTypography.headlineSm.copyWith(fontWeight: FontWeight.w900),
+        ),
         const SizedBox(height: AppSpacing.smMd),
         ProfileSignInRow(
           label: 'Google ile devam et',
@@ -102,7 +117,7 @@ class _GuestBody extends StatelessWidget {
         ProfileSignInRow(
           label: 'Apple ile devam et',
           leading: const AppleSignInLeading(),
-          backgroundColor: scheme.surfaceContainerLow,
+          backgroundColor: Colors.white,
           rotatedOffset: -0.5,
           onTap: busy
               ? null
@@ -177,23 +192,39 @@ class _SignedInBody extends StatelessWidget {
 
   Future<void> _confirmSignOut(BuildContext context) async {
     final scheme = context.scheme;
+    final track = context.track;
+    
     final go = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Çıkış yap', style: AppTypography.headlineSm),
+        backgroundColor: scheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+          side: BorderSide(color: track.brutalistInk, width: 3),
+        ),
+        title: Text(
+          'Çıkış yap?',
+          style: AppTypography.headlineSm.copyWith(fontWeight: FontWeight.w900),
+        ),
         content: Text(
-          'Oturumu kapatıyorsun. Veriler bu cihazda kalmaya devam eder; bulut senkronu aktif olunca tekrar giriş gerekir.',
+          'Oturumu kapatıyorsun. Verilerin bu cihazda kalmaya devam eder; bulut senkronu aktif olunca tekrar giriş gerekir.',
           style: AppTypography.bodyMd,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Vazgeç'),
+            child: Text('VAZGEÇ', style: AppTypography.labelLg.copyWith(color: track.brutalistInk)),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: scheme.error),
-            child: const Text('Çıkış yap'),
+          BrutalistContainer(
+            onTap: () => Navigator.pop(ctx, true),
+            backgroundColor: scheme.error,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+            shadowOffset: 4,
+            borderWidth: 2,
+            child: const Text(
+              'ÇIKIŞ YAP',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+            ),
           ),
         ],
       ),
@@ -202,7 +233,11 @@ class _SignedInBody extends StatelessWidget {
       await context.read<AuthSessionProvider>().signOut();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Çıkış yapıldı.')),
+          SnackBar(
+            content: const Text('Başarıyla çıkış yapıldı.'),
+            backgroundColor: track.brutalistInk,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }
@@ -211,6 +246,7 @@ class _SignedInBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = context.scheme;
+    final track = context.track;
     final email = auth.email ?? 'Kullanıcı';
     final initial = email.isNotEmpty ? email[0].toUpperCase() : '?';
     final method = auth.method;
@@ -218,44 +254,66 @@ class _SignedInBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 36,
-              backgroundColor: scheme.primaryContainer,
-              child: Text(
-                initial,
-                style: AppTypography.headlineMd.copyWith(
-                  color: scheme.onPrimary,
-                  height: 1,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(email, style: AppTypography.headlineSm.copyWith(fontSize: 18)),
-                  if (method != null) ...[
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      'Giriş: ${ProfileScreen._methodLabel(method)}',
-                      style: AppTypography.bodySm.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
+        BrutalistContainer(
+          backgroundColor: scheme.surfaceContainerLowest,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: track.brutalistInk, width: 2.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: track.brutalistInk,
+                      offset: const Offset(3, 3),
                     ),
                   ],
-                ],
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  initial,
+                  style: AppTypography.headlineMd.copyWith(
+                    color: scheme.onPrimary,
+                    height: 1,
+                  ),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      email,
+                      style: AppTypography.headlineSm.copyWith(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    if (method != null) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Yöntem: ${ProfileScreen._methodLabel(method)}',
+                        style: AppTypography.bodySm.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: AppSpacing.lg),
         const ProfileCloudSyncCard(),
         const SizedBox(height: AppSpacing.md),
         BrutalistContainer(
-          backgroundColor: scheme.surfaceContainerLow,
+          backgroundColor: track.brutalistSurface,
           rotatedOffset: 0.5,
           padding: const EdgeInsets.all(AppSpacing.cardPadding),
           child: Row(
@@ -272,7 +330,10 @@ class _SignedInBody extends StatelessWidget {
                   children: [
                     Text(
                       'Grafikler ve özetler',
-                      style: AppTypography.labelLg.copyWith(fontSize: 16),
+                      style: AppTypography.labelLg.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
@@ -288,17 +349,18 @@ class _SignedInBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
-        SizedBox(
-          height: AppSpacing.buttonHeight,
-          child: OutlinedButton(
-            onPressed: auth.isBusy ? null : () => _confirmSignOut(context),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: scheme.error,
-              side: BorderSide(color: scheme.error, width: 2),
-            ),
+        BrutalistContainer(
+          onTap: auth.isBusy ? null : () => _confirmSignOut(context),
+          backgroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+          child: Center(
             child: Text(
-              'Çıkış yap',
-              style: AppTypography.labelLg.copyWith(color: scheme.error),
+              'ÇIKIŞ YAP',
+              style: AppTypography.labelLg.copyWith(
+                color: scheme.error,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.1,
+              ),
             ),
           ),
         ),
@@ -307,3 +369,4 @@ class _SignedInBody extends StatelessWidget {
     );
   }
 }
+
