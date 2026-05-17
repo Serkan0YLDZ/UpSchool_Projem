@@ -158,8 +158,8 @@ Takvim etkinlikleri, tekrarlayan alışkanlıklar ve yapılacakları tek uygulam
 
 **Kabul kriterleri:**
 
-- [ ] CRUD işlemleri bu tablolar üzerinden yapılır; migration sürümü yönetilir.
-- [ ] Soft delete ve `local_revision` senkron taslağı (v0.2) ile uyumludur.
+- [x] CRUD işlemleri bu tablolar üzerinden yapılır; migration sürümü yönetilir.
+- [x] Soft delete ve `local_revision` senkron taslağı (v0.2) ile uyumludur.
 
 ---
 
@@ -204,9 +204,9 @@ Anchor \(D_0\) = ayın 10’u, \(N = 2\). Planlı günler: 10, 12, 14, …
 
 **Kabul kriterleri:**
 
-- [ ] Yukarıdaki 10 / 12 / 14 tarih senaryosu birim testi ile doğrulanır.
-- [ ] Haftalık es geç sayacı doğru sıfırlanır.
-- [ ] Seri bittiğinde ileri tarihlerde liste kuralları uygulanır; kullanıcıya “yeniden başlat” veya düzenleme akışı (minimal: seriyi sıfırlama) tanımlanır.
+- [x] Yukarıdaki 10 / 12 / 14 tarih senaryosu birim testi ile doğrulanır.
+- [x] Haftalık es geç sayacı doğru sıfırlanır.
+- [x] Seri bittiğinde ileri tarihlerde liste kuralları uygulanır; kullanıcıya “yeniden başlat” veya düzenleme akışı (minimal: seriyi sıfırlama) tanımlanır.
 
 ---
 

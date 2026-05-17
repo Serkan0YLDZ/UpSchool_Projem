@@ -245,7 +245,7 @@ class _EditHabitSheetState extends State<_EditHabitSheet> {
                 children: List.generate(7, (i) {
                   final sel = _days.contains(_codes[i]);
                   return GestureDetector(
-                    onTap: () => setState(() { if (sel) _days.remove(_codes[i]); else { _days.add(_codes[i]); _interval = null; } }),
+                    onTap: () => setState(() { if (sel) { _days.remove(_codes[i]); } else { _days.add(_codes[i]); _interval = null; } }),
                     child: Container(width: w, height: w,
                       decoration: BoxDecoration(
                         color: sel ? accent : context.track.brutalistSurface,
@@ -359,7 +359,7 @@ class _EditTodoSheetState extends State<_EditTodoSheet> {
                 Text('(İsteğe Bağlı)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
               ]),
               _ToggleSwitch(value: _showDueDate, accentColor: accent,
-                onChanged: (v) => setState(() { _showDueDate = v; if (!v) _dueDate = null; else _dueDate = DateTime.now(); })),
+                onChanged: (v) => setState(() { _showDueDate = v; if (!v) { _dueDate = null; } else { _dueDate = DateTime.now(); } })),
             ]),
             if (_showDueDate) ...[
               const SizedBox(height: 12),

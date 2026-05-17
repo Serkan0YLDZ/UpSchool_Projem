@@ -45,25 +45,25 @@ class HabitCard extends StatelessWidget {
           if (isDone) {
             // Geçmiş tamamlamayı geri al
             await streakProvider.logDay(habit, selectedDate, DayLogStatus.pending);
-            if (context.mounted) {
-              await context.read<HabitDayLogProvider>().loadLogsForDate(selectedDate);
-              await context.read<StreakProvider>().loadForHabits(
-                context.read<HabitProvider>().habits, todayYmd);
-            }
+            if (!context.mounted) return;
+            final logProv = context.read<HabitDayLogProvider>();
+            final sProv = context.read<StreakProvider>();
+            final hProv = context.read<HabitProvider>();
+            await logProv.loadLogsForDate(selectedDate);
+            await sProv.loadForHabits(hProv.habits, todayYmd);
           } else if (context.mounted) {
             _showLockedSnack(context);
           }
           return;
         }
         await streakProvider.logDay(habit, selectedDate, isDone ? DayLogStatus.pending : DayLogStatus.met);
-        if (context.mounted) {
-          // Hem streak hem de log provider'ı güncelle (UI tutarlılığı)
-          await context.read<HabitDayLogProvider>().loadLogsForDate(selectedDate);
-          await context.read<StreakProvider>().loadForHabits(
-            context.read<HabitProvider>().habits, 
-            todayYmd
-          );
-        }
+        if (!context.mounted) return;
+        final logProv = context.read<HabitDayLogProvider>();
+        final sProv = context.read<StreakProvider>();
+        final hProv = context.read<HabitProvider>();
+        // Hem streak hem de log provider'ı güncelle (UI tutarlılığı)
+        await logProv.loadLogsForDate(selectedDate);
+        await sProv.loadForHabits(hProv.habits, todayYmd);
       },
       onLongPress: () => _showContextMenu(context),
       onStreakTap: () => showStreakStatsDialog(

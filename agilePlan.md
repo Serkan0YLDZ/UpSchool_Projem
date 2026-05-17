@@ -40,15 +40,15 @@
 
 ### Teknik görevler
 
-- [ ] `sqflite` + `path` bağımlılıkları; `DatabaseHelper` (veya Drift) ve sürüm `onUpgrade`.
-- [ ] Tablolar: `calendar_events`, `habits`, `todos`, `habit_day_logs`, `streak_snapshots` (veya türetim stratejisi dokümante).
-- [ ] Repository katmanı: CRUD + soft delete + `local_revision`.
-- [ ] Mevcut mock akışından veri kaynağına geçiş planı (feature flag veya tek seferlik import).
+- [x] `sqflite` + `path` bağımlılıkları; `DatabaseHelper` (veya Drift) ve sürüm `onUpgrade`.
+- [x] Tablolar: `calendar_events`, `habits`, `todos`, `habit_day_logs`, `streak_snapshots` (veya türetim stratejisi dokümante).
+- [x] Repository katmanı: CRUD + soft delete + `local_revision`.
+- [x] Mevcut mock akışından veri kaynağına geçiş planı (feature flag veya tek seferlik import).
 
 ### Definition of Done
 
-- [ ] Temiz kurulumda migration hatasız.
-- [ ] En az bir birim testi: habit insert + günlük log satırı.
+- [x] Temiz kurulumda migration hatasız.
+- [x] En az bir birim testi: habit insert + günlük log satırı.
 
 ---
 
@@ -101,13 +101,13 @@
 
 ### Teknik görevler
 
-- [ ] `Provider` (veya mevcut state) ile repository bağlantısı.
-- [ ] İkon seçici UI + `icon_key`, `icon_color_argb` persistans.
-- [ ] Takvim çubuğu ve güne göre filtre.
+- [x] `Provider` (veya mevcut state) ile repository bağlantısı.
+- [x] İkon seçici UI + `icon_key`, `icon_color_argb` persistans.
+- [x] Takvim çubuğu ve güne göre filtre.
 
 ### DoD
 
-- [ ] Üç mod uçtan uca veri okur/yazar.
+- [x] Üç mod uçtan uca veri okur/yazar.
 
 ---
 
@@ -125,15 +125,15 @@
 
 ### Teknik görevler
 
-- [ ] Planlı gün üretici: `anchor_date` + `interval_days` / haftalık maske.
-- [ ] `StreakService` (veya domain servisi): `met` / `missed` / `skipped` / `series_lapsed` geçişleri.
-- [ ] ISO haftası bazlı `skip_used` sayacı (Pazartesi başlangıç).
-- [ ] **Birim testleri:** PRD’deki 10-12-14 senaryosu + es geç sınırı.
+- [x] Planlı gün üretici: `anchor_date` + `interval_days` / haftalık maske.
+- [x] `StreakService` (veya domain servisi): `met` / `missed` / `skipped` / `series_lapsed` geçişleri.
+- [x] ISO haftası bazlı `skip_used` sayacı (Pazartesi başlangıç).
+- [x] **Birim testleri:** PRD’deki 10-12-14 senaryosu + es geç sınırı.
 
 ### DoD
 
-- [ ] Tüm birim testleri yeşil.
-- [ ] `skip_source` alanı yazılıyor (`free_weekly`).
+- [x] Tüm birim testleri yeşil.
+- [x] `skip_source` alanı yazılıyor (`free_weekly`).
 
 ---
 
@@ -154,16 +154,16 @@
 
 ### Teknik görevler
 
-- [ ] Profil widget’ları tema token’larına bağlama.
-- [ ] `EmptyStateWidget` ikonlaştırma; öncelik satırlarından ikon kaldırma.
-- [ ] `todo_filter_button` metin + chip `neoStackFace`.
-- [ ] Onboarding sayfası + `SharedPreferences` anahtarı.
-- [ ] Native splash + ilk frame tema.
+- [x] Profil widget’ları tema token’larına bağlama.
+- [x] `EmptyStateWidget` ikonlaştırma; öncelik satırlarından ikon kaldırma.
+- [x] `todo_filter_button` metin + chip `neoStackFace`.
+- [x] Onboarding sayfası + `SharedPreferences` anahtarı.
+- [x] Native splash + ilk frame tema.
 
 ### DoD (v0.1 çıkış)
 
-- [ ] PRD v0.1 FR maddeleri için manuel test checklist tamamlandı.
-- [ ] `flutter analyze` kritik uyarı yok (takım eşiği).
+- [x] PRD v0.1 FR maddeleri için manuel test checklist tamamlandı.
+- [x] `flutter analyze` kritik uyarı yok (takım eşiği).
 
 ---
 

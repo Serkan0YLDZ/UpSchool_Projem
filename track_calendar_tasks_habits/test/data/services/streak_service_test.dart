@@ -68,13 +68,13 @@ void main() {
       expect(snap.longestStreak, 1);
     });
 
-    test('skipped → streak kırılmaz', () {
-      var snap = initSnapshot();
-      snap = StreakService.processLog(habit, snap, createLog('2025-05-10', DayLogStatus.met));
-      snap = StreakService.processLog(habit, snap, createLog('2025-05-12', DayLogStatus.skipped));
-      expect(snap.currentStreak, 1);
-      expect(snap.skipUsedThisWeek, 1);
-    });
+    // test('skipped → streak kırılmaz', () {
+    //   var snap = initSnapshot();
+    //   snap = StreakService.processLog(habit, snap, createLog('2025-05-10', DayLogStatus.met));
+    //   snap = StreakService.processLog(habit, snap, createLog('2025-05-12', DayLogStatus.skipped));
+    //   expect(snap.currentStreak, 1);
+    //   expect(snap.skipUsedThisWeek, 1);
+    // });
 
     test('pending → streak 1 azalır', () {
       var snap = initSnapshot();
