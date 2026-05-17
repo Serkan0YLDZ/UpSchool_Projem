@@ -22,11 +22,23 @@
 
 ## Kurulum ve çalıştırma
 
+1. Repo'yu klonlayın ve klasöre girin:
 ```bash
 cd track_calendar_tasks_habits
-flutter pub get
-flutter run
 ```
+
+2. Proje dizininde bir `.env` dosyası oluşturun ve Gemini API anahtarınızı ekleyin:
+```bash
+# track_calendar_tasks_habits/.env dosyası
+GEMINI_API_KEY=AIzaSy...
+```
+
+3. Paketleri indirin ve uygulamayı başlatın:
+```bash
+flutter pub get
+flutter run --dart-define-from-file=.env
+```
+*(Not: VS Code kullanıyorsanız `launch.json` ayarlayarak direkt Run tuşuyla da çalıştırabilirsiniz.)*
 
 ---
 

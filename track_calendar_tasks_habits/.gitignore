@@ -47,6 +47,7 @@ app.*.map.json
 # Firebase / Google services (v0.2 — ekip politikası: repoda tutulmaz)
 **/google-services.json
 **/GoogleService-Info.plist
+**/firebase_options.dart
 
 # Android imzalama (yerel)
 **/android/key.properties

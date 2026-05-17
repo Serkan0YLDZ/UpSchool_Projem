@@ -26,6 +26,21 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	
+	<!-- Google Sign-In URL Scheme (Apple Sign-In için plist değişikliği gerekmez, Xcode'dan Capability eklenir) -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- TODO: REVERSED_CLIENT_ID buraya eklenecek -->
+				<string>REVERSED_CLIENT_ID_BURAYA</string>
+			</array>
+		</dict>
+	</array>
+	
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

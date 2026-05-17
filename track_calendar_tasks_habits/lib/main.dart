@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 import 'package:track_calendar_tasks_habits/core/router/app_router.dart';
 import 'package:track_calendar_tasks_habits/core/theme/app_theme.dart';
@@ -25,6 +27,11 @@ import 'package:track_calendar_tasks_habits/presentation/providers/home_state_pr
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   await initializeDateFormatting('tr_TR', null);
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
