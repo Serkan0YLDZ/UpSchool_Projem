@@ -247,8 +247,44 @@
 
 ---
 
-## 14. Riskler ve bağımlılıklar
+## 14. Epic E12 — AI Asistan (v0.2 · Sprint S12)
+
+**Hedef:** PRD §FR-17 — Alt barda AI sekmesi (palette dummy yerine); giriş zorunlu; günlük/haftalık plan, alışkanlık hatırlatıcı, takvim analizi, boş saatte öncelik sıralı yapılacak önerisi. Servis: Google AI Studio / Gemini API.
+
+### Kullanıcı hikayeleri
+
+| ID | Hikaye | PRD |
+|----|--------|-----|
+| US-12.1 | Giriş yapmış kullanıcı olarak AI sekmesine erişebilmeliyim; giriş yapmadan açamam. | FR-17 |
+| US-12.2 | Kullanıcı olarak günlük planımı sabah/öğle/akşam bloklarıyla görmek istiyorum. | FR-17 |
+| US-12.3 | Kullanıcı olarak yeni alışkanlıklarım için AI hatırlatıcısı görmek istiyorum. | FR-17 |
+| US-12.4 | Kullanıcı olarak takvimimdeki boş saatlerde öncelik sıralı yapılacak önerileri görmek istiyorum. | FR-17 |
+
+### Teknik görevler
+
+- [ ] `ai_planner_service.dart` — Gemini API prompt üretimi + istek/yanıt yaşam döngüsü.
+- [ ] `ai_repository.dart` — HTTP katmanı (Google AI Studio).
+- [ ] `ai_assistant_screen.dart` — go_router auth guard + içerik ekranı.
+- [ ] Widget'lar: `daily_plan_card.dart`, `habit_reminder_card.dart`, `free_slot_suggestion_card.dart`.
+- [ ] Bottom bar: `Icons.palette_rounded` → `Icons.auto_awesome_rounded` + `/ai` rotası bağlama.
+- [ ] `isSubscribed` bayrağı user model'e eklenir (v0.3 hazırlığı).
+- [ ] go_router redirect: giriş yoksa `/login`'e yönlendir.
+
+### DoD
+
+- [ ] Giriş yapılmadan sekme açılamaz.
+- [ ] Günlük plan en az 3 blok (sabah/öğle/akşam) gösterir.
+- [ ] Boş saat önerisi `high → medium → low` sıralamasına uyar.
+- [ ] `isSubscribed` bayrağı user modelinde mevcut.
+- [ ] AI ikon rengi `neoStackFace` (`#434D5E`) — Home/Profile aktif rengiyle eşleşir.
+- [ ] `dart analyze` temiz.
+
+---
+
+## 15. Riskler ve bağımlılıklar
 
 - **Harici takvim:** Apple EventKit kapalı ekosistem; Graph ve Google API kota/limitleri.
 - **Sosyal:** PII ve KVKK; telefon/e-posta araması için indeks ve hash stratejisi zorunlu.
 - **Widget:** Arka plan güncelleme sıklığı OS kısıtları.
+- **AI (E12):** Gemini API kota ve gizlilik; kullanıcı verisini minimize et (anonim/özet gönder). Abonelik geçişi v0.3'te Stripe veya platform in-app purchase gerektirir.
+- **Es Geç (Skip):** Backend hazır (`habit_day_logs`, `skip_source`); UI bağlantısı v0.2'de tamamlanacak (v0.1'de pasif bırakıldı).

@@ -330,6 +330,65 @@ Tablo taslağı: `badges` (tanım), `user_badges` (user_id + badge_id + earned_a
 
 ---
 
+## 3.5. FR-17 — AI Asistan Bölümü (v0.2)
+
+**Bağlam:** Alt barda `palette` (dummy) ikonunun yerine AI sekmesi gelir. Sekme yalnızca giriş yapan kullanıcılara açıktır.
+
+### Erişim kuralları
+
+| Durum | Erişim |
+|---|---|
+| Giriş yapılmamış | ❌ → `/login`'e yönlendir (go_router guard) |
+| Giriş yapılmış (v0.2) | ✅ Tam erişim |
+| Giriş + abonelik yok (v0.3+) | ✅ Günlük kotaya kadar |
+| Abone (v0.3+) | ✅ Sınırsız |
+
+> **v0.2 notu:** Abonelik sistemi v0.3'e bırakılır; kod şimdiden `isSubscribed` bayrağını taşır.
+
+### Özellikler
+
+#### A — Günlük & Haftalık Plan
+
+- Kullanıcının takvim etkinlikleri, planlı alışkanlıkları ve bekleyen yapılacakları toplanır.
+- **Google AI Studio / Gemini API** üzerinden yapılandırılmış plan istenir.
+- Yanıt: kart listesi — sabah / öğle / akşam blokları.
+
+#### B — Alışkanlık Hatırlatıcı
+
+- Özellikle **yeni / ilk alışkanlıklar** için: *"Yeni başladın, bugün X yapma zamanı!"*
+- Streak durumuna göre motivasyon mesajı: *"3 günlük seride devam et!"*
+- Planlı gün yoksa boş durum: ikon + metin (FR-06 kuralı).
+
+#### C — Takvim Listeleme
+
+- Seçilen gün / haftanın etkinlik özeti AI bölümünde gösterilir.
+- Boş saat dilimleri tespit edilir.
+
+#### D — Boş Saatte Yapılacak Önerisi
+
+- Boş zaman dilimleri → bekleyen yapılacaklar `high → medium → low` sırasıyla eşleştirilir.
+- Gösterim formatı: *"Saat 14:00–15:30 boş — şunu yapabilirsin: [yapılacak başlığı]"*
+
+### Tasarım notları
+
+- **İkon:** `Icons.auto_awesome_rounded` (veya `Icons.psychology_rounded`)
+- **İkon rengi:** Seçili durumda `neoStackFace` (`#434D5E`) — Home ve Profile ile aynı aktif renk.
+- **Mimari:**
+  - `presentation/screens/ai/ai_assistant_screen.dart` — auth guard + içerik
+  - `domain/services/ai_planner_service.dart` — prompt üretimi + Gemini API çağrısı
+  - `data/repositories/ai_repository.dart` — HTTP katmanı
+- **Privacy:** Kullanıcı verisi local DB'den çekilir; sunucuya yalnızca anonim/özet gönderilir.
+
+### Kabul kriterleri
+
+- [ ] Giriş yapılmadan sekme açılamaz; guard `/login`'e yönlendirir.
+- [ ] Günlük plan en az 3 blok (sabah/öğle/akşam) gösterir.
+- [ ] Boş saat önerisi `high → medium → low` sırasına uyar.
+- [ ] `isSubscribed` bayrağı user modelinde yer alır (v0.3 hazırlığı).
+- [ ] İkon rengi Home/Profile aktif rengiyle (`neoStackFace`) eşleşir.
+
+---
+
 ## 4. Kalite ve tanım (DoD özeti)
 
 - v0.1: Kritik kullanıcı akışları çevrimdışı; seri örnek testi geçer; onboarding ve splash davranışı doğrulanır.
