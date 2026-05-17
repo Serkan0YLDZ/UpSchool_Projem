@@ -1,4 +1,4 @@
-import '../models/completion_model.dart';
+import 'package:track_calendar_tasks_habits/data/models/completion_model.dart';
 
 /// Günlük tamamlama işlemleri için sözleşme.
 abstract class CompletionRepository {

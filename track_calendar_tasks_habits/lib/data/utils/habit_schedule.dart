@@ -1,52 +1,60 @@
-import '../../core/utils/calendar_date.dart';
-import '../models/record_model.dart';
+import 'package:track_calendar_tasks_habits/data/models/habit_model.dart';
 
-/// Alışkanlığın belirli bir takvim gününde planlı olup olmadığını hesaplar.
-abstract final class HabitSchedule {
-  static const _abbrs = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+/// Alışkanlıkların planlı günlerini hesaplamak için yardımcı sınıf.
+/// PRD §FR-05 gereksinimlerini karşılar.
+class HabitSchedule {
+  HabitSchedule._();
 
-  static String dayAbbreviation(String yyyyMmDd) {
-    final weekday = DateTime.parse(yyyyMmDd).weekday;
-    return _abbrs[weekday - 1];
-  }
+  /// Belirli bir tarihin alışkanlık için planlı bir gün olup olmadığını kontrol eder.
+  /// [date] ISO8601 YYYY-MM-DD formatında olmalıdır.
+  static bool isScheduledForDate(HabitModel habit, String date) {
+    final targetDate = DateTime.parse(date);
+    final anchor = DateTime.parse(habit.anchorDate);
 
-  static bool isScheduledOn(RecordModel r, String yyyyMmDd) {
-    if (r.type != RecordType.habit) return false;
-    if (r.intervalDays != null) {
-      final target = DateTime.parse(yyyyMmDd);
-      final start = DateTime(r.createdAt.year, r.createdAt.month, r.createdAt.day);
-      final diff = target.difference(start).inDays;
-      if (diff < 0) return false;
-      return diff % r.intervalDays! == 0;
+    // Hedef tarih başlangıç tarihinden önceyse planlı değildir.
+    final targetDateOnly = DateTime(targetDate.year, targetDate.month, targetDate.day);
+    final anchorDateOnly = DateTime(anchor.year, anchor.month, anchor.day);
+    if (targetDateOnly.isBefore(anchorDateOnly)) {
+      return false;
     }
-    return r.repeatDays.isEmpty || r.repeatDays.contains(dayAbbreviation(yyyyMmDd));
+
+    if (habit.scheduleKind == ScheduleKind.weekly) {
+      if (habit.weeklyDaysMask == null) return false;
+      // DateTime.weekday: 1 (Pzt) ... 7 (Paz)
+      // Maskemiz: bit0 (Pzt) ... bit6 (Paz)
+      final bitIndex = targetDate.weekday - 1;
+      final isSet = (habit.weeklyDaysMask! & (1 << bitIndex)) != 0;
+      return isSet;
+    } else if (habit.scheduleKind == ScheduleKind.interval) {
+      if (habit.intervalDays == null || habit.intervalDays! <= 0) return false;
+      final diffDays = targetDateOnly.difference(anchorDateOnly).inDays;
+      return diffDays % habit.intervalDays! == 0;
+    }
+
+    return false;
   }
 
-  static List<String> scheduledDaysInclusive(
-    RecordModel habit,
-    String fromYyyyMmDd,
-    String toYyyyMmDd,
+  /// Belirli bir tarih aralığındaki tüm planlı günlerin 'YYYY-MM-DD' listesini döner.
+  static List<String> getScheduledDatesBetween(
+    HabitModel habit,
+    String startDate,
+    String endDate,
   ) {
-    if (habit.type != RecordType.habit) return [];
-    var cursor = DateTime.parse(fromYyyyMmDd);
-    final end = DateTime.parse(toYyyyMmDd);
-    final out = <String>[];
-    while (!cursor.isAfter(end)) {
-      final key = CalendarDate.ymd(cursor);
-      if (isScheduledOn(habit, key)) out.add(key);
-      cursor = cursor.add(const Duration(days: 1));
-    }
-    return out;
-  }
+    final start = DateTime.parse(startDate);
+    final end = DateTime.parse(endDate);
+    final List<String> scheduled = [];
 
-  static String? nextScheduledAfter(RecordModel habit, String afterYyyyMmDd) {
-    var cursor = DateTime.parse(afterYyyyMmDd).add(const Duration(days: 1));
-    final limit = cursor.add(const Duration(days: 800));
-    while (!cursor.isAfter(limit)) {
-      final key = CalendarDate.ymd(cursor);
-      if (isScheduledOn(habit, key)) return key;
-      cursor = cursor.add(const Duration(days: 1));
+    var current = DateTime(start.year, start.month, start.day);
+    final last = DateTime(end.year, end.month, end.day);
+
+    while (!current.isAfter(last)) {
+      final isoDate = current.toIso8601String().substring(0, 10);
+      if (isScheduledForDate(habit, isoDate)) {
+        scheduled.add(isoDate);
+      }
+      current = current.add(const Duration(days: 1));
     }
-    return null;
+
+    return scheduled;
   }
 }

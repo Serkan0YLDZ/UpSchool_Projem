@@ -3,17 +3,25 @@ import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
-import 'core/router/app_router.dart';
-import 'core/theme/app_theme.dart';
-import 'data/auth/mock_auth_backend.dart';
-import 'data/repositories/completion_repository.dart';
-import 'data/repositories/record_repository.dart';
-import 'data/repositories/streak_repository.dart';
-import 'providers/auth_session_provider.dart';
-import 'providers/completion_provider.dart';
-import 'providers/record_provider.dart';
-import 'providers/streak_provider.dart';
-import 'providers/sync_status_provider.dart';
+import 'package:track_calendar_tasks_habits/core/router/app_router.dart';
+import 'package:track_calendar_tasks_habits/core/theme/app_theme.dart';
+import 'package:track_calendar_tasks_habits/data/auth/mock_auth_backend.dart';
+import 'package:track_calendar_tasks_habits/data/db/database_helper.dart';
+
+import 'package:track_calendar_tasks_habits/data/repositories/calendar_event_repository.dart';
+import 'package:track_calendar_tasks_habits/data/repositories/habit_repository.dart';
+import 'package:track_calendar_tasks_habits/data/repositories/todo_repository.dart';
+import 'package:track_calendar_tasks_habits/data/repositories/habit_day_log_repository.dart';
+import 'package:track_calendar_tasks_habits/data/repositories/streak_snapshot_repository.dart';
+
+import 'package:track_calendar_tasks_habits/presentation/providers/auth_session_provider.dart';
+import 'package:track_calendar_tasks_habits/presentation/providers/sync_status_provider.dart';
+import 'package:track_calendar_tasks_habits/presentation/providers/calendar_event_provider.dart';
+import 'package:track_calendar_tasks_habits/presentation/providers/habit_provider.dart';
+import 'package:track_calendar_tasks_habits/presentation/providers/todo_provider.dart';
+import 'package:track_calendar_tasks_habits/presentation/providers/habit_day_log_provider.dart';
+import 'package:track_calendar_tasks_habits/presentation/providers/streak_provider.dart';
+import 'package:track_calendar_tasks_habits/presentation/providers/home_state_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,29 +37,40 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Mock repository'ler — backend bağlantısı gerektirmez.
-  final recordRepo = MockRecordRepository();
-  final completionRepo = MockCompletionRepository();
-  final streakRepo = MockStreakRepository();
+  // SQLite Database Initialization
+  final db = await DatabaseHelper.instance.database;
+
+  // Initialize SQLite Repositories
+  final calendarRepo = CalendarEventSqliteRepository(db);
+  final habitRepo = HabitSqliteRepository(db);
+  final todoRepo = TodoSqliteRepository(db);
+  final habitDayLogRepo = HabitDayLogSqliteRepository(db);
+  final streakSnapshotRepo = StreakSnapshotSqliteRepository(db);
 
   runApp(TrackHabitsApp(
-    recordRepo: recordRepo,
-    completionRepo: completionRepo,
-    streakRepo: streakRepo,
+    calendarRepo: calendarRepo,
+    habitRepo: habitRepo,
+    todoRepo: todoRepo,
+    habitDayLogRepo: habitDayLogRepo,
+    streakSnapshotRepo: streakSnapshotRepo,
   ));
 }
 
 class TrackHabitsApp extends StatelessWidget {
   const TrackHabitsApp({
     super.key,
-    required this.recordRepo,
-    required this.completionRepo,
-    required this.streakRepo,
+    required this.calendarRepo,
+    required this.habitRepo,
+    required this.todoRepo,
+    required this.habitDayLogRepo,
+    required this.streakSnapshotRepo,
   });
 
-  final RecordRepository recordRepo;
-  final CompletionRepository completionRepo;
-  final StreakRepository streakRepo;
+  final CalendarEventRepository calendarRepo;
+  final HabitRepository habitRepo;
+  final TodoRepository todoRepo;
+  final HabitDayLogRepository habitDayLogRepo;
+  final StreakSnapshotRepository streakSnapshotRepo;
 
   @override
   Widget build(BuildContext context) {
@@ -64,21 +83,24 @@ class TrackHabitsApp extends StatelessWidget {
           create: (_) => SyncStatusProvider(),
         ),
         ChangeNotifierProvider(
-          create: (_) => RecordProvider(recordRepo),
+          create: (_) => CalendarEventProvider(repository: calendarRepo),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => HabitProvider(repository: habitRepo),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TodoProvider(repository: todoRepo),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => HabitDayLogProvider(repository: habitDayLogRepo),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => HomeStateProvider(),
         ),
         ChangeNotifierProvider(
           create: (_) => StreakProvider(
-            completionRepository: completionRepo,
-            streakRepository: streakRepo,
-            recordRepository: recordRepo,
-          ),
-        ),
-        ChangeNotifierProvider(
-          create: (ctx) => CompletionProvider(
-            completionRepo,
-            onMutated: (recordId) async {
-              await ctx.read<StreakProvider>().reconcileForRecord(recordId);
-            },
+            snapshotRepo: streakSnapshotRepo,
+            logRepo: habitDayLogRepo,
           ),
         ),
       ],

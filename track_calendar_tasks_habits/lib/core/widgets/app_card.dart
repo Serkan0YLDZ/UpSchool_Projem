@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_spacing.dart';
-import '../theme/track_custom_colors.dart';
+import 'package:track_calendar_tasks_habits/core/theme/app_spacing.dart';
+import 'package:track_calendar_tasks_habits/core/theme/track_custom_colors.dart';
 
 class AppCard extends StatelessWidget {
   const AppCard({

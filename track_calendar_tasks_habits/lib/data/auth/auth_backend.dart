@@ -1,4 +1,4 @@
-import 'auth_user.dart';
+import 'package:track_calendar_tasks_habits/data/auth/auth_user.dart';
 
 /// Mock veya gerçek auth backend'ler için ortak sözleşme.
 abstract class AuthBackend {

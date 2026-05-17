@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'app_colors.dart';
-import 'app_spacing.dart';
-import 'app_typography.dart';
-import 'track_custom_colors.dart';
+import 'package:track_calendar_tasks_habits/core/theme/app_colors.dart';
+import 'package:track_calendar_tasks_habits/core/theme/app_spacing.dart';
+import 'package:track_calendar_tasks_habits/core/theme/app_typography.dart';
+import 'package:track_calendar_tasks_habits/core/theme/track_custom_colors.dart';
 
 abstract final class AppTheme {
   static ThemeData get light => _buildTheme(Brightness.light);

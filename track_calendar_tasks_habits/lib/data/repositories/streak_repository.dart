@@ -1,4 +1,4 @@
-import '../models/streak_model.dart';
+import 'package:track_calendar_tasks_habits/data/models/streak_model.dart';
 
 /// Seri verisi için sözleşme.
 abstract class StreakRepository {

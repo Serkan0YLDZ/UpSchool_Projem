@@ -62,8 +62,8 @@ Takvim etkinlikleri, tekrarlayan alışkanlıklar ve yapılacakları tek uygulam
 
 **Kabul kriterleri:**
 
-- [ ] Profilde kullanılan yüzey renkleri `surface` ailesiyle uyumlu; metin kontrastı okunabilir.
-- [ ] Navigasyon ve üst çubuk ile çakışan renk tutarsızlığı yok.
+- [x] Profilde kullanılan yüzey renkleri `surface` ailesiyle uyumlu; metin kontrastı okunabilir.
+- [x] Navigasyon ve üst çubuk ile çakışan renk tutarsızlığı yok.
 
 ---
 
@@ -76,8 +76,8 @@ Takvim etkinlikleri, tekrarlayan alışkanlıklar ve yapılacakları tek uygulam
 
 **Kabul kriterleri:**
 
-- [ ] Kayıtlı alışkanlık kartında seçilen ikon ve renk görünür.
-- [ ] Veri modelinde ikon alanları dolu; varsayılan ikon + renk tanımlıdır.
+- [x] Kayıtlı alışkanlık kartında seçilen ikon ve renk görünür.
+- [x] Veri modelinde ikon alanları dolu; varsayılan ikon + renk tanımlıdır.
 
 ---
 
@@ -216,7 +216,7 @@ Anchor \(D_0\) = ayın 10’u, \(N = 2\). Planlı günler: 10, 12, 14, …
 
 **Kabul kriterleri:**
 
-- [ ] Tüm boş durum bileşenleri ikon + metin kullanır.
+- [x] Tüm boş durum bileşenleri ikon + metin kullanır.
 
 ---
 
@@ -226,7 +226,7 @@ Anchor \(D_0\) = ayın 10’u, \(N = 2\). Planlı günler: 10, 12, 14, …
 
 **Kabul kriterleri:**
 
-- [ ] Öncelik satırlarında ikon yok; yalnızca renk / yazı.
+- [x] Öncelik satırlarında ikon yok; yalnızca renk / yazı.
 
 ---
 
@@ -239,8 +239,8 @@ Anchor \(D_0\) = ayın 10’u, \(N = 2\). Planlı günler: 10, 12, 14, …
 
 **Kabul kriterleri:**
 
-- [ ] Metin birebir doğru.
-- [ ] Seçili chip görseli FAB koyu gri ile eşleşir.
+- [x] Metin birebir doğru.
+- [x] Seçili chip görseli FAB koyu gri ile eşleşir.
 
 ---
 
@@ -250,7 +250,7 @@ Anchor \(D_0\) = ayın 10’u, \(N = 2\). Planlı günler: 10, 12, 14, …
 
 **Kabul kriterleri:**
 
-- [ ] `SharedPreferences` (veya eşdeğeri) ile “onboarding tamamlandı” bayrağı; tekrar gösterilmez (Ayarlar’dan sıfırlanabilir opsiyonel).
+- [x] `SharedPreferences` (veya eşdeğeri) ile “onboarding tamamlandı” bayrağı; tekrar gösterilmez (Ayarlar’dan sıfırlanabilir opsiyonel).
 
 ---
 
@@ -263,7 +263,7 @@ Anchor \(D_0\) = ayın 10’u, \(N = 2\). Planlı günler: 10, 12, 14, …
 
 **Kabul kriterleri:**
 
-- [ ] Soğuk başlatmada kullanıcı anlamlı bir görsel görür (düz beyaz ekran kabul edilmez).
+- [x] Soğuk başlatmada kullanıcı anlamlı bir görsel görür (düz beyaz ekran kabul edilmez).
 
 ---
 

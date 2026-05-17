@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
+import 'package:track_calendar_tasks_habits/core/theme/app_colors.dart';
 
 /// ColorScheme dışı semantik renkler (brutalist çizgiler, seri, bantlar, öncelik).
 @immutable

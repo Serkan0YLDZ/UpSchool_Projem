@@ -1,0 +1,84 @@
+import 'package:flutter/material.dart';
+
+import 'package:track_calendar_tasks_habits/core/theme/app_spacing.dart';
+import 'package:track_calendar_tasks_habits/core/theme/app_typography.dart';
+import 'package:track_calendar_tasks_habits/core/theme/track_custom_colors.dart';
+import 'package:track_calendar_tasks_habits/core/widgets/brutalist_container.dart';
+
+class ProfileBenefitsCard extends StatelessWidget {
+  const ProfileBenefitsCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = context.scheme;
+
+    return BrutalistContainer(
+      rotatedOffset: -0.8,
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      backgroundColor: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Giriş yapınca neler olur?',
+            style: AppTypography.headlineSm.copyWith(
+              color: scheme.onSurface,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.smMd),
+          const _Bullet(
+            text: 'Alışkanlık ve görev verilerin bulutta güvenle saklanır.',
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          const _Bullet(
+            text: 'Telefon veya tablette aynı hesapla otomatik senkron olur.',
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          const _Bullet(
+            text:
+                'İlerlemen, seriler ve özet grafikler hesabına bağlandığında burada görünür.',
+          ),
+          const SizedBox(height: AppSpacing.smMd),
+          Text(
+            'Giriş yapmadan da uygulamayı kullanabilirsin; veriler yalnızca bu cihazda kalır.',
+            style: AppTypography.bodySm.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Bullet extends StatelessWidget {
+  const _Bullet({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = context.scheme;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Icon(
+            Icons.check_circle_outline_rounded,
+            size: 18,
+            color: scheme.primaryContainer,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            text,
+            style: AppTypography.bodyMd.copyWith(color: scheme.onSurface),
+          ),
+        ),
+      ],
+    );
+  }
+}

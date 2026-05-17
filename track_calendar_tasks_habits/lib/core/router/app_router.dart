@@ -1,13 +1,13 @@
 import 'package:go_router/go_router.dart';
 
-import '../../screens/focus/focus_section.dart';
-import '../../screens/focus/focus_section_screen.dart';
-import '../../screens/home/home_screen.dart';
-import '../../screens/profile/profile_screen.dart';
-import '../../screens/shell/main_shell.dart';
+import 'package:track_calendar_tasks_habits/presentation/screens/focus/focus_section.dart';
+import 'package:track_calendar_tasks_habits/presentation/screens/focus/focus_section_screen.dart';
+import 'package:track_calendar_tasks_habits/presentation/screens/home/home_screen.dart';
+import 'package:track_calendar_tasks_habits/presentation/screens/profile/profile_screen.dart';
+import 'package:track_calendar_tasks_habits/presentation/screens/shell/main_shell.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../screens/onboarding/onboarding_screen.dart';
+import 'package:track_calendar_tasks_habits/presentation/screens/onboarding/onboarding_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: AppRoutes.home,

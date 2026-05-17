@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'auth_backend.dart';
-import 'auth_user.dart';
+import 'package:track_calendar_tasks_habits/data/auth/auth_backend.dart';
+import 'package:track_calendar_tasks_habits/data/auth/auth_user.dart';
 
 /// Gerçek ağ veya Firebase olmadan çalışan in-memory auth.
 class MockAuthBackend implements AuthBackend {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../theme/app_spacing.dart';
-import '../theme/app_typography.dart';
-import '../theme/track_custom_colors.dart';
+import 'package:track_calendar_tasks_habits/core/theme/app_spacing.dart';
+import 'package:track_calendar_tasks_habits/core/theme/app_typography.dart';
+import 'package:track_calendar_tasks_habits/core/theme/track_custom_colors.dart';
 
 class AppButton extends StatelessWidget {
   const AppButton({

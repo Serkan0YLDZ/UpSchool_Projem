@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../data/models/record_model.dart';
-import 'app_colors.dart';
+import 'package:track_calendar_tasks_habits/core/enums/item_type.dart';
+import 'package:track_calendar_tasks_habits/core/theme/app_colors.dart';
 
 /// Takvim (etkinlik) / alışkanlık / yapılacaklar için ana sayfa ile aynı şerit renkleri.
-Color recordTypeSectionAccent(RecordType type) {
+Color recordTypeSectionAccent(ItemType type) {
   return switch (type) {
-    RecordType.event => AppColors.homeSectionCalendarBlue,
-    RecordType.habit => AppColors.homeSectionHabitsCoral,
-    RecordType.todo => AppColors.homeSectionTodosOrange,
+    ItemType.event => AppColors.homeSectionCalendarBlue,
+    ItemType.habit => AppColors.homeSectionHabitsCoral,
+    ItemType.todo => AppColors.homeSectionTodosOrange,
   };
 }
